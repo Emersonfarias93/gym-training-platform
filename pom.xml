@@ -27,6 +27,7 @@
         <module>backend/user-service</module>
         <module>backend/payment-service</module>
         <module>backend/email-service</module>
+        <module>backend/llm-service</module>
         <module>backend/workout-service</module>
         <module>backend/realtime-service</module>
     </modules>
