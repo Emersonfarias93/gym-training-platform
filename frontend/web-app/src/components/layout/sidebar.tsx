@@ -1,17 +1,21 @@
 import Link from "next/link";
 import { ActivitySquare, Bell, Search } from "lucide-react";
 
+import { LogoutButton } from "@/components/layout/logout-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { getUserInitials } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import type { AuthUser } from "@/types/auth";
 import type { AppView, NavItem } from "@/types/dashboard";
 
 type SidebarProps = {
   activeView: AppView;
   items: NavItem[];
+  user: AuthUser;
 };
 
-export function Sidebar({ activeView, items }: SidebarProps) {
+export function Sidebar({ activeView, items, user }: SidebarProps) {
   return (
     <aside className="hidden w-[290px] shrink-0 border-r border-[var(--fitai-border-subtle)] bg-[var(--fitai-bg-shell)] px-5 py-6 lg:flex lg:flex-col">
       <div className="flex items-center justify-between rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-4">
@@ -67,6 +71,24 @@ export function Sidebar({ activeView, items }: SidebarProps) {
           Libere modelos de prescricao, relatorios automaticos e previsoes avancadas.
         </p>
         <Button className="mt-4 w-full">Ativar plano</Button>
+      </div>
+
+      <div className="mt-4 rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-4">
+        <div className="flex items-center gap-3">
+          <div className="grid size-11 place-items-center rounded-2xl fitai-ai-gradient text-sm font-semibold text-white">
+            {getUserInitials(user.fullName)}
+          </div>
+          <div className="min-w-0">
+            <p className="truncate text-sm font-semibold text-[var(--fitai-text-primary)]">{user.fullName}</p>
+            <p className="truncate text-xs text-[var(--fitai-text-secondary)]">{user.email}</p>
+          </div>
+        </div>
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <Badge className="border-[rgba(79,124,255,0.14)] bg-[rgba(79,124,255,0.08)] text-[var(--fitai-primary)]">
+            {user.role}
+          </Badge>
+          <LogoutButton label="Sair" variant="ghost" />
+        </div>
       </div>
     </aside>
   );

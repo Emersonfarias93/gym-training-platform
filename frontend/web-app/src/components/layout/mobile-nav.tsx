@@ -4,12 +4,16 @@ import Link from "next/link";
 import { Crown, MoreHorizontal, X } from "lucide-react";
 import { useState } from "react";
 
+import { LogoutButton } from "@/components/layout/logout-button";
 import { sidebarItems } from "@/features/navigation/config";
+import { getUserInitials } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import type { AuthUser } from "@/types/auth";
 import type { AppView } from "@/types/dashboard";
 
 type MobileNavProps = {
   activeView: AppView;
+  user: AuthUser;
 };
 
 const primaryNav: Array<{ id: AppView; label: string }> = [
@@ -50,7 +54,7 @@ const moreNav: Array<{ id: AppView; label: string; tone: string }> = [
 const navById = new Map(sidebarItems.map((item) => [item.id, item]));
 const moreIds = new Set<AppView>(moreNav.map((item) => item.id));
 
-export function MobileNav({ activeView }: MobileNavProps) {
+export function MobileNav({ activeView, user }: MobileNavProps) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
   const isMoreActive = moreIds.has(activeView);
 
@@ -103,16 +107,18 @@ export function MobileNav({ activeView }: MobileNavProps) {
 
             <div className="mt-4 flex items-center gap-3 rounded-2xl border border-[var(--fitai-border-strong)] bg-[var(--fitai-surface)] p-3">
               <div className="grid size-10 place-items-center rounded-2xl fitai-ai-gradient text-sm font-bold text-white">
-                RM
+                {getUserInitials(user.fullName)}
               </div>
               <div>
-                <p className="text-sm font-semibold text-[var(--fitai-text-primary)]">Rafael Mendes</p>
+                <p className="text-sm font-semibold text-[var(--fitai-text-primary)]">{user.fullName}</p>
                 <p className="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-[var(--fitai-warning)]">
                   <Crown className="size-3" />
-                  Premium ativo
+                  {user.role === "TRAINER" ? "Trainer ativo" : "Conta ativa"}
                 </p>
               </div>
             </div>
+
+            <LogoutButton className="mt-3 w-full" label="Encerrar sessao" variant="secondary" />
           </div>
         </div>
       ) : null}

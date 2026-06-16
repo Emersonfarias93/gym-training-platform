@@ -5,19 +5,21 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { Topbar } from "@/components/layout/topbar";
 import { sidebarItems } from "@/features/navigation/config";
 import { cn } from "@/lib/utils";
+import type { AuthUser } from "@/types/auth";
 import type { AppView } from "@/types/dashboard";
 
 type AppShellProps = {
   activeView: AppView;
   children: ReactNode;
+  user: AuthUser;
 };
 
-export function AppShell({ activeView, children }: AppShellProps) {
+export function AppShell({ activeView, children, user }: AppShellProps) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-[var(--fitai-bg-shell)] text-[var(--fitai-text-primary)]">
       <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(79,124,255,0.08),transparent_28%)]" />
       <div className="relative mx-auto flex min-h-screen max-w-[1680px]">
-        <Sidebar activeView={activeView} items={sidebarItems} />
+        <Sidebar activeView={activeView} items={sidebarItems} user={user} />
         <div className="flex min-w-0 flex-1 flex-col bg-[var(--fitai-bg-page)]">
           <Topbar activeView={activeView} />
           <main
@@ -30,7 +32,7 @@ export function AppShell({ activeView, children }: AppShellProps) {
           </main>
         </div>
       </div>
-      <MobileNav activeView={activeView} />
+      <MobileNav activeView={activeView} user={user} />
     </div>
   );
 }
