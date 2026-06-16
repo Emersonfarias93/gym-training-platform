@@ -26,14 +26,14 @@ export function SettingsPage() {
         <OverviewCard title="Customizacao" value="Avancada" helper="tema e operacao personalizados" icon={SlidersHorizontal} />
       </section>
 
-      <div className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] p-6">
-        <h3 className="text-lg font-semibold text-white">Saude da configuracao</h3>
+      <div className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface)] p-6">
+        <h3 className="text-lg font-semibold text-[var(--fitai-text-primary)]">Saude da configuracao</h3>
         <div className="mt-6 space-y-5">
           {controls.map((control) => (
             <div key={control.label}>
               <div className="flex items-center justify-between gap-3">
-                <p className="font-medium text-white">{control.label}</p>
-                <span className="text-sm text-[var(--muted-foreground)]">{control.value}%</span>
+                <p className="font-medium text-[var(--fitai-text-primary)]">{control.label}</p>
+                <span className="text-sm text-[var(--fitai-text-secondary)]">{control.value}%</span>
               </div>
               <Progress value={control.value} className="mt-3 h-2.5" />
             </div>

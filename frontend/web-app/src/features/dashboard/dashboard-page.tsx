@@ -47,29 +47,29 @@ export function DashboardPage() {
         <Card className="overflow-hidden p-6 md:p-8">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="max-w-2xl">
-              <Badge className="border-emerald-400/15 bg-emerald-400/10 text-emerald-300">
+              <Badge>
                 Athlete overview
               </Badge>
-              <h2 className="mt-4 text-3xl font-semibold tracking-tight text-white md:text-4xl">
+              <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[var(--fitai-text-primary)] md:text-4xl">
                 Painel premium para treino, nutricao e operacao da equipe.
               </h2>
-              <p className="mt-4 text-sm leading-7 text-[var(--muted-foreground)] md:text-base">
+              <p className="mt-4 text-sm leading-7 text-[var(--fitai-text-secondary)] md:text-base">
                 Estrutura inspirada em um SaaS de alta densidade visual, com leituras compactas,
                 contraste forte e destaque para o FitAI Coach.
               </p>
             </div>
-            <div className="rounded-[28px] border border-white/8 bg-black/20 p-5">
-              <p className="text-sm text-[var(--muted-foreground)]">Atleta principal</p>
-              <p className="mt-2 text-xl font-semibold text-white">Bianca S. Moreira</p>
-              <p className="mt-1 text-sm text-emerald-300">Plano elite com acompanhamento diario</p>
+            <div className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-5">
+              <p className="text-sm text-[var(--fitai-text-secondary)]">Atleta principal</p>
+              <p className="mt-2 text-xl font-semibold text-[var(--fitai-text-primary)]">Bianca S. Moreira</p>
+              <p className="mt-1 text-sm text-[var(--fitai-success)]">Plano elite com acompanhamento diario</p>
             </div>
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-3">
             {heroPills.map((item) => (
-              <div key={item.label} className="rounded-[22px] border border-white/8 bg-black/20 p-4">
-                <p className="text-sm text-[var(--muted-foreground)]">{item.label}</p>
-                <p className="mt-2 text-xl font-semibold text-white">{item.value}</p>
+              <div key={item.label} className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-4">
+                <p className="text-sm text-[var(--fitai-text-secondary)]">{item.label}</p>
+                <p className="mt-2 text-xl font-semibold text-[var(--fitai-text-primary)]">{item.value}</p>
               </div>
             ))}
           </div>
@@ -78,12 +78,12 @@ export function DashboardPage() {
         <Card className="p-6">
           <div className="flex items-start justify-between gap-3">
             <div>
-              <p className="text-lg font-semibold text-white">Sinais de performance</p>
-              <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">
+              <p className="text-lg font-semibold text-[var(--fitai-text-primary)]">Sinais de performance</p>
+              <p className="mt-2 text-sm leading-6 text-[var(--fitai-text-secondary)]">
                 Resumo operacional com indicadores acionaveis para a equipe.
               </p>
             </div>
-            <Sparkles className="size-5 text-emerald-300" />
+            <Sparkles className="size-5 text-[var(--fitai-primary)]" />
           </div>
 
           <div className="mt-6 space-y-3">
@@ -93,15 +93,15 @@ export function DashboardPage() {
               return (
                 <div
                   key={signal.label}
-                  className="flex items-center justify-between rounded-[22px] border border-white/8 bg-black/20 p-4"
+                  className="flex items-center justify-between rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-4"
                 >
-                  <span className="flex items-center gap-3 text-white">
-                    <span className="rounded-2xl bg-white/5 p-3 text-emerald-300">
+                  <span className="flex items-center gap-3 text-[var(--fitai-text-primary)]">
+                    <span className="rounded-2xl bg-[rgba(79,124,255,0.10)] p-3 text-[var(--fitai-primary)]">
                       <Icon className="size-4" />
                     </span>
                     {signal.label}
                   </span>
-                  <span className="text-sm text-[var(--muted-foreground)]">{signal.value}</span>
+                  <span className="text-sm text-[var(--fitai-text-secondary)]">{signal.value}</span>
                 </div>
               );
             })}
@@ -130,27 +130,27 @@ export function DashboardPage() {
           <Card className="p-6">
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-lg font-semibold text-white">Sessoes em destaque</p>
-                <p className="mt-2 text-sm text-[var(--muted-foreground)]">
+                <p className="text-lg font-semibold text-[var(--fitai-text-primary)]">Sessoes em destaque</p>
+                <p className="mt-2 text-sm text-[var(--fitai-text-secondary)]">
                   O que vem pela frente com prioridade e intensidade.
                 </p>
               </div>
-              <Badge className="border-white/10 bg-white/5 text-white/70">Today stack</Badge>
+              <Badge className="border-[var(--fitai-border)] bg-[var(--fitai-surface-secondary)] text-[var(--fitai-text-secondary)]">Today stack</Badge>
             </div>
             <div className="mt-6 grid gap-4">
               {highlightSessions.map((session) => (
                 <div
                   key={`${session.title}-${session.time}`}
-                  className="rounded-[24px] border border-white/8 bg-black/20 p-4"
+                  className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-4"
                 >
                   <div className="flex flex-wrap items-center justify-between gap-3">
                     <div>
-                      <p className="font-medium text-white">{session.title}</p>
-                      <p className="mt-1 text-sm text-[var(--muted-foreground)]">
+                      <p className="font-medium text-[var(--fitai-text-primary)]">{session.title}</p>
+                      <p className="mt-1 text-sm text-[var(--fitai-text-secondary)]">
                         {session.coach} · {session.time}
                       </p>
                     </div>
-                    <span className="rounded-full border border-white/10 px-3 py-1 text-xs uppercase tracking-[0.18em] text-[var(--muted-foreground)]">
+                    <span className="rounded-full border border-[var(--fitai-border)] px-3 py-1 text-xs uppercase tracking-[0.18em] text-[var(--fitai-text-secondary)]">
                       {session.intensity}
                     </span>
                   </div>
@@ -179,12 +179,12 @@ export function DashboardPage() {
           <Card className="overflow-hidden p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-lg font-semibold text-white">Acoes rapidas</p>
-                <p className="text-sm text-[var(--muted-foreground)]">
+                <p className="text-lg font-semibold text-[var(--fitai-text-primary)]">Acoes rapidas</p>
+                <p className="text-sm text-[var(--fitai-text-secondary)]">
                   Fluxos usados com mais frequencia pela equipe.
                 </p>
               </div>
-              <Sparkles className="size-5 text-emerald-300" />
+              <Sparkles className="size-5 text-[var(--fitai-primary)]" />
             </div>
             <div className="mt-6 grid gap-3">
               {quickActions.map((action) => {
@@ -193,15 +193,15 @@ export function DashboardPage() {
                 return (
                   <button
                     key={action.label}
-                    className="flex items-center justify-between rounded-[22px] border border-white/8 bg-white/4 p-4 text-left transition-colors hover:bg-white/7"
+                    className="flex items-center justify-between rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-4 text-left transition-colors hover:bg-[var(--fitai-surface-secondary)]"
                   >
-                    <span className="flex items-center gap-3 text-white">
-                      <span className="rounded-2xl bg-black/30 p-3">
-                        <Icon className="size-4 text-emerald-300" />
+                    <span className="flex items-center gap-3 text-[var(--fitai-text-primary)]">
+                      <span className="rounded-2xl bg-[rgba(79,124,255,0.10)] p-3">
+                        <Icon className="size-4 text-[var(--fitai-primary)]" />
                       </span>
                       {action.label}
                     </span>
-                    <ArrowRight className="size-4 text-[var(--muted-foreground)]" />
+                    <ArrowRight className="size-4 text-[var(--fitai-text-secondary)]" />
                   </button>
                 );
               })}

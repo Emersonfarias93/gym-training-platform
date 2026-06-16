@@ -5,9 +5,9 @@ import { OverviewCard } from "@/features/shared/components/overview-card";
 import { StackedListCard } from "@/features/shared/components/stacked-list-card";
 
 const students = [
-  { title: "Julia Mendes", subtitle: "Aderencia alta · plano premium", meta: "Estavel", accent: "#86efac" },
-  { title: "Caio Ribeiro", subtitle: "Queda de frequencia nos ultimos 7 dias", meta: "Atencao", accent: "#fcd34d" },
-  { title: "Ana Torres", subtitle: "Nova fase de ganho de massa", meta: "Oportunidade", accent: "#67e8f9" }
+  { title: "Julia Mendes", subtitle: "Aderencia alta · plano premium", meta: "Estavel", tone: "success" as const },
+  { title: "Caio Ribeiro", subtitle: "Queda de frequencia nos ultimos 7 dias", meta: "Atencao", tone: "warning" as const },
+  { title: "Ana Torres", subtitle: "Nova fase de ganho de massa", meta: "Oportunidade", tone: "primary" as const }
 ];
 
 export function TrainerPage() {

@@ -13,21 +13,21 @@ type SidebarProps = {
 
 export function Sidebar({ activeView, items }: SidebarProps) {
   return (
-    <aside className="hidden w-[290px] shrink-0 border-r border-white/6 bg-black/20 px-5 py-6 lg:flex lg:flex-col">
-      <div className="flex items-center justify-between rounded-[26px] border border-white/8 bg-white/5 p-4">
+    <aside className="hidden w-[290px] shrink-0 border-r border-[var(--fitai-border-subtle)] bg-[var(--fitai-bg-shell)] px-5 py-6 lg:flex lg:flex-col">
+      <div className="flex items-center justify-between rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-4">
         <div className="flex items-center gap-3">
-          <div className="grid size-12 place-items-center rounded-2xl bg-[linear-gradient(135deg,var(--primary),var(--primary-strong))] text-white shadow-[0_18px_40px_-18px_rgba(34,197,94,0.85)]">
+          <div className="grid size-12 place-items-center rounded-2xl fitai-primary-gradient text-white shadow-[0_18px_40px_-22px_rgba(79,124,255,0.9)]">
             <ActivitySquare className="size-6" />
           </div>
           <div>
-            <p className="font-semibold text-white">FitAI Coach</p>
-            <p className="text-sm text-[var(--muted-foreground)]">Performance SaaS</p>
+            <p className="font-semibold text-[var(--fitai-text-primary)]">FitAI Coach</p>
+            <p className="text-sm text-[var(--fitai-text-secondary)]">Performance SaaS</p>
           </div>
         </div>
-        <Bell className="size-5 text-[var(--muted-foreground)]" />
+        <Bell className="size-5 text-[var(--fitai-text-secondary)]" />
       </div>
 
-      <div className="mt-6 flex items-center gap-3 rounded-full border border-white/8 bg-white/4 px-4 py-3 text-sm text-[var(--muted-foreground)]">
+      <div className="mt-6 flex items-center gap-3 rounded-full border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] px-4 py-3 text-sm text-[var(--fitai-text-secondary)]">
         <Search className="size-4" />
         Buscar modulos
       </div>
@@ -43,8 +43,8 @@ export function Sidebar({ activeView, items }: SidebarProps) {
               className={cn(
                 "flex items-center justify-between rounded-[20px] px-4 py-3 text-left text-sm transition-colors",
                 activeView === item.id
-                  ? "bg-[linear-gradient(135deg,rgba(34,197,94,0.18),rgba(16,185,129,0.08))] text-white"
-                  : "text-[var(--muted-foreground)] hover:bg-white/5 hover:text-white"
+                  ? "border border-[var(--fitai-border)] bg-[rgba(79,124,255,0.11)] text-[var(--fitai-text-primary)]"
+                  : "text-[var(--fitai-text-secondary)] hover:bg-[rgba(79,124,255,0.06)] hover:text-[var(--fitai-text-primary)]"
               )}
             >
               <span className="flex items-center gap-3">
@@ -52,7 +52,7 @@ export function Sidebar({ activeView, items }: SidebarProps) {
                 {item.label}
               </span>
               {item.badge ? (
-                <Badge className="border-emerald-400/15 bg-emerald-400/10 text-emerald-300">
+                <Badge className="border-[rgba(0,208,132,0.18)] bg-[rgba(0,208,132,0.10)] text-[var(--fitai-success)]">
                   {item.badge}
                 </Badge>
               ) : null}
@@ -61,9 +61,9 @@ export function Sidebar({ activeView, items }: SidebarProps) {
         })}
       </nav>
 
-      <div className="rounded-[28px] border border-white/8 bg-[radial-gradient(circle_at_top,rgba(34,197,94,0.18),transparent_70%),rgba(255,255,255,0.04)] p-5">
-        <p className="font-semibold text-white">Upgrade Pro Coach</p>
-        <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">
+      <div className="rounded-2xl border border-[var(--fitai-border)] bg-[linear-gradient(135deg,rgba(79,124,255,0.13),rgba(0,208,132,0.06))] p-5">
+        <p className="font-semibold text-[var(--fitai-text-primary)]">Upgrade Pro Coach</p>
+        <p className="mt-2 text-sm leading-6 text-[var(--fitai-text-secondary)]">
           Libere modelos de prescricao, relatorios automaticos e previsoes avancadas.
         </p>
         <Button className="mt-4 w-full">Ativar plano</Button>

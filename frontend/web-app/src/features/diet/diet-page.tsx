@@ -5,9 +5,9 @@ import { OverviewCard } from "@/features/shared/components/overview-card";
 import { StackedListCard } from "@/features/shared/components/stacked-list-card";
 
 const meals = [
-  { title: "Cafe da manha", subtitle: "32g prot · 48g carb · 12g fat", meta: "612 kcal", accent: "#86efac" },
-  { title: "Almoco", subtitle: "46g prot · 65g carb · 18g fat", meta: "780 kcal", accent: "#67e8f9" },
-  { title: "Jantar", subtitle: "38g prot · 40g carb · 14g fat", meta: "590 kcal", accent: "#fcd34d" }
+  { title: "Cafe da manha", subtitle: "32g prot · 48g carb · 12g fat", meta: "612 kcal", tone: "warning" as const },
+  { title: "Almoco", subtitle: "46g prot · 65g carb · 18g fat", meta: "780 kcal", tone: "warning" as const },
+  { title: "Jantar", subtitle: "38g prot · 40g carb · 14g fat", meta: "590 kcal", tone: "warning" as const }
 ];
 
 export function DietPage() {
@@ -32,19 +32,19 @@ export function DietPage() {
           description="Sequencia alimentar com densidade visual enxuta para consulta rapida."
           items={meals}
         />
-        <div className="rounded-[28px] border border-white/8 bg-[radial-gradient(circle_at_top,rgba(34,197,94,0.16),transparent_55%),rgba(255,255,255,0.04)] p-6">
-          <h3 className="text-lg font-semibold text-white">Distribuicao de macros</h3>
+        <div className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface)] p-6">
+          <h3 className="text-lg font-semibold text-[var(--fitai-text-primary)]">Distribuicao de macros</h3>
           <div className="mt-6 grid gap-4 sm:grid-cols-3">
             {[
-              { label: "Proteina", value: "30%", tone: "from-emerald-400 to-emerald-200" },
-              { label: "Carbo", value: "44%", tone: "from-cyan-400 to-cyan-200" },
-              { label: "Gordura", value: "26%", tone: "from-amber-400 to-amber-200" }
+              { label: "Proteina", value: "30%", className: "bg-[var(--fitai-primary)]" },
+              { label: "Carbo", value: "44%", className: "bg-[var(--fitai-success)]" },
+              { label: "Gordura", value: "26%", className: "bg-[var(--fitai-purple)]" }
             ].map((item) => (
-              <div key={item.label} className="rounded-[22px] border border-white/8 bg-black/20 p-4 text-center">
-                <div className={`mx-auto grid size-24 place-items-center rounded-full bg-gradient-to-br ${item.tone} text-xl font-semibold text-black`}>
+              <div key={item.label} className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-4 text-center">
+                <div className={`mx-auto grid size-24 place-items-center rounded-full ${item.className} text-xl font-semibold text-white`}>
                   {item.value}
                 </div>
-                <p className="mt-4 text-sm text-[var(--muted-foreground)]">{item.label}</p>
+                <p className="mt-4 text-sm text-[var(--fitai-text-secondary)]">{item.label}</p>
               </div>
             ))}
           </div>
