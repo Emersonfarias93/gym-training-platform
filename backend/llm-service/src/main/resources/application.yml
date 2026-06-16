@@ -1,6 +1,18 @@
 spring:
   application:
     name: llm-service
+  profiles:
+    active: local
+  ai:
+    model:
+      chat: openai
+    openai:
+      api-key: ${GROQ_API_KEY:}
+      base-url: ${GROQ_BASE_URL:https://api.groq.com/openai}
+      chat:
+        options:
+          model: ${GROQ_MODEL:llama-3.3-70b-versatile}
+          temperature: ${GROQ_TEMPERATURE:0.7}
   kafka:
     bootstrap-servers: localhost:9092
 
