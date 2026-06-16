@@ -1,0 +1,55 @@
+@import "tailwindcss";
+
+:root {
+  --font-sans: "Aptos", "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  --font-display: "Aptos Display", "Trebuchet MS", "Segoe UI", sans-serif;
+  --background: #09090b;
+  --background-soft: #111116;
+  --surface: #18181b;
+  --surface-2: #202028;
+  --foreground: #f4f4f5;
+  --muted-foreground: #a1a1aa;
+  --border: rgba(255, 255, 255, 0.08);
+  --primary: #22c55e;
+  --primary-strong: #0f9f58;
+  --ring: rgba(123, 241, 176, 0.55);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top, rgba(34, 197, 94, 0.08), transparent 22%),
+    linear-gradient(180deg, #09090b 0%, #0f1115 100%);
+  color: var(--foreground);
+  font-family: var(--font-sans), sans-serif;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display), sans-serif;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}

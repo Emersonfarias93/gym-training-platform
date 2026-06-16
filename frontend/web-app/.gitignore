@@ -1,0 +1,12 @@
+.next/
+node_modules/
+AGENT.md
+agent.md
+**/AGENT.md
+**/agent.md
+SKILL.md
+skill.md
+**/SKILL.md
+**/skill.md
+skills/
+.skills/
