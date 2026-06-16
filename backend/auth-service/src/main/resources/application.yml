@@ -1,8 +1,24 @@
 spring:
   application:
     name: auth-service
+  datasource:
+    url: ${AUTH_DB_URL:jdbc:postgresql://localhost:5432/gym_training}
+    username: ${AUTH_DB_USERNAME:gym_user}
+    password: ${AUTH_DB_PASSWORD:gym_pass}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
   kafka:
     bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
 
 server:
   port: 8081
@@ -12,3 +28,13 @@ management:
     web:
       exposure:
         include: health,info,metrics
+
+security:
+  jwt:
+    secret: ${AUTH_JWT_SECRET:Z3ltLXRyYWluaW5nLWF1dGgtc2VjdXJlLXNpZ25pbmcta2V5LWZvci1kZXYtdXNhZ2UtMjU2}
+    expiration-ms: ${AUTH_JWT_EXPIRATION_MS:3600000}
+
+application:
+  kafka:
+    topics:
+      auth-events: ${AUTH_EVENTS_TOPIC:auth.events}
