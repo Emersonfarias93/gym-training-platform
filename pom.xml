@@ -1,0 +1,33 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.4.0</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>com.gym.training</groupId>
+    <artifactId>gym-training-platform</artifactId>
+    <version>0.0.1-SNAPSHOT</version>
+    <packaging>pom</packaging>
+
+    <name>gym-training-platform</name>
+    <description>Monorepo base para a plataforma Gym Training</description>
+
+    <properties>
+        <java.version>21</java.version>
+    </properties>
+
+    <modules>
+        <module>backend/auth-service</module>
+        <module>backend/user-service</module>
+        <module>backend/payment-service</module>
+        <module>backend/email-service</module>
+        <module>backend/workout-service</module>
+        <module>backend/realtime-service</module>
+    </modules>
+</project>

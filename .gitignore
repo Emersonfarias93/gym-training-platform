@@ -1,0 +1,9 @@
+target/
+.idea/
+.vscode/
+.settings/
+.classpath
+.project
+.mvn/
+node_modules/
+.DS_Store
