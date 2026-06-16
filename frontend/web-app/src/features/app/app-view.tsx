@@ -9,13 +9,15 @@ import { SchedulePage } from "@/features/schedule/schedule-page";
 import { SettingsPage } from "@/features/settings/settings-page";
 import { TrainerPage } from "@/features/trainer/trainer-page";
 import { WorkoutsPage } from "@/features/workouts/workouts-page";
+import type { AuthUser } from "@/types/auth";
 import type { AppView } from "@/types/dashboard";
 
 type AppViewProps = {
+  user: AuthUser;
   view: AppView;
 };
 
-export function AppViewContent({ view }: AppViewProps) {
+export function AppViewContent({ user, view }: AppViewProps) {
   switch (view) {
     case "workouts":
       return <WorkoutsPage />;
@@ -26,7 +28,7 @@ export function AppViewContent({ view }: AppViewProps) {
     case "assessments":
       return <AssessmentsPage />;
     case "ai-coach":
-      return <AICoachPage />;
+      return <AICoachPage user={user} />;
     case "schedule":
       return <SchedulePage />;
     case "trainer":

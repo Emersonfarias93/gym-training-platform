@@ -36,7 +36,7 @@ export default async function Home({ searchParams }: HomeProps) {
 
   return (
     <AppShell activeView={activeView} user={session.user}>
-      <AppViewContent view={activeView} />
+      <AppViewContent user={session.user} view={activeView} />
     </AppShell>
   );
 }
