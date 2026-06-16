@@ -5,9 +5,9 @@ import { OverviewCard } from "@/features/shared/components/overview-card";
 import { StackedListCard } from "@/features/shared/components/stacked-list-card";
 
 const assessments = [
-  { title: "Bioimpedancia", subtitle: "Atualizada ha 6 dias", meta: "Concluida", accent: "#86efac" },
-  { title: "Teste de VO2", subtitle: "Historico de condicionamento", meta: "Revisar", accent: "#fcd34d" },
-  { title: "Mobilidade global", subtitle: "Abertura de ombro e quadril", meta: "Agendada", accent: "#67e8f9" }
+  { title: "Bioimpedancia", subtitle: "Atualizada ha 6 dias", meta: "Concluida", tone: "success" as const },
+  { title: "Teste de VO2", subtitle: "Historico de condicionamento", meta: "Revisar", tone: "warning" as const },
+  { title: "Mobilidade global", subtitle: "Abertura de ombro e quadril", meta: "Agendada", tone: "primary" as const }
 ];
 
 export function AssessmentsPage() {

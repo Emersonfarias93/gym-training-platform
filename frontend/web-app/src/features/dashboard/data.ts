@@ -88,19 +88,19 @@ export const focusAreas = [
     label: "Forca",
     icon: Target,
     progress: 81,
-    tone: "emerald" as const
+    tone: "primary" as const
   },
   {
     label: "Condicionamento",
     icon: Activity,
     progress: 67,
-    tone: "cyan" as const
+    tone: "success" as const
   },
   {
     label: "Recuperacao",
     icon: HeartPulse,
     progress: 72,
-    tone: "amber" as const
+    tone: "warning" as const
   }
 ];
 

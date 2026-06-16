@@ -14,7 +14,7 @@ export function Progress({
   return (
     <div
       className={cn(
-        "h-2 overflow-hidden rounded-full bg-white/8",
+        "h-2 overflow-hidden rounded-full bg-[var(--fitai-surface-secondary)]",
         className
       )}
       aria-valuemax={100}
@@ -24,7 +24,7 @@ export function Progress({
     >
       <div
         className={cn(
-          "h-full rounded-full bg-[linear-gradient(90deg,var(--primary),#7bf1b0)]",
+          "h-full rounded-full fitai-progress-gradient",
           indicatorClassName
         )}
         style={{ width: `${value}%` }}

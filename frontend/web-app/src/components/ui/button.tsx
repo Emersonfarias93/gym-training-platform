@@ -4,15 +4,16 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--background)] disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex min-h-10 items-center justify-center gap-2 rounded-full text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--ring)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--fitai-bg-page)] disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
         primary:
-          "bg-[linear-gradient(135deg,var(--primary),var(--primary-strong))] text-white shadow-[0_18px_40px_-18px_rgba(34,197,94,0.85)] hover:brightness-110",
+          "fitai-primary-gradient text-white shadow-[0_18px_38px_-22px_rgba(79,124,255,0.95)] hover:bg-[var(--fitai-primary-hover)] hover:brightness-105",
         secondary:
-          "border border-white/10 bg-white/5 text-[var(--foreground)] hover:bg-white/10",
-        ghost: "text-[var(--muted-foreground)] hover:bg-white/5 hover:text-[var(--foreground)]"
+          "border border-[var(--fitai-border)] bg-[var(--fitai-surface-secondary)] text-[var(--fitai-text-primary)] hover:border-[var(--fitai-border-strong)] hover:bg-[var(--fitai-surface-elevated)]",
+        ghost:
+          "text-[var(--fitai-text-secondary)] hover:bg-[rgba(79,124,255,0.07)] hover:text-[var(--fitai-text-primary)]"
       },
       size: {
         sm: "h-10 px-4",

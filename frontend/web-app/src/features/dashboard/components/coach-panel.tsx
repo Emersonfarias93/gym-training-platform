@@ -10,17 +10,17 @@ type CoachPanelProps = {
 export function CoachPanel({ insights }: CoachPanelProps) {
   return (
     <Card className="relative overflow-hidden p-6">
-      <div className="absolute inset-x-10 top-0 h-32 rounded-full bg-emerald-400/10 blur-3xl" />
+      <div className="absolute inset-x-10 top-0 h-32 rounded-full bg-[rgba(79,124,255,0.10)] blur-3xl" />
       <div className="relative flex items-start justify-between gap-4">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-400/20 bg-emerald-400/10 px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-emerald-300">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[rgba(79,124,255,0.22)] bg-[rgba(79,124,255,0.10)] px-3 py-1 text-xs font-medium uppercase tracking-[0.18em] text-[var(--fitai-primary)]">
             <Sparkles className="size-3.5" />
             AI Coach
           </div>
-          <h2 className="mt-4 text-2xl font-semibold text-white">
+          <h2 className="mt-4 text-2xl font-semibold text-[var(--fitai-text-primary)]">
             Recomendacoes adaptativas em tempo real
           </h2>
-          <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--muted-foreground)]">
+          <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--fitai-text-secondary)]">
             O motor FitAI correlaciona treinos, sono, agenda e nutricao para sugerir o proximo melhor passo.
           </p>
         </div>
@@ -33,10 +33,10 @@ export function CoachPanel({ insights }: CoachPanelProps) {
         {insights.map((insight) => (
           <div
             key={insight.title}
-            className="rounded-[24px] border border-white/8 bg-black/20 p-4"
+            className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-4"
           >
-            <p className="font-medium text-white">{insight.title}</p>
-            <p className="mt-2 text-sm leading-6 text-[var(--muted-foreground)]">
+            <p className="font-medium text-[var(--fitai-text-primary)]">{insight.title}</p>
+            <p className="mt-2 text-sm leading-6 text-[var(--fitai-text-secondary)]">
               {insight.body}
             </p>
           </div>

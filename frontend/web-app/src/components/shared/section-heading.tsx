@@ -20,9 +20,9 @@ export function SectionHeading({
       <div className="space-y-2">
         {eyebrow ? <Badge>{eyebrow}</Badge> : null}
         <div>
-          <h2 className="text-xl font-semibold text-white md:text-2xl">{title}</h2>
+          <h2 className="text-xl font-semibold text-[var(--fitai-text-primary)] md:text-2xl">{title}</h2>
           {description ? (
-            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--muted-foreground)]">
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--fitai-text-secondary)]">
               {description}
             </p>
           ) : null}

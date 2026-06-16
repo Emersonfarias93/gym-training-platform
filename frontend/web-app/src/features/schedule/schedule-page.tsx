@@ -5,9 +5,9 @@ import { OverviewCard } from "@/features/shared/components/overview-card";
 import { StackedListCard } from "@/features/shared/components/stacked-list-card";
 
 const agenda = [
-  { title: "Check-in presencial", subtitle: "Marina Silva · Sala 02", meta: "09:00", accent: "#86efac" },
-  { title: "Avaliacao de mobilidade", subtitle: "Pedro Lima · Studio", meta: "11:30", accent: "#67e8f9" },
-  { title: "Consulta nutricional", subtitle: "Julia Costa · Online", meta: "16:00", accent: "#fcd34d" }
+  { title: "Check-in presencial", subtitle: "Marina Silva · Sala 02", meta: "09:00", tone: "primary" as const },
+  { title: "Avaliacao de mobilidade", subtitle: "Pedro Lima · Studio", meta: "11:30", tone: "warning" as const },
+  { title: "Consulta nutricional", subtitle: "Julia Costa · Online", meta: "16:00", tone: "success" as const }
 ];
 
 export function SchedulePage() {

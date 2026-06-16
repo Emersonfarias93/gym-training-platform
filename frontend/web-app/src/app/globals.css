@@ -1,18 +1,66 @@
 @import "tailwindcss";
 
 :root {
-  --font-sans: "Aptos", "Segoe UI Variable Text", "Segoe UI", sans-serif;
-  --font-display: "Aptos Display", "Trebuchet MS", "Segoe UI", sans-serif;
-  --background: #09090b;
-  --background-soft: #111116;
-  --surface: #18181b;
-  --surface-2: #202028;
-  --foreground: #f4f4f5;
-  --muted-foreground: #a1a1aa;
-  --border: rgba(255, 255, 255, 0.08);
-  --primary: #22c55e;
-  --primary-strong: #0f9f58;
-  --ring: rgba(123, 241, 176, 0.55);
+  --font-sans: "Geist", "Inter", "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  --font-display: "Geist", "Inter", "Segoe UI Variable Text", "Segoe UI", sans-serif;
+
+  --fitai-bg-shell: #0A0C10;
+  --fitai-bg-page: #0F1117;
+  --fitai-surface: #1A1D24;
+  --fitai-surface-elevated: #15181F;
+  --fitai-surface-secondary: #21252E;
+
+  --fitai-primary: #4F7CFF;
+  --fitai-primary-hover: #3055D8;
+  --fitai-success: #00D084;
+  --fitai-warning: #FF9F43;
+  --fitai-purple: #9B59FF;
+  --fitai-danger: #FF6B6B;
+
+  --fitai-text-primary: rgba(255,255,255,0.92);
+  --fitai-text-secondary: rgba(255,255,255,0.62);
+  --fitai-text-muted: rgba(255,255,255,0.38);
+  --fitai-text-disabled: rgba(255,255,255,0.28);
+
+  --fitai-border-subtle: rgba(255,255,255,0.055);
+  --fitai-border: rgba(255,255,255,0.07);
+  --fitai-border-strong: rgba(255,255,255,0.10);
+
+  --background: var(--fitai-bg-page);
+  --foreground: var(--fitai-text-primary);
+  --card: var(--fitai-surface);
+  --card-foreground: var(--fitai-text-primary);
+  --popover: var(--fitai-surface);
+  --popover-foreground: var(--fitai-text-primary);
+  --primary: var(--fitai-primary);
+  --primary-foreground: #ffffff;
+  --primary-strong: var(--fitai-primary-hover);
+  --secondary: var(--fitai-surface-secondary);
+  --secondary-foreground: var(--fitai-text-primary);
+  --muted: var(--fitai-surface-secondary);
+  --muted-foreground: var(--fitai-text-secondary);
+  --accent: rgba(79,124,255,0.10);
+  --accent-foreground: var(--fitai-primary);
+  --destructive: var(--fitai-danger);
+  --destructive-foreground: #ffffff;
+  --border: var(--fitai-border);
+  --input: var(--fitai-surface);
+  --ring: rgba(79,124,255,0.45);
+
+  --chart-1: var(--fitai-primary);
+  --chart-2: var(--fitai-success);
+  --chart-3: var(--fitai-warning);
+  --chart-4: var(--fitai-purple);
+  --chart-5: var(--fitai-danger);
+
+  --sidebar: var(--fitai-bg-shell);
+  --sidebar-foreground: var(--fitai-text-secondary);
+  --sidebar-primary: var(--fitai-primary);
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: rgba(79,124,255,0.07);
+  --sidebar-accent-foreground: var(--fitai-primary);
+  --sidebar-border: var(--fitai-border-subtle);
+  --sidebar-ring: rgba(79,124,255,0.45);
 }
 
 * {
@@ -26,9 +74,7 @@ html {
 body {
   margin: 0;
   min-height: 100vh;
-  background:
-    radial-gradient(circle at top, rgba(34, 197, 94, 0.08), transparent 22%),
-    linear-gradient(180deg, #09090b 0%, #0f1115 100%);
+  background: var(--fitai-bg-shell);
   color: var(--foreground);
   font-family: var(--font-sans), sans-serif;
 }
@@ -52,4 +98,73 @@ select {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+@layer utilities {
+  .fitai-shell {
+    background: var(--fitai-bg-shell);
+  }
+
+  .fitai-page {
+    background: var(--fitai-bg-page);
+  }
+
+  .fitai-card {
+    background: var(--fitai-surface);
+    border-color: var(--fitai-border);
+  }
+
+  .fitai-card-elevated {
+    background: var(--fitai-surface-elevated);
+    border-color: var(--fitai-border-strong);
+  }
+
+  .fitai-subtle-surface {
+    background: var(--fitai-surface-secondary);
+    border-color: var(--fitai-border);
+  }
+
+  .fitai-text-primary {
+    color: var(--fitai-text-primary);
+  }
+
+  .fitai-text-secondary {
+    color: var(--fitai-text-secondary);
+  }
+
+  .fitai-text-muted {
+    color: var(--fitai-text-muted);
+  }
+
+  .fitai-primary {
+    color: var(--fitai-primary);
+  }
+
+  .fitai-success {
+    color: var(--fitai-success);
+  }
+
+  .fitai-warning {
+    color: var(--fitai-warning);
+  }
+
+  .fitai-purple {
+    color: var(--fitai-purple);
+  }
+
+  .fitai-danger {
+    color: var(--fitai-danger);
+  }
+
+  .fitai-primary-gradient {
+    background: linear-gradient(135deg, var(--fitai-primary), var(--fitai-primary-hover));
+  }
+
+  .fitai-ai-gradient {
+    background: linear-gradient(135deg, var(--fitai-primary), var(--fitai-success));
+  }
+
+  .fitai-progress-gradient {
+    background: linear-gradient(90deg, var(--fitai-primary), var(--fitai-success));
+  }
 }

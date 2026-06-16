@@ -27,17 +27,17 @@ export function EvolutionPage() {
       </section>
 
       <div className="grid gap-6 xl:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)]">
-        <div className="rounded-[28px] border border-white/8 bg-[linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] p-6">
-          <h3 className="text-lg font-semibold text-white">Tendencias dos indicadores</h3>
+        <div className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface)] p-6">
+          <h3 className="text-lg font-semibold text-[var(--fitai-text-primary)]">Tendencias dos indicadores</h3>
           <div className="mt-6 space-y-5">
             {series.map((item) => (
               <div key={item.label}>
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <p className="font-medium text-white">{item.label}</p>
-                    <p className="text-sm text-[var(--muted-foreground)]">{item.value}</p>
+                    <p className="font-medium text-[var(--fitai-text-primary)]">{item.label}</p>
+                    <p className="text-sm text-[var(--fitai-text-secondary)]">{item.value}</p>
                   </div>
-                  <span className="text-sm text-emerald-300">{item.delta}</span>
+                  <span className="text-sm text-[var(--fitai-success)]">{item.delta}</span>
                 </div>
                 <Progress value={item.progress} className="mt-3 h-2.5" />
               </div>
@@ -48,10 +48,10 @@ export function EvolutionPage() {
           {["Frente", "Lado"].map((view) => (
             <div
               key={view}
-              className="min-h-56 rounded-[28px] border border-dashed border-white/12 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.14),transparent_50%),rgba(255,255,255,0.03)] p-5"
+              className="min-h-56 rounded-2xl border border-dashed border-[var(--fitai-border-strong)] bg-[var(--fitai-surface)] p-5"
             >
-              <p className="text-sm uppercase tracking-[0.22em] text-[var(--muted-foreground)]">{view}</p>
-              <div className="mt-6 flex h-40 items-center justify-center rounded-[22px] border border-white/8 bg-black/20 text-sm text-[var(--muted-foreground)]">
+              <p className="text-sm uppercase tracking-[0.22em] text-[var(--fitai-text-secondary)]">{view}</p>
+              <div className="mt-6 flex h-40 items-center justify-center rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] text-sm text-[var(--fitai-text-secondary)]">
                 Placeholder de foto de progresso
               </div>
             </div>
