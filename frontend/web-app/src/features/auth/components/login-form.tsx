@@ -16,8 +16,8 @@ import { FormStatus } from "@/features/auth/components/form-status";
 import { PasswordInput } from "@/features/auth/components/password-input";
 
 const loginSignals = [
-  "Use o e-mail cadastrado no auth-service.",
-  "A sessao e validada no servidor antes de abrir o dashboard."
+  "Use o e-mail cadastrado na sua conta FitAI.",
+  "A sessao sera preparada antes de abrir o dashboard."
 ];
 
 export function LoginForm() {
@@ -99,14 +99,14 @@ export function LoginForm() {
           placeholder="Digite sua senha"
           {...form.register("password")}
         />
-        <p className="text-xs text-[var(--fitai-text-muted)]">A senha nao e armazenada no frontend.</p>
+        <p className="text-xs text-[var(--fitai-text-muted)]">Mantenha sua senha em seguranca.</p>
         {form.formState.errors.password ? (
           <p className="text-sm text-[var(--fitai-danger)]">{form.formState.errors.password.message}</p>
         ) : null}
       </div>
 
       {mutation.isError ? (
-        <FormStatus message={mutation.error.message} tone="error" />
+        <FormStatus message="Login ou senha invalido." tone="error" />
       ) : null}
 
       {successMessage ? (

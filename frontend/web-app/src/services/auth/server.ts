@@ -10,6 +10,7 @@ import {
   getAuthServiceEndpoint,
   sanitizeAuthUser
 } from "@/lib/auth";
+import { MOCK_AUTH_TOKEN, mockAuthUser } from "@/lib/mock-auth";
 import type {
   AuthErrorResponse,
   AuthResponse,
@@ -135,6 +136,13 @@ export const getServerAuthSession = cache(async () => {
 
   if (!token) {
     return null;
+  }
+
+  if (token === MOCK_AUTH_TOKEN) {
+    return {
+      accessToken: token,
+      user: mockAuthUser
+    };
   }
 
   try {
