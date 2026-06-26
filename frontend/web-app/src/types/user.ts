@@ -1,8 +1,10 @@
+export type UserPremiumStatus = "NONE" | "ACTIVE" | "TRIALING" | "PAST_DUE" | "CANCELED" | "EXPIRED";
+
 export type UserPremiumStatusResponse = {
   userId: string;
   premiumActive: boolean;
   planName: string | null;
-  status: "NONE" | "ACTIVE" | "TRIALING" | "PAST_DUE" | "CANCELED" | "EXPIRED";
+  status: UserPremiumStatus;
   currentPeriodEnd: string | null;
   lastSyncedAt: string;
 };

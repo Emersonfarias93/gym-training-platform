@@ -14,7 +14,7 @@ import {
   sanitizeAuthUser
 } from "@/lib/auth";
 import { findMockUserByToken } from "@/lib/mock-auth";
-import { resolveUserPlanStatus } from "@/services/user/server";
+import { getUserPremiumStatus, premiumActiveToPlanStatus } from "@/services/user/server";
 import type {
   AuthErrorResponse,
   AuthResponse,
@@ -64,16 +64,26 @@ async function enrichAuthUser(user: AuthUser): Promise<AuthUser> {
   if (await hasMockPremiumCookie()) {
     return sanitizeAuthUser({
       ...user,
-      planStatus: "ACTIVE_PLAN"
+      planStatus: "ACTIVE_PLAN",
+      planName: "FitAI Premium",
+      premiumStatus: "ACTIVE"
     });
   }
 
-  const planStatus = await resolveUserPlanStatus(user);
+  try {
+    const premium = await getUserPremiumStatus(user);
 
-  return sanitizeAuthUser({
-    ...user,
-    planStatus
-  });
+    return sanitizeAuthUser({
+      ...user,
+      planStatus: premiumActiveToPlanStatus(premium.premiumActive),
+      planName: premium.planName,
+      premiumStatus: premium.status,
+      currentPeriodEnd: premium.currentPeriodEnd,
+      lastSyncedAt: premium.lastSyncedAt
+    });
+  } catch {
+    return sanitizeAuthUser(user);
+  }
 }
 
 async function toAuthUser(response: AuthResponse): Promise<AuthUser> {
@@ -81,7 +91,12 @@ async function toAuthUser(response: AuthResponse): Promise<AuthUser> {
     userId: response.userId,
     fullName: response.fullName,
     email: response.email,
+    cpfMasked: response.cpfMasked,
     planStatus: normalizePlanStatus(response.planStatus),
+    planName: response.planName,
+    premiumStatus: response.premiumStatus,
+    currentPeriodEnd: response.currentPeriodEnd,
+    lastSyncedAt: response.lastSyncedAt,
     expiresAt: response.expiresAt
   });
 }
@@ -192,7 +207,7 @@ export const getServerAuthSession = cache(async () => {
 
     return {
       accessToken: token,
-      user: mockUser
+      user: sanitizeAuthUser(mockUser)
     };
   }
 
@@ -220,7 +235,12 @@ export const getServerAuthSession = cache(async () => {
         userId: validation.userId,
         fullName,
         email: validation.email,
+        cpfMasked: profile?.cpfMasked,
         planStatus: normalizePlanStatus(profile?.planStatus ?? validation.planStatus),
+        planName: profile?.planName,
+        premiumStatus: profile?.premiumStatus,
+        currentPeriodEnd: profile?.currentPeriodEnd,
+        lastSyncedAt: profile?.lastSyncedAt,
         expiresAt
       }))
     };

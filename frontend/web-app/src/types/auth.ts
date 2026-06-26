@@ -1,3 +1,5 @@
+import type { UserPremiumStatus } from "@/types/user";
+
 export type UserPlanStatus = "COMMON" | "ACTIVE_PLAN";
 export type BackendAuthRole = "USER" | "ADMIN" | "TRAINER";
 
@@ -5,7 +7,12 @@ export type AuthUser = {
   userId: string;
   fullName: string;
   email: string;
+  cpfMasked?: string | null;
   planStatus: UserPlanStatus;
+  planName?: string | null;
+  premiumStatus?: UserPremiumStatus;
+  currentPeriodEnd?: string | null;
+  lastSyncedAt?: string | null;
   expiresAt: string;
 };
 
@@ -13,7 +20,12 @@ export type AuthResponse = {
   userId: string;
   fullName: string;
   email: string;
+  cpfMasked?: string | null;
   planStatus?: UserPlanStatus | null;
+  planName?: string | null;
+  premiumStatus?: UserPremiumStatus;
+  currentPeriodEnd?: string | null;
+  lastSyncedAt?: string | null;
   role?: BackendAuthRole;
   accessToken: string;
   tokenType: string;

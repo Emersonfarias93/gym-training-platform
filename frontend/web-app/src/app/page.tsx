@@ -12,6 +12,7 @@ const validViews: AppView[] = [
   "assessments",
   "ai-coach",
   "schedule",
+  "account",
   "settings"
 ];
 

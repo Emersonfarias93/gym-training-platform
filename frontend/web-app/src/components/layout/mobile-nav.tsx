@@ -40,6 +40,11 @@ const moreNav: Array<{ id: AppView; label: string; tone: string }> = [
     tone: "bg-[rgba(0,208,132,0.10)] text-[var(--fitai-success)]"
   },
   {
+    id: "account",
+    label: "Conta",
+    tone: "bg-[rgba(79,124,255,0.10)] text-[var(--fitai-primary)]"
+  },
+  {
     id: "settings",
     label: "Configurações",
     tone: "bg-[var(--fitai-surface-secondary)] text-[var(--fitai-text-secondary)]"
@@ -59,7 +64,7 @@ export function MobileNav({ activeView, user }: MobileNavProps) {
         <div className="fixed inset-0 z-50 bg-[rgba(0,0,0,0.35)] backdrop-blur-[2px] lg:hidden">
           <div
             aria-modal="true"
-            className="absolute inset-x-3 bottom-3 rounded-[22px] border border-[var(--fitai-border-strong)] bg-[var(--fitai-surface-elevated)] p-4 shadow-[0_24px_80px_-32px_rgba(0,0,0,0.95)]"
+            className="absolute inset-x-3 bottom-3 max-h-[calc(100dvh-1.5rem)] overflow-y-auto rounded-[22px] border border-[var(--fitai-border-strong)] bg-[var(--fitai-surface-elevated)] p-4 shadow-[0_24px_80px_-32px_rgba(0,0,0,0.95)]"
             role="dialog"
           >
             <div className="mx-auto h-1 w-9 rounded-full bg-[var(--fitai-text-muted)]" />

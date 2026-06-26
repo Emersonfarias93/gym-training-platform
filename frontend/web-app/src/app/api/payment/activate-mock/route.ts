@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 
-import { MOCK_PREMIUM_COOKIE, hasActivePlan, isMockCheckoutEnabled } from "@/lib/auth";
+import {
+  MOCK_PREMIUM_COOKIE,
+  getMonthlyPlanPeriodEndIso,
+  hasActivePlan,
+  isMockCheckoutEnabled
+} from "@/lib/auth";
 import { getServerAuthSession } from "@/services/auth/server";
 
 // MOCK: ativacao simulada do plano premium (ambiente de testes).
@@ -28,14 +33,14 @@ export async function POST() {
   }
 
   const response = NextResponse.json({ ok: true });
-  const expires = new Date(session.user.expiresAt);
+  const expires = new Date(getMonthlyPlanPeriodEndIso());
 
   response.cookies.set(MOCK_PREMIUM_COOKIE, "1", {
     httpOnly: true,
     path: "/",
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    ...(Number.isNaN(expires.getTime()) ? {} : { expires })
+    expires
   });
 
   return response;

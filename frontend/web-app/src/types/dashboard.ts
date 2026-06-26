@@ -8,6 +8,7 @@ export type AppView =
   | "assessments"
   | "ai-coach"
   | "schedule"
+  | "account"
   | "settings";
 
 export type NavItem = {

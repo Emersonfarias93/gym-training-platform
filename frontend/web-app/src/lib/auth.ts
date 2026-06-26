@@ -44,12 +44,26 @@ export function getPlanLabel(user: AuthUser) {
   return hasActivePlan(user) ? "Plano ativo" : "Plano comum";
 }
 
+export function getMonthlyPlanPeriodEndIso(from = new Date()) {
+  const periodEnd = new Date(from);
+  periodEnd.setMonth(periodEnd.getMonth() + 1);
+  return periodEnd.toISOString();
+}
+
 export function sanitizeAuthUser(user: AuthUser): AuthUser {
+  const planStatus = normalizePlanStatus(user.planStatus);
+  const isActivePlan = planStatus === "ACTIVE_PLAN";
+
   return {
     userId: user.userId,
     fullName: user.fullName,
     email: user.email,
-    planStatus: normalizePlanStatus(user.planStatus),
+    cpfMasked: user.cpfMasked ?? null,
+    planStatus,
+    planName: user.planName ?? (isActivePlan ? "FitAI Premium" : null),
+    premiumStatus: user.premiumStatus ?? (isActivePlan ? "ACTIVE" : "NONE"),
+    currentPeriodEnd: user.currentPeriodEnd ?? (isActivePlan ? getMonthlyPlanPeriodEndIso() : null),
+    lastSyncedAt: user.lastSyncedAt ?? null,
     expiresAt: user.expiresAt
   };
 }

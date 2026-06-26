@@ -2,6 +2,7 @@ import {
   BarChart3,
   BrainCircuit,
   CalendarRange,
+  CreditCard,
   Dumbbell,
   Gauge,
   Settings,
@@ -19,6 +20,7 @@ export const sidebarItems: NavItem[] = [
   { id: "assessments", label: "Avaliacoes", icon: ShieldPlus },
   { id: "ai-coach", label: "AI Coach", icon: BrainCircuit, badge: "Live" },
   { id: "schedule", label: "Agenda", icon: CalendarRange },
+  { id: "account", label: "Conta", icon: CreditCard },
   { id: "settings", label: "Configuracoes", icon: Settings }
 ];
 
@@ -71,6 +73,13 @@ export const pageIntro: Record<AppView, PageIntro> = {
     description:
       "Distribua compromissos com contexto de prioridade, capacidade e status em tempo real.",
     filters: ["Hoje", "Semana", "Plano ativo", "Capacidade"]
+  },
+  account: {
+    eyebrow: "Conta e assinatura",
+    title: "Plano, dados pessoais e pagamentos em um so lugar",
+    description:
+      "Acompanhe sua assinatura mensal, vencimento do plano, dados basicos e historico de cobrancas.",
+    filters: ["Plano", "Pagamentos", "LGPD", "Perfil"]
   },
   settings: {
     eyebrow: "Workspace Settings",

@@ -1,6 +1,7 @@
 "use client";
 
 import { AICoachPage } from "@/features/ai-coach/ai-coach-page";
+import { AccountPage } from "@/features/account/account-page";
 import { AssessmentsPage } from "@/features/assessments/assessments-page";
 import { DashboardPage } from "@/features/dashboard/dashboard-page";
 import { DietPage } from "@/features/diet/diet-page";
@@ -30,6 +31,8 @@ export function AppViewContent({ user, view }: AppViewProps) {
       return <AICoachPage user={user} />;
     case "schedule":
       return <SchedulePage />;
+    case "account":
+      return <AccountPage user={user} />;
     case "settings":
       return <SettingsPage />;
     case "dashboard":
