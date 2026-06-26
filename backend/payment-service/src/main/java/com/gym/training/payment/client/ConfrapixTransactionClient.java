@@ -10,6 +10,7 @@ import org.springframework.web.client.RestClient;
 @Component
 public class ConfrapixTransactionClient {
 
+    private static final String VERSION_PATH = "/api";
     private static final String STORE_TRANSACTION_PATH = "/api/transaction-ec/store";
 
     private final RestClient confrapixRestClient;
@@ -23,6 +24,18 @@ public class ConfrapixTransactionClient {
                 .post()
                 .uri(STORE_TRANSACTION_PATH)
                 .body(request)
+                .retrieve()
+                .onStatus(HttpStatusCode::isError, (httpRequest, response) -> {
+                    String responseBody = new String(response.getBody().readAllBytes());
+                    throw new ConfrapixApiException(response.getStatusCode(), responseBody);
+                })
+                .body(JsonNode.class);
+    }
+
+    public JsonNode version() {
+        return confrapixRestClient
+                .get()
+                .uri(VERSION_PATH)
                 .retrieve()
                 .onStatus(HttpStatusCode::isError, (httpRequest, response) -> {
                     String responseBody = new String(response.getBody().readAllBytes());

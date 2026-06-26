@@ -1,0 +1,148 @@
+{
+  "info": {
+    "_postman_id": "7f8d9a1f-7b7d-4e1f-a3a5-9d6acdf04d5c",
+    "name": "Gym Training - Payment Service - Confrapix",
+    "description": "Requisicoes do payment-service para criar transacoes Pix, testar a API Confrapix e simular callback/webhook. O token da Confrapix fica no backend, nao no Postman.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8083",
+      "type": "string"
+    },
+    {
+      "key": "amount",
+      "value": "10.00",
+      "type": "string"
+    },
+    {
+      "key": "customerName",
+      "value": "Cliente Teste",
+      "type": "string"
+    },
+    {
+      "key": "customerDocument",
+      "value": "12345678900",
+      "type": "string"
+    },
+    {
+      "key": "description",
+      "value": "Teste Pix Gym Training",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Confrapix - Version",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/payments/pix/confrapix/version",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "pix",
+            "confrapix",
+            "version"
+          ]
+        },
+        "description": "Testa se o payment-service consegue chamar a URL base da Confrapix usando o token configurado no backend."
+      },
+      "response": []
+    },
+    {
+      "name": "Pix - Store Transaction",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "const response = pm.response.json();",
+              "",
+              "if (response.uuid) {",
+              "    pm.collectionVariables.set('lastTransactionUuid', response.uuid);",
+              "}",
+              "",
+              "if (response.id) {",
+              "    pm.collectionVariables.set('lastTransactionId', response.id);",
+              "}",
+              "",
+              "if (response.pix && response.pix.code) {",
+              "    pm.collectionVariables.set('lastPixCode', response.pix.code);",
+              "}",
+              "",
+              "pm.test('Transacao criada ou processada', function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"amount\": {{amount}},\n  \"description\": \"{{description}}\",\n  \"customer_name\": \"{{customerName}}\",\n  \"customer_document\": \"{{customerDocument}}\"\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/payments/pix/transactions",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "pix",
+            "transactions"
+          ]
+        },
+        "description": "Cria uma transacao Pix na Confrapix. O backend adiciona callback_url e Authorization Bearer automaticamente."
+      },
+      "response": []
+    },
+    {
+      "name": "Pix - Callback Webhook Simulation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"id\": {{lastTransactionId}},\n  \"uuid\": \"{{lastTransactionUuid}}\",\n  \"customer_name\": \"{{customerName}}\",\n  \"customer_document\": \"{{customerDocument}}\",\n  \"description\": \"{{description}}\",\n  \"payment_type\": \"pix\",\n  \"status\": \"succeeded\",\n  \"confirmed\": true,\n  \"amount\": \"{{amount}}\",\n  \"net_amount\": \"0.0000\",\n  \"discount\": \"0.0000\",\n  \"callback_url\": \"{{baseUrl}}/api/payments/pix/webhook\",\n  \"expired_in\": \"2026-06-26 23:59:59\",\n  \"captured_in\": \"2026-06-26 02:00:00\",\n  \"payed_in\": \"2026-06-26 02:10:00\",\n  \"type\": \"payment\",\n  \"seller_document\": \"00000000000\",\n  \"pix\": {\n    \"url\": \"https://qr.example.com/pix/teste\",\n    \"txid\": \"teste-txid\",\n    \"code\": \"{{lastPixCode}}\",\n    \"endtoend_id\": \"teste-endtoend\",\n    \"payer_data\": {\n      \"cpf\": \"{{customerDocument}}\",\n      \"nome\": \"{{customerName}}\",\n      \"cnpj\": \"\"\n    }\n  }\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/payments/pix/webhook",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "pix",
+            "webhook"
+          ]
+        },
+        "description": "Simula a chamada de callback que a Confrapix faz quando uma transacao muda de status. A resposta esperada e 204 No Content."
+      },
+      "response": []
+    }
+  ]
+}

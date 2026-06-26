@@ -10,6 +10,7 @@ confrapix:
   api:
     base-url: ${CONFRAPIX_BASE_URL:https://api.confrapix.com.br}
     token: ${CONFRAPIX_TOKEN:}
+    callback-url: ${CONFRAPIX_CALLBACK_URL:}
 
 server:
   port: 8083
