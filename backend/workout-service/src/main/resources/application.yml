@@ -2,7 +2,7 @@ spring:
   application:
     name: workout-service
   datasource:
-    url: ${WORKOUT_DB_URL:jdbc:postgresql://localhost:5432/gym_training}
+    url: ${WORKOUT_DB_URL:jdbc:postgresql://localhost:5432/gym_workouts}
     username: ${WORKOUT_DB_USERNAME:gym_user}
     password: ${WORKOUT_DB_PASSWORD:gym_pass}
   jpa:

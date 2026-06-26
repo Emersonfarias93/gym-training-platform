@@ -3,14 +3,37 @@ spring:
     name: payment-service
   config:
     import: optional:classpath:application-local.yml
+  datasource:
+    url: ${PAYMENT_DB_URL:jdbc:postgresql://localhost:5432/gym_payments}
+    username: ${PAYMENT_DB_USERNAME:gym_user}
+    password: ${PAYMENT_DB_PASSWORD:gym_pass}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
   kafka:
     bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.add.type.headers: false
 
 confrapix:
   api:
     base-url: ${CONFRAPIX_BASE_URL:https://api.confrapix.com.br}
     token: ${CONFRAPIX_TOKEN:}
     callback-url: ${CONFRAPIX_CALLBACK_URL:}
+  webhook:
+    secret: ${CONFRAPIX_WEBHOOK_SECRET:}
+
+application:
+  kafka:
+    topics:
+      payment-events: ${PAYMENT_EVENTS_TOPIC:payment.events}
 
 server:
   port: 8083

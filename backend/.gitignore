@@ -16,3 +16,5 @@ skills/
 .skills/
 skills-lock.json
 .env**
+.agents
+.agents/**
