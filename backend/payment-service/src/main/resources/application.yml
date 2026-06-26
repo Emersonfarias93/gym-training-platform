@@ -1,8 +1,15 @@
 spring:
   application:
     name: payment-service
+  config:
+    import: optional:classpath:application-local.yml
   kafka:
     bootstrap-servers: localhost:9092
+
+confrapix:
+  api:
+    base-url: ${CONFRAPIX_BASE_URL:https://api.confrapix.com.br}
+    token: ${CONFRAPIX_TOKEN:}
 
 server:
   port: 8083
