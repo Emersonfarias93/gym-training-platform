@@ -1,6 +1,17 @@
 spring:
   application:
     name: user-service
+  datasource:
+    url: ${USER_DB_URL:jdbc:postgresql://localhost:5432/gym_training}
+    username: ${USER_DB_USERNAME:gym_user}
+    password: ${USER_DB_PASSWORD:gym_pass}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
   kafka:
     bootstrap-servers: localhost:9092
 
