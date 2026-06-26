@@ -2,16 +2,21 @@ import { BellDot, ChevronDown, Sparkles } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { UpgradePlanButton } from "@/features/checkout/upgrade-plan-button";
 import { pageIntro } from "@/features/navigation/config";
+import { hasActivePlan } from "@/lib/auth";
 import { cn } from "@/lib/utils";
+import type { AuthUser } from "@/types/auth";
 import type { AppView } from "@/types/dashboard";
 
 type TopbarProps = {
   activeView: AppView;
+  user: AuthUser;
 };
 
-export function Topbar({ activeView }: TopbarProps) {
+export function Topbar({ activeView, user }: TopbarProps) {
   const intro = pageIntro[activeView];
+  const showUpgrade = !hasActivePlan(user);
 
   return (
     <header
@@ -33,6 +38,7 @@ export function Topbar({ activeView }: TopbarProps) {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
+          {showUpgrade ? <UpgradePlanButton withIcon /> : null}
           <Button variant="secondary">
             <BellDot className="size-4" />
             Alertas

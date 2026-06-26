@@ -21,7 +21,7 @@ export function AppShell({ activeView, children, user }: AppShellProps) {
       <div className="relative mx-auto flex min-h-screen max-w-[1680px]">
         <Sidebar activeView={activeView} items={sidebarItems} user={user} />
         <div className="flex min-w-0 flex-1 flex-col bg-[var(--fitai-bg-page)]">
-          <Topbar activeView={activeView} />
+          <Topbar activeView={activeView} user={user} />
           <main
             className={cn(
               "flex-1 px-4 pb-28 pt-6 md:px-8 md:py-8",

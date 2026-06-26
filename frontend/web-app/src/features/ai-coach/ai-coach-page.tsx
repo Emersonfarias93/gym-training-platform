@@ -17,6 +17,7 @@ import { useMutation } from "@tanstack/react-query";
 import { FormEvent, useEffect, useRef, useState, useTransition } from "react";
 
 import { Button } from "@/components/ui/button";
+import { CheckoutDialog } from "@/features/checkout/checkout-dialog";
 import { getUserInitials, hasActivePlan } from "@/lib/auth";
 import {
   createAiCoachMessage,
@@ -46,6 +47,8 @@ function renderMessageContent(content: string) {
 }
 
 function AiCoachUpgradeState() {
+  const [checkoutOpen, setCheckoutOpen] = useState(false);
+
   return (
     <div className="mx-auto grid min-h-[calc(100dvh-10rem)] max-w-4xl place-items-center rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-bg-shell)] p-6 lg:min-h-[calc(100dvh-8rem)]">
       <div className="max-w-xl text-center">
@@ -62,11 +65,12 @@ function AiCoachUpgradeState() {
           Usuarios comuns continuam com acesso ao dashboard, treinos, dieta, evolucao e agenda. O plano ativo libera
           conversas com IA, analises contextuais e proximos passos personalizados.
         </p>
-        <Button className="mt-6">
+        <Button className="mt-6" onClick={() => setCheckoutOpen(true)}>
           <Crown className="size-4" />
           Ativar plano
         </Button>
       </div>
+      <CheckoutDialog open={checkoutOpen} onOpenChange={setCheckoutOpen} />
     </div>
   );
 }

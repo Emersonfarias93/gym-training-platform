@@ -4,6 +4,11 @@ AGENT.md
 agent.md
 **/AGENT.md
 **/agent.md
+CLAUDE.md
+claude.md
+.claude/
+**/CLAUDE.md
+**/claude.md
 SKILL.md
 skill.md
 **/SKILL.md
@@ -11,3 +16,5 @@ skill.md
 skills/
 .skills/
 skills-lock.json
+.env**
+tsconfig.tsbuildinfo

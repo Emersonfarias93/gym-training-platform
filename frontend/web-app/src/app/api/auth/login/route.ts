@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { createMockAuthResponse, isMockLogin } from "@/lib/mock-auth";
+import { createMockAuthResponse } from "@/lib/mock-auth";
 import {
   applyAuthCookies,
   createAuthUserFromResponse,
@@ -12,9 +12,8 @@ import type { LoginInput } from "@/types/auth";
 export async function POST(request: Request) {
   try {
     const payload = (await request.json()) as LoginInput;
-    const authResponse = isMockLogin(payload)
-      ? createMockAuthResponse()
-      : await loginWithAuthService(payload);
+    const authResponse =
+      createMockAuthResponse(payload) ?? (await loginWithAuthService(payload));
     const user = await createAuthUserFromResponse(authResponse);
     const response = NextResponse.json({
       authenticated: true,

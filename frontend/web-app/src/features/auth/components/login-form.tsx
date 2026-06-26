@@ -1,6 +1,5 @@
 "use client";
 
-import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle, Mail } from "lucide-react";
@@ -14,15 +13,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { FormStatus } from "@/features/auth/components/form-status";
 import { PasswordInput } from "@/features/auth/components/password-input";
+import { MOCK_AUTH_CREDENTIALS, MOCK_COMMON_CREDENTIALS } from "@/lib/mock-auth";
 
-const loginSignals = [
-  "Use o e-mail cadastrado na sua conta FitAI.",
-  "A sessao sera preparada antes de abrir o dashboard."
-];
+const demoAccounts = [
+  { label: "Demo · plano ativo", credentials: MOCK_AUTH_CREDENTIALS },
+  { label: "Comum", credentials: MOCK_COMMON_CREDENTIALS }
+] as const;
 
 export function LoginForm() {
   const router = useRouter();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
+  const [showForgotHint, setShowForgotHint] = useState(false);
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     mode: "onChange",
@@ -50,19 +51,15 @@ export function LoginForm() {
     await mutation.mutateAsync(values);
   });
 
+  function fillDemo(credentials: { email: string; password: string }) {
+    setSuccessMessage(null);
+    mutation.reset();
+    form.setValue("email", credentials.email, { shouldValidate: true });
+    form.setValue("password", credentials.password, { shouldValidate: true });
+  }
+
   return (
     <form className="space-y-5" onSubmit={onSubmit}>
-      <div className="rounded-[28px] border border-[var(--fitai-border)] bg-[rgba(79,124,255,0.06)] p-4">
-        <p className="text-sm font-medium text-[var(--fitai-text-primary)]">Entrada segura</p>
-        <div className="mt-3 grid gap-2">
-          {loginSignals.map((signal) => (
-            <p className="text-sm leading-6 text-[var(--fitai-text-secondary)]" key={signal}>
-              {signal}
-            </p>
-          ))}
-        </div>
-      </div>
-
       <div className="space-y-2">
         <label className="text-sm font-medium text-[var(--fitai-text-primary)]" htmlFor="login-email">
           E-mail
@@ -78,7 +75,6 @@ export function LoginForm() {
             {...form.register("email")}
           />
         </div>
-        <p className="text-xs text-[var(--fitai-text-muted)]">Use o mesmo e-mail que foi registrado na plataforma.</p>
         {form.formState.errors.email ? (
           <p className="text-sm text-[var(--fitai-danger)]">{form.formState.errors.email.message}</p>
         ) : null}
@@ -89,9 +85,13 @@ export function LoginForm() {
           <label className="text-sm font-medium text-[var(--fitai-text-primary)]" htmlFor="login-password">
             Senha
           </label>
-          <Link className="text-sm text-[var(--fitai-primary)] hover:text-white" href="/register">
-            Criar conta
-          </Link>
+          <button
+            className="text-sm text-[var(--fitai-primary)] transition-colors hover:text-white"
+            onClick={() => setShowForgotHint((current) => !current)}
+            type="button"
+          >
+            Esqueceu a senha?
+          </button>
         </div>
         <PasswordInput
           autoComplete="current-password"
@@ -99,7 +99,11 @@ export function LoginForm() {
           placeholder="Digite sua senha"
           {...form.register("password")}
         />
-        <p className="text-xs text-[var(--fitai-text-muted)]">Mantenha sua senha em seguranca.</p>
+        {showForgotHint ? (
+          <p className="text-xs text-[var(--fitai-text-muted)]">
+            Recuperacao de senha estara disponivel em breve.
+          </p>
+        ) : null}
         {form.formState.errors.password ? (
           <p className="text-sm text-[var(--fitai-danger)]">{form.formState.errors.password.message}</p>
         ) : null}
@@ -121,6 +125,27 @@ export function LoginForm() {
         {isBusy ? <LoaderCircle className="size-4 animate-spin" /> : null}
         Entrar na plataforma
       </Button>
+
+      <div className="flex items-center gap-3">
+        <span className="h-px flex-1 bg-[var(--fitai-border-subtle)]" />
+        <span className="text-xs text-[var(--fitai-text-muted)]">ou entre com uma conta demo</span>
+        <span className="h-px flex-1 bg-[var(--fitai-border-subtle)]" />
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {demoAccounts.map((account) => (
+          <Button
+            className="flex-1"
+            key={account.label}
+            onClick={() => fillDemo(account.credentials)}
+            size="sm"
+            type="button"
+            variant="secondary"
+          >
+            {account.label}
+          </Button>
+        ))}
+      </div>
     </form>
   );
 }

@@ -18,6 +18,8 @@ export default async function LoginPage() {
       alternateText="Criar conta"
       description="Autentique sua operacao, valide seu acesso e retome treinos, dieta e acompanhamento com a mesma linguagem premium do ecossistema FitAI."
       eyebrow="FitAI Access"
+      formSubtitle="Entre com suas credenciais para abrir seu ambiente de treino e IA."
+      formTitle="Bem-vindo de volta"
       title="Entre para continuar no cockpit de performance."
     >
       <LoginForm />

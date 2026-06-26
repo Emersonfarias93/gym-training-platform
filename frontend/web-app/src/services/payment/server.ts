@@ -1,0 +1,111 @@
+import "server-only";
+
+import type { PixCheckoutResponse, PixProviderResponse } from "@/types/payment";
+
+const DEFAULT_PAYMENT_SERVICE_URL = "http://localhost:8083";
+
+class PaymentApiError extends Error {
+  status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "PaymentApiError";
+    this.status = status;
+  }
+}
+
+function getPaymentServiceBaseUrl() {
+  return (process.env.PAYMENT_SERVICE_URL ?? DEFAULT_PAYMENT_SERVICE_URL).replace(/\/$/, "");
+}
+
+function getPaymentServiceEndpoint(path: string) {
+  return new URL(path, `${getPaymentServiceBaseUrl()}/`).toString();
+}
+
+type CreatePixInput = {
+  amount: number;
+  /** Validade do Pix em horas a partir de agora. Default: 24h. */
+  expiresInHours?: number;
+};
+
+/** Formata a validade no padrao aceito pela Confrapix: "YYYY-MM-DD HH:mm:ss". */
+function formatExpirationDate(hoursFromNow: number) {
+  const date = new Date(Date.now() + hoursFromNow * 60 * 60 * 1000);
+  const pad = (value: number) => String(value).padStart(2, "0");
+
+  return (
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
+    `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
+  );
+}
+
+function buildStorePixTransactionBody(input: CreatePixInput) {
+  // Apenas `amount` e obrigatorio na rota do backend e na Confrapix.
+  // `customer_name`/`customer_document` sao opcionais e ficam de fora por enquanto.
+  return {
+    amount: input.amount,
+    expiration_date: formatExpirationDate(input.expiresInHours ?? 24),
+    payment_type: "pix",
+    type: "payment"
+  };
+}
+
+function normalizePixResponse(payload: PixProviderResponse): PixCheckoutResponse {
+  const transaction = payload.transaction;
+
+  if (!transaction?.pix?.url || !transaction.pix.code || !transaction.uuid) {
+    throw new PaymentApiError("O provedor Pix retornou uma transacao incompleta.", 502);
+  }
+
+  return {
+    transactionId: transaction.uuid,
+    qrCodeImage: `data:image/png;base64,${transaction.pix.url}`,
+    copyPaste: transaction.pix.code,
+    amount: transaction.amount ?? 0,
+    status: transaction.status ?? "processing",
+    expiresAt: transaction.expired_in ?? ""
+  };
+}
+
+async function parsePaymentResponse(response: Response): Promise<PixProviderResponse> {
+  const payload = (await response.json()) as PixProviderResponse & { message?: string };
+
+  if (!response.ok || payload.success === false) {
+    throw new PaymentApiError(
+      payload.message ?? "Nao foi possivel gerar a cobranca Pix agora.",
+      response.ok ? 502 : response.status
+    );
+  }
+
+  return payload;
+}
+
+export async function createPixTransaction(input: CreatePixInput): Promise<PixCheckoutResponse> {
+  const response = await fetch(getPaymentServiceEndpoint("/api/payments/pix/transactions"), {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(buildStorePixTransactionBody(input))
+  });
+
+  const payload = await parsePaymentResponse(response);
+  return normalizePixResponse(payload);
+}
+
+export function getPaymentApiErrorMessage(error: unknown) {
+  if (error instanceof PaymentApiError) {
+    return error.message;
+  }
+
+  return "Nao foi possivel falar com o servico de pagamento agora.";
+}
+
+export function getPaymentApiErrorStatus(error: unknown, fallbackStatus: number) {
+  if (error instanceof PaymentApiError) {
+    return error.status;
+  }
+
+  return fallbackStatus;
+}

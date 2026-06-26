@@ -7,11 +7,13 @@ import { NextResponse } from "next/server";
 import {
   AUTH_PROFILE_COOKIE,
   AUTH_TOKEN_COOKIE,
+  MOCK_PREMIUM_COOKIE,
   getAuthServiceEndpoint,
+  isMockCheckoutEnabled,
   normalizePlanStatus,
   sanitizeAuthUser
 } from "@/lib/auth";
-import { MOCK_AUTH_TOKEN, mockAuthUser } from "@/lib/mock-auth";
+import { findMockUserByToken } from "@/lib/mock-auth";
 import { resolveUserPlanStatus } from "@/services/user/server";
 import type {
   AuthErrorResponse,
@@ -48,7 +50,24 @@ function getCookieOptions(expiresAt?: string) {
   };
 }
 
+async function hasMockPremiumCookie(): Promise<boolean> {
+  if (!isMockCheckoutEnabled()) {
+    return false;
+  }
+
+  const cookieStore = await cookies();
+  return cookieStore.get(MOCK_PREMIUM_COOKIE)?.value === "1";
+}
+
 async function enrichAuthUser(user: AuthUser): Promise<AuthUser> {
+  // MOCK: ativacao simulada do plano. Substituir por integracao real de pagamento.
+  if (await hasMockPremiumCookie()) {
+    return sanitizeAuthUser({
+      ...user,
+      planStatus: "ACTIVE_PLAN"
+    });
+  }
+
   const planStatus = await resolveUserPlanStatus(user);
 
   return sanitizeAuthUser({
@@ -149,6 +168,8 @@ export function applyAuthCookies(response: NextResponse, authResponse: AuthRespo
 export function clearAuthCookies(response: NextResponse) {
   response.cookies.set(AUTH_TOKEN_COOKIE, "", { ...getCookieOptions(), maxAge: 0 });
   response.cookies.set(AUTH_PROFILE_COOKIE, "", { ...getCookieOptions(), maxAge: 0 });
+  // MOCK: limpa a ativacao simulada do plano ao encerrar a sessao.
+  response.cookies.set(MOCK_PREMIUM_COOKIE, "", { ...getCookieOptions(), maxAge: 0 });
 }
 
 export const getServerAuthSession = cache(async () => {
@@ -159,10 +180,19 @@ export const getServerAuthSession = cache(async () => {
     return null;
   }
 
-  if (token === MOCK_AUTH_TOKEN) {
+  const mockUser = findMockUserByToken(token);
+  if (mockUser) {
+    // MOCK: aplica a ativacao simulada do plano tambem ao usuario comum mockado.
+    if (mockUser.planStatus !== "ACTIVE_PLAN" && (await hasMockPremiumCookie())) {
+      return {
+        accessToken: token,
+        user: sanitizeAuthUser({ ...mockUser, planStatus: "ACTIVE_PLAN" })
+      };
+    }
+
     return {
       accessToken: token,
-      user: mockAuthUser
+      user: mockUser
     };
   }
 

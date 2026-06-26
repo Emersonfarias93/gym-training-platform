@@ -3,7 +3,8 @@ import { ActivitySquare, Bell, Search } from "lucide-react";
 
 import { LogoutButton } from "@/components/layout/logout-button";
 import { Badge } from "@/components/ui/badge";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
+import { UpgradePlanButton } from "@/features/checkout/upgrade-plan-button";
 import { getPlanLabel, getUserInitials, hasActivePlan } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import type { AuthUser } from "@/types/auth";
@@ -82,7 +83,7 @@ export function Sidebar({ activeView, items, user }: SidebarProps) {
               Abrir AI Coach
             </Link>
           ) : (
-            <Button size="sm" className="mt-3 w-full">Ativar plano</Button>
+            <UpgradePlanButton size="sm" className="mt-3 w-full" />
           )}
         </div>
 

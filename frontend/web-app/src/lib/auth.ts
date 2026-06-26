@@ -2,6 +2,14 @@ import type { AuthUser, UserPlanStatus } from "@/types/auth";
 
 export const AUTH_TOKEN_COOKIE = "fitai_access_token";
 export const AUTH_PROFILE_COOKIE = "fitai_profile";
+// MOCK: cookie de ativacao simulada do plano premium (ambiente de testes).
+// Quando presente, a sessao trata o usuario como ACTIVE_PLAN sem consultar o
+// user-service. Ponto de plugagem para a integracao real (webhook -> ativacao).
+export const MOCK_PREMIUM_COOKIE = "fitai_mock_premium";
+
+export function isMockCheckoutEnabled() {
+  return process.env.NEXT_PUBLIC_ENABLE_MOCK_CHECKOUT !== "false";
+}
 
 const DEFAULT_AUTH_SERVICE_URL = "http://localhost:8081";
 

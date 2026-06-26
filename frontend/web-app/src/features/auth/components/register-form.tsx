@@ -1,25 +1,19 @@
 "use client";
 
-import Link from "next/link";
 import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { LoaderCircle, Mail, UserRound } from "lucide-react";
+import { Check, LoaderCircle, Mail, UserRound } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { startTransition, useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 import { FormStatus } from "@/features/auth/components/form-status";
 import { PasswordInput } from "@/features/auth/components/password-input";
 import { register } from "@/services/auth/client";
 import { registerSchema, type RegisterFormValues } from "@/features/auth/schema";
-
-const passwordRules = [
-  "Minimo de 8 caracteres",
-  "Use uma combinacao forte para proteger sua conta",
-  "Sua conta comeca no plano comum"
-];
 
 export function RegisterForm() {
   const router = useRouter();
@@ -47,10 +41,9 @@ export function RegisterForm() {
 
   const isBusy = form.formState.isSubmitting || mutation.isPending;
   const passwordValue = form.watch("password");
-  const completedRules = [
-    passwordValue.length >= 8,
-    /[A-Za-z]/.test(passwordValue) && /\d/.test(passwordValue),
-    true
+  const passwordChecks = [
+    { label: "Minimo de 8 caracteres", done: passwordValue.length >= 8 },
+    { label: "Letras e numeros", done: /[A-Za-z]/.test(passwordValue) && /\d/.test(passwordValue) }
   ];
 
   const onSubmit = form.handleSubmit(async (values) => {
@@ -60,20 +53,6 @@ export function RegisterForm() {
 
   return (
     <form className="space-y-5" onSubmit={onSubmit}>
-      <div className="rounded-[28px] border border-[var(--fitai-border)] bg-[rgba(79,124,255,0.06)] p-4">
-        <p className="text-sm font-medium text-[var(--fitai-text-primary)]">Primeiro acesso</p>
-        <div className="mt-3 grid gap-2">
-          {passwordRules.map((rule, index) => (
-            <div className="flex items-center gap-2" key={rule}>
-              <span
-                className={`size-2 rounded-full ${completedRules[index] ? "bg-[var(--fitai-success)]" : "bg-[var(--fitai-text-muted)]"}`}
-              />
-              <p className="text-sm leading-6 text-[var(--fitai-text-secondary)]">{rule}</p>
-            </div>
-          ))}
-        </div>
-      </div>
-
       <div className="space-y-2">
         <label className="text-sm font-medium text-[var(--fitai-text-primary)]" htmlFor="register-name">
           Nome completo
@@ -88,7 +67,6 @@ export function RegisterForm() {
             {...form.register("fullName")}
           />
         </div>
-        <p className="text-xs text-[var(--fitai-text-muted)]">Esse nome sera exibido na sidebar e no menu mobile.</p>
         {form.formState.errors.fullName ? (
           <p className="text-sm text-[var(--fitai-danger)]">{form.formState.errors.fullName.message}</p>
         ) : null}
@@ -109,28 +87,37 @@ export function RegisterForm() {
             {...form.register("email")}
           />
         </div>
-        <p className="text-xs text-[var(--fitai-text-muted)]">Use um e-mail unico para evitar conflito no cadastro.</p>
         {form.formState.errors.email ? (
           <p className="text-sm text-[var(--fitai-danger)]">{form.formState.errors.email.message}</p>
         ) : null}
       </div>
 
       <div className="space-y-2">
-        <div className="flex items-center justify-between gap-3">
-          <label className="text-sm font-medium text-[var(--fitai-text-primary)]" htmlFor="register-password">
-            Senha
-          </label>
-          <Link className="text-sm text-[var(--fitai-primary)] hover:text-white" href="/login">
-            Ja tenho conta
-          </Link>
-        </div>
+        <label className="text-sm font-medium text-[var(--fitai-text-primary)]" htmlFor="register-password">
+          Senha
+        </label>
         <PasswordInput
           autoComplete="new-password"
           id="register-password"
           placeholder="Minimo de 8 caracteres"
           {...form.register("password")}
         />
-        <p className="text-xs text-[var(--fitai-text-muted)]">Combine letras e numeros para uma senha mais forte.</p>
+        {passwordValue ? (
+          <div className="flex flex-wrap gap-x-4 gap-y-1 pt-1">
+            {passwordChecks.map((check) => (
+              <span
+                className={cn(
+                  "inline-flex items-center gap-1.5 text-xs transition-colors",
+                  check.done ? "text-[var(--fitai-success)]" : "text-[var(--fitai-text-muted)]"
+                )}
+                key={check.label}
+              >
+                <Check className="size-3.5" />
+                {check.label}
+              </span>
+            ))}
+          </div>
+        ) : null}
         {form.formState.errors.password ? (
           <p className="text-sm text-[var(--fitai-danger)]">{form.formState.errors.password.message}</p>
         ) : null}
