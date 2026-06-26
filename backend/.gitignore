@@ -16,5 +16,9 @@ skills/
 .skills/
 skills-lock.json
 .env**
+# Mantem os exemplos versionados (sem segredos); ignora apenas .env reais.
+**/.env.example
+.env.example
+llm-service/.env.example
 .agents
 .agents/**
