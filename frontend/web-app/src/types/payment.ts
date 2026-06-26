@@ -52,8 +52,9 @@ export type PixProviderTransaction = {
 export type PixProviderResponse = {
   success?: boolean;
   message?: string;
-  /** Status/confirmed podem vir no topo (show) ou aninhados em `transaction`. */
-  status?: string;
+  /** No show/:id, o `status` do topo e o codigo HTTP (numero); o status real
+   * da transacao fica em `transaction.status`. */
+  status?: string | number;
   confirmed?: boolean;
   transaction?: PixProviderTransaction;
 };

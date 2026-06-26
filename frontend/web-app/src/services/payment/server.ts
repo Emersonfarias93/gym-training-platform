@@ -81,9 +81,11 @@ function normalizePixResponse(payload: PixProviderResponse): PixCheckoutResponse
 }
 
 function normalizePixStatus(payload: PixProviderResponse): PixStatusResponse {
-  // O show/:id pode retornar status/confirmed no topo ou aninhado em `transaction`.
-  const status = payload.status ?? payload.transaction?.status ?? "processing";
-  const confirmed = payload.confirmed ?? payload.transaction?.confirmed ?? false;
+  // No show/:id o status real esta em `transaction.status`; o `status` do topo e o
+  // codigo HTTP (numero). So usamos o do topo como fallback se for string.
+  const topStatus = typeof payload.status === "string" ? payload.status : undefined;
+  const status = payload.transaction?.status ?? topStatus ?? "processing";
+  const confirmed = payload.transaction?.confirmed ?? payload.confirmed ?? false;
 
   return {
     status,
