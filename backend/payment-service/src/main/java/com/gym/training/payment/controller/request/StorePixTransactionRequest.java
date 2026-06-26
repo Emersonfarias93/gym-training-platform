@@ -29,7 +29,7 @@ public class StorePixTransactionRequest {
     @JsonProperty("callback_url")
     private String callbackUrl;
 
-    @JsonProperty("expired_in")
+    @JsonProperty("expiration_date")
     private String expiredIn;
 
     @JsonProperty("payment_type")
