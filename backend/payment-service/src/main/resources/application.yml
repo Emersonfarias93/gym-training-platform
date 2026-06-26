@@ -25,10 +25,15 @@ spring:
 confrapix:
   api:
     base-url: ${CONFRAPIX_BASE_URL:https://api.confrapix.com.br}
-    token: ${CONFRAPIX_TOKEN}
+    token: ${CONFRAPIX_TOKEN:}
     callback-url: ${CONFRAPIX_CALLBACK_URL:}
   webhook:
     secret: ${CONFRAPIX_WEBHOOK_SECRET:}
+
+payment:
+  pix:
+    # Janela de validade do QR Code Pix (minutos). Padrao de mercado: 15-30 min.
+    expiration-minutes: ${PIX_EXPIRATION_MINUTES:15}
 
 application:
   kafka:
