@@ -23,16 +23,6 @@ const moreNav: Array<{ id: AppView; label: string; tone: string }> = [
     tone: "bg-[rgba(255,159,67,0.10)] text-[var(--fitai-warning)]"
   },
   {
-    id: "assessments",
-    label: "Avaliações",
-    tone: "bg-[rgba(79,124,255,0.10)] text-[var(--fitai-primary)]"
-  },
-  {
-    id: "schedule",
-    label: "Agenda",
-    tone: "bg-[rgba(0,208,132,0.10)] text-[var(--fitai-success)]"
-  },
-  {
     id: "account",
     label: "Conta",
     tone: "bg-[rgba(79,124,255,0.10)] text-[var(--fitai-primary)]"

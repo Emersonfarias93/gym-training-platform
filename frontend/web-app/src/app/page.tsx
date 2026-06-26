@@ -9,9 +9,7 @@ const validViews: AppView[] = [
   "workouts",
   "diet",
   "evolution",
-  "assessments",
   "ai-coach",
-  "schedule",
   "account",
   "settings"
 ];

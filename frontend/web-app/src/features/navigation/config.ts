@@ -1,12 +1,10 @@
 import {
   BarChart3,
   BrainCircuit,
-  CalendarRange,
   CreditCard,
   Dumbbell,
   Gauge,
   Settings,
-  ShieldPlus,
   UtensilsCrossed
 } from "lucide-react";
 
@@ -17,9 +15,7 @@ export const sidebarItems: NavItem[] = [
   { id: "workouts", label: "Treinos", icon: Dumbbell },
   { id: "diet", label: "Dieta", icon: UtensilsCrossed },
   { id: "evolution", label: "Evolucao", icon: BarChart3 },
-  { id: "assessments", label: "Avaliacoes", icon: ShieldPlus },
   { id: "ai-coach", label: "AI Coach", icon: BrainCircuit, badge: "Live" },
-  { id: "schedule", label: "Agenda", icon: CalendarRange },
   { id: "account", label: "Conta", icon: CreditCard },
   { id: "settings", label: "Configuracoes", icon: Settings }
 ];
@@ -53,26 +49,12 @@ export const pageIntro: Record<AppView, PageIntro> = {
       "Leia peso, gordura, massa magra e fotos de progresso com historico pronto para decisao.",
     filters: ["30 dias", "90 dias", "1 ano", "Comparativos"]
   },
-  assessments: {
-    eyebrow: "Avaliacoes",
-    title: "Area de avaliacoes em transicao",
-    description:
-      "Estamos substituindo a estrutura atual por uma tela mais adequada ao acompanhamento individual do usuario.",
-    filters: []
-  },
   "ai-coach": {
     eyebrow: "FitAI Assistant",
     title: "IA conversacional para estrategia, prescricao e acompanhamento",
     description:
       "Centralize historico, prompts rapidos e respostas guiadas para usuarios com plano ativo.",
     filters: ["Insights", "Treino", "Dieta", "Mensagens"]
-  },
-  schedule: {
-    eyebrow: "Agenda",
-    title: "Agenda em refatoracao",
-    description:
-      "Essa experiencia sera refeita para apresentar compromissos e lembretes do usuario de forma mais simples.",
-    filters: []
   },
   account: {
     eyebrow: "Conta e assinatura",

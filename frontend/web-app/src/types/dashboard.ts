@@ -5,9 +5,7 @@ export type AppView =
   | "workouts"
   | "diet"
   | "evolution"
-  | "assessments"
   | "ai-coach"
-  | "schedule"
   | "account"
   | "settings";
 
