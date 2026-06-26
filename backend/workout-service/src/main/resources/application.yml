@@ -1,11 +1,27 @@
 spring:
   application:
     name: workout-service
+  datasource:
+    url: ${WORKOUT_DB_URL:jdbc:postgresql://localhost:5432/gym_training}
+    username: ${WORKOUT_DB_USERNAME:gym_user}
+    password: ${WORKOUT_DB_PASSWORD:gym_pass}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
   kafka:
     bootstrap-servers: localhost:9092
 
 server:
   port: 8085
+
+fitai:
+  services:
+    user-service-url: ${USER_SERVICE_URL:http://localhost:8082}
+    llm-service-url: ${LLM_SERVICE_URL:http://localhost:8087}
 
 management:
   endpoints:
