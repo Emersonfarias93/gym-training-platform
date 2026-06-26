@@ -18,6 +18,10 @@ export const FITAI_PREMIUM_PLAN: Plan = {
   ]
 };
 
+// UI: limiar (em segundos) para o cronometro do Pix entrar em estado de alerta (cor ambar).
+// A duracao real do QR e definida pelo payment-service (regra de negocio no backend).
+export const PIX_EXPIRATION_WARNING_SECONDS = 120;
+
 const BRL_FORMATTER = new Intl.NumberFormat("pt-BR", {
   style: "currency",
   currency: "BRL"

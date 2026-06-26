@@ -28,8 +28,6 @@ function getPaymentServiceEndpoint(path: string) {
 
 type CreatePixInput = {
   amount: number;
-  /** Validade do Pix em horas a partir de agora. Default: 24h. */
-  expiresInHours?: number;
 };
 
 /** Identidade enviada por header ao payment-service (não vai para a Confrapix). */
@@ -40,23 +38,12 @@ type PixRequester = {
   planName: string;
 };
 
-/** Formata a validade no padrao aceito pela Confrapix: "YYYY-MM-DD HH:mm:ss". */
-function formatExpirationDate(hoursFromNow: number) {
-  const date = new Date(Date.now() + hoursFromNow * 60 * 60 * 1000);
-  const pad = (value: number) => String(value).padStart(2, "0");
-
-  return (
-    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
-    `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}`
-  );
-}
-
 function buildStorePixTransactionBody(input: CreatePixInput) {
-  // Apenas `amount` e obrigatorio na rota do backend e na Confrapix.
+  // Apenas `amount` e obrigatorio. A validade (`expiration_date`) e imposta pelo
+  // payment-service (regra de negocio no backend), nao pelo cliente.
   // `customer_name`/`customer_document` sao opcionais e ficam de fora por enquanto.
   return {
     amount: input.amount,
-    expiration_date: formatExpirationDate(input.expiresInHours ?? 24),
     payment_type: "pix",
     type: "payment"
   };

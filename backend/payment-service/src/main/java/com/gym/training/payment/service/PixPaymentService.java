@@ -8,9 +8,12 @@ import com.gym.training.payment.domain.PixTransaction;
 import com.gym.training.payment.event.PaymentEventPublisher;
 import com.gym.training.payment.repository.PixTransactionRepository;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -19,11 +22,15 @@ import org.springframework.util.StringUtils;
 public class PixPaymentService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PixPaymentService.class);
+    private static final DateTimeFormatter EXPIRATION_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
     private final ConfrapixTransactionClient confrapixTransactionClient;
     private final ConfrapixProperties properties;
     private final PixTransactionRepository pixTransactionRepository;
     private final PaymentEventPublisher paymentEventPublisher;
+
+    @Value("${payment.pix.expiration-minutes:15}")
+    private long expirationMinutes;
 
     public PixPaymentService(
             ConfrapixTransactionClient confrapixTransactionClient,
@@ -40,6 +47,7 @@ public class PixPaymentService {
     @Transactional
     public JsonNode storeTransaction(StorePixTransactionRequest request, PaymentRequester requester) {
         applyDefaultCallbackUrl(request);
+        applyExpiration(request);
         JsonNode response = confrapixTransactionClient.store(request);
         persistTransaction(response, request, requester);
         return response;
@@ -121,5 +129,11 @@ public class PixPaymentService {
         if (!StringUtils.hasText(request.getCallbackUrl()) && StringUtils.hasText(properties.callbackUrl())) {
             request.setCallbackUrl(properties.callbackUrl());
         }
+    }
+
+    private void applyExpiration(StorePixTransactionRequest request) {
+        // Politica de expiracao imposta pelo backend (nao confia no valor do cliente).
+        String expiration = LocalDateTime.now().plusMinutes(expirationMinutes).format(EXPIRATION_FORMATTER);
+        request.setExpiredIn(expiration);
     }
 }

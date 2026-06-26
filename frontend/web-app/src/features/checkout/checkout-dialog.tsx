@@ -5,6 +5,7 @@ import {
   AlertCircle,
   Check,
   CheckCircle2,
+  Clock,
   Copy,
   Crown,
   LoaderCircle,
@@ -16,6 +17,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
+import { usePixCountdown } from "@/features/checkout/use-pix-countdown";
 import { getSession } from "@/services/auth/client";
 import { FITAI_PREMIUM_PLAN, formatBRL } from "@/lib/payment";
 import { cn } from "@/lib/utils";
@@ -36,33 +38,6 @@ const SESSION_POLL_MS = 3000;
 // pelo user-service). Usuarios reais ativam via Kafka antes disso.
 const ACTIVATION_GRACE_MS = 10000;
 const MOCK_FALLBACK_ENABLED = process.env.NEXT_PUBLIC_ENABLE_MOCK_CHECKOUT !== "false";
-
-function formatExpiry(value: string) {
-  if (!value) {
-    return null;
-  }
-
-  const parsed = new Date(value.replace(" ", "T"));
-  if (Number.isNaN(parsed.getTime())) {
-    return null;
-  }
-
-  return new Intl.DateTimeFormat("pt-BR", {
-    day: "2-digit",
-    month: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit"
-  }).format(parsed);
-}
-
-function isExpired(value: string) {
-  if (!value) {
-    return false;
-  }
-
-  const parsed = new Date(value.replace(" ", "T"));
-  return !Number.isNaN(parsed.getTime()) && parsed.getTime() < Date.now();
-}
 
 function PlanStep({
   isGenerating,
@@ -162,6 +137,8 @@ function StatusBanner({ state }: { state: PixState | "activating" }) {
 function PixStep({
   checkout,
   state,
+  countdownLabel,
+  isWarning,
   isActivating,
   isChecking,
   errorMessage,
@@ -170,6 +147,8 @@ function PixStep({
 }: {
   checkout: PixCheckoutResponse;
   state: PixState;
+  countdownLabel: string;
+  isWarning: boolean;
   isActivating: boolean;
   isChecking: boolean;
   errorMessage: string | null;
@@ -177,7 +156,6 @@ function PixStep({
   onRegenerate: () => void;
 }) {
   const [copied, setCopied] = useState(false);
-  const expiry = formatExpiry(checkout.expiresAt);
 
   useEffect(() => {
     if (!copied) {
@@ -207,7 +185,7 @@ function PixStep({
             alt="QR Code Pix para pagamento do plano FitAI Premium"
             width={196}
             height={196}
-            className="size-44"
+            className={cn("size-44 transition-opacity", state === "expired" && "opacity-30")}
           />
         </div>
         <p className="text-sm text-[var(--fitai-text-secondary)]">
@@ -216,8 +194,17 @@ function PixStep({
             {formatBRL(checkout.amount)}
           </span>
         </p>
-        {expiry ? (
-          <p className="text-xs text-[var(--fitai-text-muted)]">Valido ate {expiry}</p>
+        {state === "waiting" ? (
+          <p
+            className={cn(
+              "inline-flex items-center gap-1.5 text-xs",
+              isWarning ? "text-[var(--fitai-warning)]" : "text-[var(--fitai-text-muted)]"
+            )}
+          >
+            <Clock className="size-3.5" />
+            Expira em{" "}
+            <span className="font-mono font-semibold tabular-nums">{countdownLabel}</span>
+          </p>
         ) : null}
       </div>
 
@@ -294,7 +281,7 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
   // Fallback mock (usuarios mockados que nao passam pelo user-service).
   const mockMutation = useMutation({ mutationFn: activateMockPremium });
 
-  const expired = checkout ? isExpired(checkout.expiresAt) : false;
+  const { label: countdownLabel, expired, isWarning } = usePixCountdown(checkout?.expiresAt);
 
   const finish = useCallback(() => {
     if (finishedRef.current) {
@@ -399,6 +386,8 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
         <PixStep
           checkout={checkout}
           state={pixState}
+          countdownLabel={countdownLabel}
+          isWarning={isWarning}
           isActivating={paid}
           isChecking={statusQuery.isFetching}
           errorMessage={statusErrorMessage}
