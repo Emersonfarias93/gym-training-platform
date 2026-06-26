@@ -16,13 +16,6 @@ type MobileNavProps = {
   user: AuthUser;
 };
 
-const primaryNav: Array<{ id: AppView; label: string }> = [
-  { id: "dashboard", label: "Início" },
-  { id: "workouts", label: "Treinos" },
-  { id: "ai-coach", label: "IA Coach" },
-  { id: "diet", label: "Dieta" }
-];
-
 const moreNav: Array<{ id: AppView; label: string; tone: string }> = [
   {
     id: "evolution",
@@ -52,11 +45,15 @@ const moreNav: Array<{ id: AppView; label: string; tone: string }> = [
 ];
 
 const navById = new Map(sidebarItems.map((item) => [item.id, item]));
-const moreIds = new Set<AppView>(moreNav.map((item) => item.id));
-
 export function MobileNav({ activeView, user }: MobileNavProps) {
   const [isMoreOpen, setIsMoreOpen] = useState(false);
-  const isMoreActive = moreIds.has(activeView);
+  const primaryNav: Array<{ id: AppView; label: string }> = [
+    { id: "dashboard", label: "Início" },
+    { id: "workouts", label: "Treinos" },
+    { id: "ai-coach", label: "IA Coach" },
+    { id: "diet", label: "Dieta" }
+  ];
+  const isMoreActive = moreNav.some((item) => item.id === activeView);
 
   return (
     <>

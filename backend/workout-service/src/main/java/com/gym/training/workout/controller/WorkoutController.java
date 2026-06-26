@@ -1,5 +1,6 @@
 package com.gym.training.workout.controller;
 
+import com.gym.training.workout.controller.request.CreateManualWorkoutRequest;
 import com.gym.training.workout.controller.request.GenerateWorkoutRequest;
 import com.gym.training.workout.controller.response.WorkoutOverviewResponse;
 import com.gym.training.workout.service.AuthenticatedUser;
@@ -43,6 +44,16 @@ public class WorkoutController {
             @Valid @RequestBody(required = false) GenerateWorkoutRequest request
     ) {
         return workoutService.generateWithAi(resolveUser(userId, email, fullName), request);
+    }
+
+    @PostMapping("/manual")
+    public WorkoutOverviewResponse createManualWorkout(
+            @RequestHeader(USER_ID_HEADER) String userId,
+            @RequestHeader(USER_EMAIL_HEADER) String email,
+            @RequestHeader(value = USER_FULL_NAME_HEADER, required = false) String fullName,
+            @Valid @RequestBody CreateManualWorkoutRequest request
+    ) {
+        return workoutService.createManualWorkout(resolveUser(userId, email, fullName), request);
     }
 
     private AuthenticatedUser resolveUser(String userId, String email, String fullName) {

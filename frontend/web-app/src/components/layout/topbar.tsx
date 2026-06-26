@@ -17,6 +17,7 @@ type TopbarProps = {
 export function Topbar({ activeView, user }: TopbarProps) {
   const intro = pageIntro[activeView];
   const showUpgrade = !hasActivePlan(user);
+  const hasFilters = intro.filters.length > 0;
 
   return (
     <header
@@ -50,24 +51,26 @@ export function Topbar({ activeView, user }: TopbarProps) {
         </div>
       </div>
 
-      <div className="flex flex-wrap items-center gap-3">
-        {intro.filters.map((item, index) => (
-          <button
-            key={item}
-            className={`rounded-full px-4 py-2 text-sm transition-colors ${
-              index === 0
-                ? "bg-[var(--fitai-primary)] text-white"
-                : "border border-[var(--fitai-border)] bg-[var(--fitai-surface)] text-[var(--fitai-text-secondary)] hover:text-[var(--fitai-text-primary)]"
-            }`}
-          >
-            {item}
+      {hasFilters ? (
+        <div className="flex flex-wrap items-center gap-3">
+          {intro.filters.map((item, index) => (
+            <button
+              key={item}
+              className={`rounded-full px-4 py-2 text-sm transition-colors ${
+                index === 0
+                  ? "bg-[var(--fitai-primary)] text-white"
+                  : "border border-[var(--fitai-border)] bg-[var(--fitai-surface)] text-[var(--fitai-text-secondary)] hover:text-[var(--fitai-text-primary)]"
+              }`}
+            >
+              {item}
+            </button>
+          ))}
+          <button className="ml-auto inline-flex items-center gap-2 rounded-full border border-[var(--fitai-border)] bg-[var(--fitai-surface)] px-4 py-2 text-sm text-[var(--fitai-text-secondary)]">
+            Filtrar por plano
+            <ChevronDown className="size-4" />
           </button>
-        ))}
-        <button className="ml-auto inline-flex items-center gap-2 rounded-full border border-[var(--fitai-border)] bg-[var(--fitai-surface)] px-4 py-2 text-sm text-[var(--fitai-text-secondary)]">
-          Filtrar por plano
-          <ChevronDown className="size-4" />
-        </button>
-      </div>
+        </div>
+      ) : null}
     </header>
   );
 }

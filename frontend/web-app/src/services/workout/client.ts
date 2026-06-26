@@ -1,4 +1,8 @@
-import type { GenerateWorkoutInput, WorkoutOverviewResponse } from "@/types/workout";
+import type {
+  CreateManualWorkoutInput,
+  GenerateWorkoutInput,
+  WorkoutOverviewResponse
+} from "@/types/workout";
 
 type ApiErrorPayload = {
   message?: string;
@@ -40,5 +44,20 @@ export async function generateWorkout(input: GenerateWorkoutInput = {}): Promise
   return parseClientResponse<WorkoutOverviewResponse>(
     response,
     "Nao foi possivel gerar um novo treino agora."
+  );
+}
+
+export async function createManualWorkout(input: CreateManualWorkoutInput): Promise<WorkoutOverviewResponse> {
+  const response = await fetch("/api/workouts/manual", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(input)
+  });
+
+  return parseClientResponse<WorkoutOverviewResponse>(
+    response,
+    "Nao foi possivel salvar o treino manual agora."
   );
 }

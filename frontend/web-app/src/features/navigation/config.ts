@@ -34,10 +34,10 @@ export const pageIntro: Record<AppView, PageIntro> = {
   },
   workouts: {
     eyebrow: "Training Engine",
-    title: "Prescricao de treino com foco em performance e aderencia",
+    title: "Treinos manuais ou com IA, conforme o seu plano",
     description:
-      "Monte blocos de treino, acompanhe execucao e ajuste carga com leitura rapida por objetivo.",
-    filters: ["Forca", "Hipertrofia", "Recovery", "Periodizacao"]
+      "Usuarios comuns podem montar a propria ficha manualmente; usuarios com plano ativo geram e acompanham treinos com IA.",
+    filters: []
   },
   diet: {
     eyebrow: "Nutrition Control",

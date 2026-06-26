@@ -1,7 +1,11 @@
 import "server-only";
 
 import type { AuthUser } from "@/types/auth";
-import type { GenerateWorkoutInput, WorkoutOverviewResponse } from "@/types/workout";
+import type {
+  CreateManualWorkoutInput,
+  GenerateWorkoutInput,
+  WorkoutOverviewResponse
+} from "@/types/workout";
 
 const DEFAULT_WORKOUT_SERVICE_URL = "http://localhost:8085";
 
@@ -60,6 +64,20 @@ export async function generateWorkoutWithAi(
   input: GenerateWorkoutInput = {}
 ) {
   const response = await fetch(getWorkoutServiceEndpoint("/api/v1/workouts/me/generate-with-ai"), {
+    method: "POST",
+    cache: "no-store",
+    headers: getUserHeaders(user),
+    body: JSON.stringify(input)
+  });
+
+  return parseWorkoutResponse<WorkoutOverviewResponse>(response);
+}
+
+export async function createManualWorkout(
+  user: Pick<AuthUser, "userId" | "email" | "fullName">,
+  input: CreateManualWorkoutInput
+) {
+  const response = await fetch(getWorkoutServiceEndpoint("/api/v1/workouts/me/manual"), {
     method: "POST",
     cache: "no-store",
     headers: getUserHeaders(user),

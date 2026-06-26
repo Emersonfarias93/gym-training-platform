@@ -20,7 +20,7 @@ type AppViewProps = {
 export function AppViewContent({ user, view }: AppViewProps) {
   switch (view) {
     case "workouts":
-      return <WorkoutsPage />;
+      return <WorkoutsPage user={user} />;
     case "diet":
       return <DietPage />;
     case "evolution":

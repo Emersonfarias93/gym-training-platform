@@ -6,6 +6,7 @@ type StackedListCardProps = {
   title: string;
   description: string;
   items: {
+    id?: string | number;
     title: string;
     subtitle: string;
     meta: string;
@@ -22,6 +23,10 @@ const toneClassMap = {
   danger: "border-[rgba(255,107,107,0.22)] bg-[rgba(255,107,107,0.10)] text-[var(--fitai-danger)]"
 };
 
+function getStackedListItemKey(item: StackedListCardProps["items"][number], index: number) {
+  return item.id ?? `${item.title}-${item.subtitle}-${item.meta}-${index}`;
+}
+
 export function StackedListCard({
   title,
   description,
@@ -35,9 +40,9 @@ export function StackedListCard({
         <p className="mt-2 text-sm leading-6 text-[var(--fitai-text-secondary)]">{description}</p>
       </div>
       <div className="mt-6 space-y-3">
-        {items.map((item) => (
+        {items.map((item, index) => (
           <div
-            key={`${item.title}-${item.meta}`}
+            key={getStackedListItemKey(item, index)}
             className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-4"
           >
             <div className="flex items-start justify-between gap-3">

@@ -1,6 +1,9 @@
 package com.gym.training.workout.service;
 
+import com.gym.training.workout.controller.request.CreateManualWorkoutRequest;
 import com.gym.training.workout.controller.request.GenerateWorkoutRequest;
+import com.gym.training.workout.controller.request.ManualWorkoutExerciseRequest;
+import com.gym.training.workout.controller.request.ManualWorkoutSessionRequest;
 import com.gym.training.workout.controller.response.WorkoutBlockResponse;
 import com.gym.training.workout.controller.response.WorkoutExerciseProgressResponse;
 import com.gym.training.workout.controller.response.WorkoutOverviewResponse;
@@ -94,6 +97,21 @@ public class WorkoutService {
         List<WorkoutSession> sessions = createSessions(plan, user, context);
         createExercises(sessions.get(0), context, aiResponse);
 
+        return getOverview(user);
+    }
+
+    @Transactional
+    public WorkoutOverviewResponse createManualWorkout(AuthenticatedUser user, CreateManualWorkoutRequest request) {
+        WorkoutPlan plan = workoutPlanRepository.save(WorkoutPlan.builder()
+                .userId(user.userId())
+                .title(request.title().trim())
+                .goal(request.goal().trim())
+                .status(WorkoutPlanStatus.ACTIVE)
+                .generationStatus(WorkoutGenerationStatus.MANUAL)
+                .build());
+
+        WorkoutSession session = createManualSession(plan, user, request.session());
+        createManualExercises(session, request.session().exercises());
         return getOverview(user);
     }
 
@@ -205,6 +223,42 @@ public class WorkoutService {
         }
     }
 
+    private WorkoutSession createManualSession(
+            WorkoutPlan plan,
+            AuthenticatedUser user,
+            ManualWorkoutSessionRequest request
+    ) {
+        return workoutSessionRepository.save(WorkoutSession.builder()
+                .plan(plan)
+                .userId(user.userId())
+                .title(request.title().trim())
+                .scheduledDate(request.scheduledDate())
+                .status(request.scheduledDate().isAfter(LocalDate.now())
+                        ? WorkoutSessionStatus.SCHEDULED
+                        : WorkoutSessionStatus.IN_PROGRESS)
+                .estimatedDurationMinutes(request.estimatedDurationMinutes())
+                .intensity(request.intensity().trim())
+                .sortOrder(0)
+                .build());
+    }
+
+    private void createManualExercises(WorkoutSession session, List<ManualWorkoutExerciseRequest> exercises) {
+        for (int index = 0; index < exercises.size(); index++) {
+            ManualWorkoutExerciseRequest exercise = exercises.get(index);
+            workoutExerciseRepository.save(WorkoutExercise.builder()
+                    .session(session)
+                    .name(exercise.name().trim())
+                    .setsDescription(exercise.setsDescription().trim())
+                    .repsDescription(exercise.repsDescription().trim())
+                    .restSeconds(exercise.restSeconds())
+                    .loadSuggestion(trimToNull(exercise.loadSuggestion()))
+                    .executionNotes(trimToNull(exercise.executionNotes()))
+                    .progressPercent(0)
+                    .sortOrder(index)
+                    .build());
+        }
+    }
+
     private List<ExerciseTemplate> templatesForGoal(String goal) {
         if ("IMPROVE_CONDITIONING".equals(goal) || "LOSE_WEIGHT".equals(goal)) {
             return List.of(
@@ -261,6 +315,10 @@ public class WorkoutService {
 
     private String valueOrFallback(String value, String fallback) {
         return StringUtils.hasText(value) ? value : fallback;
+    }
+
+    private String trimToNull(String value) {
+        return StringUtils.hasText(value) ? value.trim() : null;
     }
 
     private record ExerciseTemplate(

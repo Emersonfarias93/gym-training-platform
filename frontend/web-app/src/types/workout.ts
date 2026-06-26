@@ -27,3 +27,26 @@ export type WorkoutOverviewResponse = {
 export type GenerateWorkoutInput = {
   focus?: string;
 };
+
+export type ManualWorkoutExerciseInput = {
+  name: string;
+  setsDescription: string;
+  repsDescription: string;
+  restSeconds?: number;
+  loadSuggestion?: string;
+  executionNotes?: string;
+};
+
+export type ManualWorkoutSessionInput = {
+  title: string;
+  scheduledDate: string;
+  estimatedDurationMinutes: number;
+  intensity: string;
+  exercises: ManualWorkoutExerciseInput[];
+};
+
+export type CreateManualWorkoutInput = {
+  title: string;
+  goal: string;
+  session: ManualWorkoutSessionInput;
+};
