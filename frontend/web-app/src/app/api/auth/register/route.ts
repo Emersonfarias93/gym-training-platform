@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 
 import {
   applyAuthCookies,
+  createAuthUserFromResponse,
   getAuthApiErrorMessage,
   getAuthApiErrorStatus,
   registerWithAuthService
@@ -12,13 +13,7 @@ export async function POST(request: Request) {
   try {
     const payload = (await request.json()) as RegisterInput;
     const authResponse = await registerWithAuthService(payload);
-    const user = {
-      userId: authResponse.userId,
-      fullName: authResponse.fullName,
-      email: authResponse.email,
-      role: authResponse.role,
-      expiresAt: authResponse.expiresAt
-    };
+    const user = await createAuthUserFromResponse(authResponse);
     const response = NextResponse.json({
       authenticated: true,
       user
@@ -26,7 +21,7 @@ export async function POST(request: Request) {
       status: 201
     });
 
-    applyAuthCookies(response, authResponse);
+    applyAuthCookies(response, authResponse, user);
 
     return response;
   } catch (error) {

@@ -1,4 +1,4 @@
-import type { AuthUser } from "@/types/auth";
+import type { AuthUser, UserPlanStatus } from "@/types/auth";
 
 export const AUTH_TOKEN_COOKIE = "fitai_access_token";
 export const AUTH_PROFILE_COOKIE = "fitai_profile";
@@ -24,12 +24,24 @@ export function getUserInitials(fullName: string) {
   return initials || "FA";
 }
 
+export function normalizePlanStatus(planStatus?: string | null): UserPlanStatus {
+  return planStatus === "ACTIVE_PLAN" ? "ACTIVE_PLAN" : "COMMON";
+}
+
+export function hasActivePlan(user: AuthUser) {
+  return user.planStatus === "ACTIVE_PLAN";
+}
+
+export function getPlanLabel(user: AuthUser) {
+  return hasActivePlan(user) ? "Plano ativo" : "Plano comum";
+}
+
 export function sanitizeAuthUser(user: AuthUser): AuthUser {
   return {
     userId: user.userId,
     fullName: user.fullName,
     email: user.email,
-    role: user.role,
+    planStatus: normalizePlanStatus(user.planStatus),
     expiresAt: user.expiresAt
   };
 }

@@ -58,7 +58,7 @@ export function Topbar({ activeView }: TopbarProps) {
           </button>
         ))}
         <button className="ml-auto inline-flex items-center gap-2 rounded-full border border-[var(--fitai-border)] bg-[var(--fitai-surface)] px-4 py-2 text-sm text-[var(--fitai-text-secondary)]">
-          Filtrar por atleta
+          Filtrar por plano
           <ChevronDown className="size-4" />
         </button>
       </div>

@@ -16,7 +16,7 @@ export function EvolutionPage() {
       <SectionHeading
         eyebrow="Body Progress"
         title="Historico corporal com comparativos prontos para leitura"
-        description="Monitore tendencia, composição e evolução visual do atleta em uma grade premium."
+        description="Monitore tendencia, composição e evolução visual do usuario em uma grade premium."
       />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">

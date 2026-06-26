@@ -1,4 +1,4 @@
-import { CalendarDays, Clock3, MapPinned, Users2 } from "lucide-react";
+import { CalendarDays, Clock3, MapPinned, Sparkles } from "lucide-react";
 
 import { SectionHeading } from "@/components/shared/section-heading";
 import { OverviewCard } from "@/features/shared/components/overview-card";
@@ -16,19 +16,19 @@ export function SchedulePage() {
       <SectionHeading
         eyebrow="Agenda"
         title="Grade inteligente de compromissos e capacidade"
-        description="Visualizacao pensada para filtrar sessoes do dia sem perder contexto de equipe."
+        description="Visualizacao pensada para filtrar sessoes do dia sem perder contexto da rotina."
       />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <OverviewCard title="Eventos hoje" value="14" helper="ocupacao de 78% da agenda" icon={CalendarDays} />
         <OverviewCard title="Slots livres" value="05" helper="janelas para encaixe rapido" icon={Clock3} />
         <OverviewCard title="Locais" value="03" helper="distribuicao entre studio e online" icon={MapPinned} />
-        <OverviewCard title="Equipe" value="07" helper="treinadores escalados" icon={Users2} />
+        <OverviewCard title="Plano ativo" value="IA" helper="recursos avancados liberados" icon={Sparkles} />
       </section>
 
       <StackedListCard
         title="Compromissos do dia"
-        description="Sequencia priorizada para leitura rapida e operacao da recepcao ou coach."
+        description="Sequencia priorizada para leitura rapida dos compromissos do usuario."
         items={agenda}
       />
     </div>

@@ -29,7 +29,7 @@ export function WorkoutsPage() {
       />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <OverviewCard title="Sessoes ativas" value="12" helper="4 atletas em execucao hoje" icon={Dumbbell} />
+        <OverviewCard title="Sessoes ativas" value="12" helper="4 treinos em execucao hoje" icon={Dumbbell} />
         <OverviewCard title="Volume semanal" value="18.4k" helper="tonelagem consolidada" icon={Layers3} />
         <OverviewCard title="Tempo medio" value="58 min" helper="janela ideal mantida" icon={Clock3} />
         <OverviewCard title="Intensidade" value="8.1/10" helper="RPE medio da carteira" icon={Flame} />
@@ -44,7 +44,7 @@ export function WorkoutsPage() {
         <div className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface)] p-6">
           <h3 className="text-lg font-semibold text-[var(--fitai-text-primary)]">Execucao do treino atual</h3>
           <p className="mt-2 text-sm leading-6 text-[var(--fitai-text-secondary)]">
-            Painel compacto para acompanhar a aderencia do atleta durante a sessao.
+            Painel compacto para acompanhar sua aderencia durante a sessao.
           </p>
           <div className="mt-6 space-y-4">
             {exercises.map((exercise) => (

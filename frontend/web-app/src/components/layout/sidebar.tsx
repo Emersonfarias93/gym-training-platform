@@ -4,7 +4,7 @@ import { ActivitySquare, Bell, Search } from "lucide-react";
 import { LogoutButton } from "@/components/layout/logout-button";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { getUserInitials } from "@/lib/auth";
+import { getPlanLabel, getUserInitials, hasActivePlan } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import type { AuthUser } from "@/types/auth";
 import type { AppView, NavItem } from "@/types/dashboard";
@@ -66,11 +66,11 @@ export function Sidebar({ activeView, items, user }: SidebarProps) {
       </nav>
 
       <div className="rounded-2xl border border-[var(--fitai-border)] bg-[linear-gradient(135deg,rgba(79,124,255,0.13),rgba(0,208,132,0.06))] p-5">
-        <p className="font-semibold text-[var(--fitai-text-primary)]">Upgrade Pro Coach</p>
+        <p className="font-semibold text-[var(--fitai-text-primary)]">Plano ativo FitAI</p>
         <p className="mt-2 text-sm leading-6 text-[var(--fitai-text-secondary)]">
-          Libere modelos de prescricao, relatorios automaticos e previsoes avancadas.
+          Libere AI Coach, recomendacoes inteligentes e experiencias avancadas.
         </p>
-        <Button className="mt-4 w-full">Ativar plano</Button>
+        <Button className="mt-4 w-full">{hasActivePlan(user) ? "Plano ativo" : "Ativar plano"}</Button>
       </div>
 
       <div className="mt-4 rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-4">
@@ -85,7 +85,7 @@ export function Sidebar({ activeView, items, user }: SidebarProps) {
         </div>
         <div className="mt-4 flex items-center justify-between gap-3">
           <Badge className="border-[rgba(79,124,255,0.14)] bg-[rgba(79,124,255,0.08)] text-[var(--fitai-primary)]">
-            {user.role}
+            {getPlanLabel(user)}
           </Badge>
           <LogoutButton label="Sair" variant="ghost" />
         </div>

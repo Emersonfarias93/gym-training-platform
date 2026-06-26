@@ -18,7 +18,7 @@ import { registerSchema, type RegisterFormValues } from "@/features/auth/schema"
 const passwordRules = [
   "Minimo de 8 caracteres",
   "Use uma combinacao forte para proteger sua conta",
-  "O papel inicial sera criado como USER"
+  "Sua conta comeca no plano comum"
 ];
 
 export function RegisterForm() {
@@ -55,10 +55,7 @@ export function RegisterForm() {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setSuccessMessage(null);
-    await mutation.mutateAsync({
-      ...values,
-      role: "USER"
-    });
+    await mutation.mutateAsync(values);
   });
 
   return (

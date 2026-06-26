@@ -3,7 +3,9 @@
 import {
   Bot,
   Copy,
+  Crown,
   ImageIcon,
+  LockKeyhole,
   LoaderCircle,
   MoreHorizontal,
   Paperclip,
@@ -14,7 +16,8 @@ import {
 import { useMutation } from "@tanstack/react-query";
 import { FormEvent, useEffect, useRef, useState, useTransition } from "react";
 
-import { getUserInitials } from "@/lib/auth";
+import { Button } from "@/components/ui/button";
+import { getUserInitials, hasActivePlan } from "@/lib/auth";
 import {
   createAiCoachMessage,
   formatMessageTime,
@@ -42,12 +45,40 @@ function renderMessageContent(content: string) {
     ));
 }
 
+function AiCoachUpgradeState() {
+  return (
+    <div className="mx-auto grid min-h-[calc(100dvh-10rem)] max-w-4xl place-items-center rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-bg-shell)] p-6 lg:min-h-[calc(100dvh-8rem)]">
+      <div className="max-w-xl text-center">
+        <div className="mx-auto grid size-14 place-items-center rounded-2xl fitai-ai-gradient text-white">
+          <LockKeyhole className="size-6" />
+        </div>
+        <p className="mt-6 text-sm font-semibold uppercase tracking-[0.18em] text-[var(--fitai-primary)]">
+          Plano ativo
+        </p>
+        <h2 className="mt-3 text-3xl font-semibold tracking-normal text-[var(--fitai-text-primary)]">
+          AI Coach disponivel para usuarios com plano ativo
+        </h2>
+        <p className="mt-4 text-sm leading-7 text-[var(--fitai-text-secondary)]">
+          Usuarios comuns continuam com acesso ao dashboard, treinos, dieta, evolucao e agenda. O plano ativo libera
+          conversas com IA, analises contextuais e proximos passos personalizados.
+        </p>
+        <Button className="mt-6">
+          <Crown className="size-4" />
+          Ativar plano
+        </Button>
+      </div>
+    </div>
+  );
+}
+
 export function AICoachPage({ user }: AICoachPageProps) {
   const [messages, setMessages] = useState<AiCoachMessage[]>([initialAiCoachMessage]);
   const [draft, setDraft] = useState("");
   const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  const canUseAiCoach = hasActivePlan(user);
 
   const mutation = useMutation({
     mutationFn: sendAiCoachMessage,
@@ -70,6 +101,10 @@ export function AICoachPage({ user }: AICoachPageProps) {
   useEffect(() => {
     scrollRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages, isThinking]);
+
+  if (!canUseAiCoach) {
+    return <AiCoachUpgradeState />;
+  }
 
   function sendMessage(content: string) {
     const trimmedContent = content.trim();

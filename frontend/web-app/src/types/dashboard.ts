@@ -8,7 +8,6 @@ export type AppView =
   | "assessments"
   | "ai-coach"
   | "schedule"
-  | "trainer"
   | "settings";
 
 export type NavItem = {
@@ -29,7 +28,7 @@ export type Metric = {
 export type Session = {
   title: string;
   time: string;
-  coach: string;
+  source: string;
   status: "Hoje" | "A seguir" | "Recuperacao";
 };
 

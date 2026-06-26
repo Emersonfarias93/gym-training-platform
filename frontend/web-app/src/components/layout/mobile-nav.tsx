@@ -6,7 +6,7 @@ import { useState } from "react";
 
 import { LogoutButton } from "@/components/layout/logout-button";
 import { sidebarItems } from "@/features/navigation/config";
-import { getUserInitials } from "@/lib/auth";
+import { getPlanLabel, getUserInitials } from "@/lib/auth";
 import { cn } from "@/lib/utils";
 import type { AuthUser } from "@/types/auth";
 import type { AppView } from "@/types/dashboard";
@@ -38,11 +38,6 @@ const moreNav: Array<{ id: AppView; label: string; tone: string }> = [
     id: "schedule",
     label: "Agenda",
     tone: "bg-[rgba(0,208,132,0.10)] text-[var(--fitai-success)]"
-  },
-  {
-    id: "trainer",
-    label: "Painel Trainer",
-    tone: "bg-[rgba(155,89,255,0.10)] text-[var(--fitai-purple)]"
   },
   {
     id: "settings",
@@ -113,7 +108,7 @@ export function MobileNav({ activeView, user }: MobileNavProps) {
                 <p className="text-sm font-semibold text-[var(--fitai-text-primary)]">{user.fullName}</p>
                 <p className="mt-0.5 inline-flex items-center gap-1 text-xs font-semibold text-[var(--fitai-warning)]">
                   <Crown className="size-3" />
-                  {user.role === "TRAINER" ? "Trainer ativo" : "Conta ativa"}
+                  {getPlanLabel(user)}
                 </p>
               </div>
             </div>

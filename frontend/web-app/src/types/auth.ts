@@ -1,10 +1,11 @@
-export type UserRole = "USER" | "ADMIN" | "TRAINER";
+export type UserPlanStatus = "COMMON" | "ACTIVE_PLAN";
+export type BackendAuthRole = "USER" | "ADMIN" | "TRAINER";
 
 export type AuthUser = {
   userId: string;
   fullName: string;
   email: string;
-  role: UserRole;
+  planStatus: UserPlanStatus;
   expiresAt: string;
 };
 
@@ -12,7 +13,8 @@ export type AuthResponse = {
   userId: string;
   fullName: string;
   email: string;
-  role: UserRole;
+  planStatus?: UserPlanStatus | null;
+  role?: BackendAuthRole;
   accessToken: string;
   tokenType: string;
   expiresAt: string;
@@ -27,14 +29,18 @@ export type RegisterInput = {
   fullName: string;
   email: string;
   password: string;
-  role: UserRole;
+};
+
+export type AuthServiceRegisterInput = RegisterInput & {
+  role: "USER";
 };
 
 export type TokenValidationResponse = {
   valid: boolean;
   userId: string | null;
   email: string | null;
-  role: UserRole | null;
+  planStatus?: UserPlanStatus | null;
+  role?: BackendAuthRole | null;
 };
 
 export type AuthErrorResponse = {

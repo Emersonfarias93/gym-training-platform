@@ -8,14 +8,17 @@ import {
   AUTH_PROFILE_COOKIE,
   AUTH_TOKEN_COOKIE,
   getAuthServiceEndpoint,
+  normalizePlanStatus,
   sanitizeAuthUser
 } from "@/lib/auth";
 import { MOCK_AUTH_TOKEN, mockAuthUser } from "@/lib/mock-auth";
+import { resolveUserPlanStatus } from "@/services/user/server";
 import type {
   AuthErrorResponse,
   AuthResponse,
   AuthUser,
   LoginInput,
+  AuthServiceRegisterInput,
   RegisterInput,
   TokenValidationResponse
 } from "@/types/auth";
@@ -45,14 +48,27 @@ function getCookieOptions(expiresAt?: string) {
   };
 }
 
-function toAuthUser(response: AuthResponse): AuthUser {
+async function enrichAuthUser(user: AuthUser): Promise<AuthUser> {
+  const planStatus = await resolveUserPlanStatus(user);
+
   return sanitizeAuthUser({
+    ...user,
+    planStatus
+  });
+}
+
+async function toAuthUser(response: AuthResponse): Promise<AuthUser> {
+  return enrichAuthUser({
     userId: response.userId,
     fullName: response.fullName,
     email: response.email,
-    role: response.role,
+    planStatus: normalizePlanStatus(response.planStatus),
     expiresAt: response.expiresAt
   });
+}
+
+export async function createAuthUserFromResponse(response: AuthResponse) {
+  return toAuthUser(response);
 }
 
 async function parseBackendResponse<T>(response: Response): Promise<T> {
@@ -103,9 +119,14 @@ export async function loginWithAuthService(payload: LoginInput) {
 }
 
 export async function registerWithAuthService(payload: RegisterInput) {
+  const backendPayload: AuthServiceRegisterInput = {
+    ...payload,
+    role: "USER"
+  };
+
   return authServiceRequest<AuthResponse>("/api/v1/auth/register", {
     method: "POST",
-    body: JSON.stringify(payload)
+    body: JSON.stringify(backendPayload)
   });
 }
 
@@ -116,13 +137,13 @@ export async function validateAuthToken(token: string) {
   });
 }
 
-export function applyAuthCookies(response: NextResponse, authResponse: AuthResponse) {
-  const user = toAuthUser(authResponse);
+export function applyAuthCookies(response: NextResponse, authResponse: AuthResponse, user: AuthUser) {
+  const sanitizedUser = sanitizeAuthUser(user);
 
   response.cookies.set(AUTH_TOKEN_COOKIE, authResponse.accessToken, getCookieOptions(authResponse.expiresAt));
-  response.cookies.set(AUTH_PROFILE_COOKIE, encodeProfile(user), getCookieOptions(authResponse.expiresAt));
+  response.cookies.set(AUTH_PROFILE_COOKIE, encodeProfile(sanitizedUser), getCookieOptions(authResponse.expiresAt));
 
-  return user;
+  return sanitizedUser;
 }
 
 export function clearAuthCookies(response: NextResponse) {
@@ -148,7 +169,7 @@ export const getServerAuthSession = cache(async () => {
   try {
     const validation = await validateAuthToken(token);
 
-    if (!validation.valid || !validation.userId || !validation.email || !validation.role) {
+    if (!validation.valid || !validation.userId || !validation.email) {
       return null;
     }
 
@@ -165,13 +186,13 @@ export const getServerAuthSession = cache(async () => {
 
     return {
       accessToken: token,
-      user: sanitizeAuthUser({
+      user: await enrichAuthUser(sanitizeAuthUser({
         userId: validation.userId,
         fullName,
         email: validation.email,
-        role: validation.role,
+        planStatus: normalizePlanStatus(profile?.planStatus ?? validation.planStatus),
         expiresAt
-      })
+      }))
     };
   } catch {
     return null;

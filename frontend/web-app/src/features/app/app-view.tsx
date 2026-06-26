@@ -7,7 +7,6 @@ import { DietPage } from "@/features/diet/diet-page";
 import { EvolutionPage } from "@/features/evolution/evolution-page";
 import { SchedulePage } from "@/features/schedule/schedule-page";
 import { SettingsPage } from "@/features/settings/settings-page";
-import { TrainerPage } from "@/features/trainer/trainer-page";
 import { WorkoutsPage } from "@/features/workouts/workouts-page";
 import type { AuthUser } from "@/types/auth";
 import type { AppView } from "@/types/dashboard";
@@ -31,8 +30,6 @@ export function AppViewContent({ user, view }: AppViewProps) {
       return <AICoachPage user={user} />;
     case "schedule":
       return <SchedulePage />;
-    case "trainer":
-      return <TrainerPage />;
     case "settings":
       return <SettingsPage />;
     case "dashboard":

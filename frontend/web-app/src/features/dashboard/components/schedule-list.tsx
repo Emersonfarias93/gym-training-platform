@@ -34,7 +34,7 @@ export function ScheduleList({ sessions }: ScheduleListProps) {
                   {session.time}
                 </p>
                 <p className="mt-3 text-sm text-[var(--fitai-text-secondary)]">
-                  {session.coach}
+                  {session.source}
                 </p>
               </div>
               <Badge

@@ -51,15 +51,15 @@ export function DashboardPage() {
                 Athlete overview
               </Badge>
               <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[var(--fitai-text-primary)] md:text-4xl">
-                Painel premium para treino, nutricao e operacao da equipe.
+                Painel premium para treino, nutricao e evolucao pessoal.
               </h2>
               <p className="mt-4 text-sm leading-7 text-[var(--fitai-text-secondary)] md:text-base">
-                Estrutura inspirada em um SaaS de alta densidade visual, com leituras compactas,
-                contraste forte e destaque para o FitAI Coach.
+                Estrutura de alta densidade visual, com leituras compactas,
+                contraste forte e destaque para recursos de plano ativo.
               </p>
             </div>
             <div className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-5">
-              <p className="text-sm text-[var(--fitai-text-secondary)]">Atleta principal</p>
+              <p className="text-sm text-[var(--fitai-text-secondary)]">Usuario em destaque</p>
               <p className="mt-2 text-xl font-semibold text-[var(--fitai-text-primary)]">Bianca S. Moreira</p>
               <p className="mt-1 text-sm text-[var(--fitai-success)]">Plano elite com acompanhamento diario</p>
             </div>
@@ -80,7 +80,7 @@ export function DashboardPage() {
             <div>
               <p className="text-lg font-semibold text-[var(--fitai-text-primary)]">Sinais de performance</p>
               <p className="mt-2 text-sm leading-6 text-[var(--fitai-text-secondary)]">
-                Resumo operacional com indicadores acionaveis para a equipe.
+                Resumo com indicadores acionaveis para sua rotina.
               </p>
             </div>
             <Sparkles className="size-5 text-[var(--fitai-primary)]" />
@@ -147,7 +147,7 @@ export function DashboardPage() {
                     <div>
                       <p className="font-medium text-[var(--fitai-text-primary)]">{session.title}</p>
                       <p className="mt-1 text-sm text-[var(--fitai-text-secondary)]">
-                        {session.coach} · {session.time}
+                        {session.source} · {session.time}
                       </p>
                     </div>
                     <span className="rounded-full border border-[var(--fitai-border)] px-3 py-1 text-xs uppercase tracking-[0.18em] text-[var(--fitai-text-secondary)]">
@@ -181,7 +181,7 @@ export function DashboardPage() {
               <div>
                 <p className="text-lg font-semibold text-[var(--fitai-text-primary)]">Acoes rapidas</p>
                 <p className="text-sm text-[var(--fitai-text-secondary)]">
-                  Fluxos usados com mais frequencia pela equipe.
+                  Fluxos usados com mais frequencia na sua rotina.
                 </p>
               </div>
               <Sparkles className="size-5 text-[var(--fitai-primary)]" />

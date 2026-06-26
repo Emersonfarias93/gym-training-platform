@@ -6,7 +6,6 @@ import {
   Gauge,
   Settings,
   ShieldPlus,
-  UserRoundCog,
   UtensilsCrossed
 } from "lucide-react";
 
@@ -20,7 +19,6 @@ export const sidebarItems: NavItem[] = [
   { id: "assessments", label: "Avaliacoes", icon: ShieldPlus },
   { id: "ai-coach", label: "AI Coach", icon: BrainCircuit, badge: "Live" },
   { id: "schedule", label: "Agenda", icon: CalendarRange },
-  { id: "trainer", label: "Treinador", icon: UserRoundCog },
   { id: "settings", label: "Configuracoes", icon: Settings }
 ];
 
@@ -30,13 +28,13 @@ export const pageIntro: Record<AppView, PageIntro> = {
     title: "Sua academia com inteligencia aplicada ao detalhe",
     description:
       "Visao consolidada de treino, dieta, agenda e insights para elevar consistencia e resultado.",
-    filters: ["Hoje", "Semana", "Mensal", "Coach View"]
+    filters: ["Hoje", "Semana", "Mensal", "Plano ativo"]
   },
   workouts: {
     eyebrow: "Training Engine",
     title: "Prescricao de treino com foco em performance e aderencia",
     description:
-      "Monte blocos de treino, acompanhe execucao e ajuste carga com leitura rapida por atleta.",
+      "Monte blocos de treino, acompanhe execucao e ajuste carga com leitura rapida por objetivo.",
     filters: ["Forca", "Hipertrofia", "Recovery", "Periodizacao"]
   },
   diet: {
@@ -64,7 +62,7 @@ export const pageIntro: Record<AppView, PageIntro> = {
     eyebrow: "FitAI Assistant",
     title: "IA conversacional para estrategia, prescricao e acompanhamento",
     description:
-      "Centralize historico, prompts rapidos e respostas guiadas para reduzir operacao manual.",
+      "Centralize historico, prompts rapidos e respostas guiadas para usuarios com plano ativo.",
     filters: ["Insights", "Treino", "Dieta", "Mensagens"]
   },
   schedule: {
@@ -72,20 +70,13 @@ export const pageIntro: Record<AppView, PageIntro> = {
     title: "Agenda inteligente para sessoes, consultas e checkpoints",
     description:
       "Distribua compromissos com contexto de prioridade, capacidade e status em tempo real.",
-    filters: ["Hoje", "Semana", "Equipe", "Capacidade"]
-  },
-  trainer: {
-    eyebrow: "Coach Control",
-    title: "Painel do treinador para operacao, alunos e prescricoes",
-    description:
-      "Acompanhe carteira, tarefas e oportunidades de intervencao sem perder densidade visual.",
-    filters: ["Ativos", "Em risco", "Equipe", "Receita"]
+    filters: ["Hoje", "Semana", "Plano ativo", "Capacidade"]
   },
   settings: {
     eyebrow: "Workspace Settings",
     title: "Configuracoes de operacao, automacao e experiencia do produto",
     description:
-      "Controle permissos, notificacoes, integrações e preferencias do ecossistema FitAI.",
-    filters: ["Perfil", "Equipe", "Automacoes", "Seguranca"]
+      "Controle perfil, notificacoes, integrações e preferencias do ecossistema FitAI.",
+    filters: ["Perfil", "Plano", "Automacoes", "Seguranca"]
   }
 };

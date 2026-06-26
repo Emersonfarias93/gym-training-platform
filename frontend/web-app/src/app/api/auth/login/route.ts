@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createMockAuthResponse, isMockLogin } from "@/lib/mock-auth";
 import {
   applyAuthCookies,
+  createAuthUserFromResponse,
   getAuthApiErrorStatus,
   loginWithAuthService
 } from "@/services/auth/server";
@@ -14,19 +15,13 @@ export async function POST(request: Request) {
     const authResponse = isMockLogin(payload)
       ? createMockAuthResponse()
       : await loginWithAuthService(payload);
-    const user = {
-      userId: authResponse.userId,
-      fullName: authResponse.fullName,
-      email: authResponse.email,
-      role: authResponse.role,
-      expiresAt: authResponse.expiresAt
-    };
+    const user = await createAuthUserFromResponse(authResponse);
     const response = NextResponse.json({
       authenticated: true,
       user
     });
 
-    applyAuthCookies(response, authResponse);
+    applyAuthCookies(response, authResponse, user);
 
     return response;
   } catch (error) {

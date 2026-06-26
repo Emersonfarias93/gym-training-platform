@@ -55,19 +55,19 @@ export const nextSessions: Session[] = [
   {
     title: "Upper Strength + Core",
     time: "Hoje, 18:30",
-    coach: "Coach Marina",
+    source: "Plano ativo",
     status: "Hoje"
   },
   {
     title: "Check-in nutricional",
     time: "Amanha, 08:00",
-    coach: "Nutri Lucas",
+    source: "FitAI Dieta",
     status: "A seguir"
   },
   {
     title: "Mobilidade + Recovery",
     time: "Quarta, 07:15",
-    coach: "AI Flow",
+    source: "AI Flow",
     status: "Recuperacao"
   }
 ];
@@ -119,21 +119,21 @@ export const heroPills = [
 export const highlightSessions = [
   {
     title: "Lower Body Power",
-    coach: "Coach Marina",
+    source: "Plano ativo",
     time: "18:30",
     intensity: "Alta",
     completion: 82
   },
   {
     title: "Nutrition Review",
-    coach: "Nutri Lucas",
+    source: "FitAI Dieta",
     time: "08:00",
     intensity: "Media",
     completion: 61
   },
   {
     title: "Mobility Flow",
-    coach: "AI Recovery",
+    source: "AI Recovery",
     time: "07:15",
     intensity: "Baixa",
     completion: 46

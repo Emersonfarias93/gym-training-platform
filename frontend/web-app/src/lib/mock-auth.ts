@@ -13,7 +13,7 @@ export const mockAuthUser: AuthUser = {
   userId: "00000000-0000-4000-8000-000000000001",
   fullName: "Usuario Demo",
   email: MOCK_AUTH_CREDENTIALS.email,
-  role: "USER",
+  planStatus: "ACTIVE_PLAN",
   expiresAt: mockExpiresAt
 };
 
@@ -27,6 +27,7 @@ export function isMockLogin(payload: LoginInput) {
 export function createMockAuthResponse(): AuthResponse {
   return {
     ...mockAuthUser,
+    planStatus: mockAuthUser.planStatus,
     accessToken: MOCK_AUTH_TOKEN,
     tokenType: "Bearer"
   };
