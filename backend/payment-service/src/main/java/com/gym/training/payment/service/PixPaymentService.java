@@ -27,6 +27,10 @@ public class PixPaymentService {
         return confrapixTransactionClient.store(request);
     }
 
+    public JsonNode showTransaction(String transactionId) {
+        return confrapixTransactionClient.show(transactionId);
+    }
+
     public JsonNode version() {
         return confrapixTransactionClient.version();
     }

@@ -1,6 +1,7 @@
 import type {
   ActivateMockPremiumResponse,
-  PixCheckoutResponse
+  PixCheckoutResponse,
+  PixStatusResponse
 } from "@/types/payment";
 
 type ApiErrorPayload = {
@@ -26,6 +27,20 @@ export async function createPixCheckout(): Promise<PixCheckoutResponse> {
   });
 
   return parseClientResponse<PixCheckoutResponse>(response, "Nao foi possivel gerar a cobranca Pix.");
+}
+
+export async function getPixStatus(transactionId: string): Promise<PixStatusResponse> {
+  const response = await fetch(`/api/payment/pix/${encodeURIComponent(transactionId)}`, {
+    method: "GET",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+
+  return parseClientResponse<PixStatusResponse>(
+    response,
+    "Nao foi possivel consultar o status do pagamento."
+  );
 }
 
 export async function activateMockPremium(): Promise<ActivateMockPremiumResponse> {

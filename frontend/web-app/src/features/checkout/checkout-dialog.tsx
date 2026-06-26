@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   AlertCircle,
   Check,
@@ -8,7 +8,8 @@ import {
   Copy,
   Crown,
   LoaderCircle,
-  QrCode
+  QrCode,
+  RefreshCw
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -17,7 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
 import { FITAI_PREMIUM_PLAN, formatBRL } from "@/lib/payment";
 import { cn } from "@/lib/utils";
-import { activateMockPremium, createPixCheckout } from "@/services/payment/client";
+import { activateMockPremium, createPixCheckout, getPixStatus } from "@/services/payment/client";
 import type { PixCheckoutResponse } from "@/types/payment";
 
 type CheckoutDialogProps = {
@@ -26,6 +27,9 @@ type CheckoutDialogProps = {
 };
 
 type Step = "plan" | "pix";
+type PixState = "waiting" | "paid" | "expired";
+
+const POLL_INTERVAL_MS = 4000;
 
 function formatExpiry(value: string) {
   if (!value) {
@@ -43,6 +47,15 @@ function formatExpiry(value: string) {
     hour: "2-digit",
     minute: "2-digit"
   }).format(parsed);
+}
+
+function isExpired(value: string) {
+  if (!value) {
+    return false;
+  }
+
+  const parsed = new Date(value.replace(" ", "T"));
+  return !Number.isNaN(parsed.getTime()) && parsed.getTime() < Date.now();
 }
 
 function PlanStep({
@@ -113,16 +126,49 @@ function PlanStep({
   );
 }
 
+function StatusBanner({ state }: { state: PixState | "activating" }) {
+  if (state === "expired") {
+    return (
+      <p className="flex items-center gap-2 rounded-xl border border-[var(--fitai-danger)]/40 bg-[var(--fitai-danger)]/10 px-3 py-2.5 text-sm text-[var(--fitai-danger)]">
+        <AlertCircle className="size-4 shrink-0" />
+        Pix expirado. Gere um novo codigo para continuar.
+      </p>
+    );
+  }
+
+  if (state === "paid" || state === "activating") {
+    return (
+      <p className="flex items-center gap-2 rounded-xl border border-[var(--fitai-success)]/40 bg-[var(--fitai-success)]/10 px-3 py-2.5 text-sm text-[var(--fitai-success)]">
+        <CheckCircle2 className="size-4 shrink-0" />
+        Pagamento confirmado! Ativando seu plano...
+      </p>
+    );
+  }
+
+  return (
+    <p className="flex items-center gap-2 rounded-xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-secondary)] px-3 py-2.5 text-sm text-[var(--fitai-text-secondary)]">
+      <LoaderCircle className="size-4 shrink-0 animate-spin text-[var(--fitai-primary)]" />
+      Aguardando pagamento...
+    </p>
+  );
+}
+
 function PixStep({
   checkout,
+  state,
   isActivating,
+  isChecking,
   errorMessage,
-  onConfirm
+  onManualCheck,
+  onRegenerate
 }: {
   checkout: PixCheckoutResponse;
+  state: PixState;
   isActivating: boolean;
+  isChecking: boolean;
   errorMessage: string | null;
-  onConfirm: () => void;
+  onManualCheck: () => void;
+  onRegenerate: () => void;
 }) {
   const [copied, setCopied] = useState(false);
   const expiry = formatExpiry(checkout.expiresAt);
@@ -191,6 +237,8 @@ function PixStep({
         </div>
       </div>
 
+      <StatusBanner state={isActivating ? "activating" : state} />
+
       {errorMessage ? (
         <p className="flex items-center gap-2 rounded-xl border border-[var(--fitai-danger)]/40 bg-[var(--fitai-danger)]/10 px-3 py-2 text-sm text-[var(--fitai-danger)]">
           <AlertCircle className="size-4 shrink-0" />
@@ -198,19 +246,26 @@ function PixStep({
         </p>
       ) : null}
 
-      <Button className="w-full" onClick={onConfirm} disabled={isActivating}>
-        {isActivating ? (
-          <>
+      {state === "expired" ? (
+        <Button className="w-full" onClick={onRegenerate}>
+          <QrCode className="size-4" />
+          Gerar novo Pix
+        </Button>
+      ) : (
+        <Button
+          className="w-full"
+          variant="secondary"
+          onClick={onManualCheck}
+          disabled={isChecking || isActivating || state === "paid"}
+        >
+          {isChecking ? (
             <LoaderCircle className="size-4 animate-spin" />
-            Confirmando...
-          </>
-        ) : (
-          <>
-            <CheckCircle2 className="size-4" />
-            Ja paguei
-          </>
-        )}
-      </Button>
+          ) : (
+            <RefreshCw className="size-4" />
+          )}
+          Verificar agora
+        </Button>
+      )}
     </div>
   );
 }
@@ -236,6 +291,26 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
     }
   });
 
+  const expired = checkout ? isExpired(checkout.expiresAt) : false;
+
+  const statusQuery = useQuery({
+    queryKey: ["pix-status", checkout?.numericId],
+    queryFn: () => getPixStatus(checkout!.numericId),
+    enabled: step === "pix" && !!checkout && !expired && !activateMutation.isSuccess,
+    refetchInterval: (query) => (query.state.data?.paid ? false : POLL_INTERVAL_MS),
+    refetchOnWindowFocus: true
+  });
+
+  const paid = statusQuery.data?.paid ?? false;
+
+  // Quando o pagamento e confirmado, dispara a ativacao (mock nesta fase).
+  useEffect(() => {
+    if (paid && !activateMutation.isPending && !activateMutation.isSuccess) {
+      activateMutation.mutate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paid]);
+
   useEffect(() => {
     if (open) {
       return;
@@ -249,6 +324,13 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
+  const pixState: PixState = paid ? "paid" : expired ? "expired" : "waiting";
+  const statusErrorMessage = statusQuery.isError
+    ? (statusQuery.error as Error).message
+    : activateMutation.isError
+      ? (activateMutation.error as Error).message
+      : null;
+
   return (
     <Dialog
       open={open}
@@ -257,7 +339,7 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
       description={
         step === "plan"
           ? "Conclua o pagamento via Pix para liberar o AI Coach."
-          : "Pague com o QR Code e confirme para ativar seu plano."
+          : "Pague com o QR Code — a confirmacao e automatica."
       }
     >
       {step === "plan" || !checkout ? (
@@ -269,9 +351,16 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
       ) : (
         <PixStep
           checkout={checkout}
-          isActivating={activateMutation.isPending}
-          errorMessage={activateMutation.isError ? (activateMutation.error as Error).message : null}
-          onConfirm={() => activateMutation.mutate()}
+          state={pixState}
+          isActivating={activateMutation.isPending || activateMutation.isSuccess}
+          isChecking={statusQuery.isFetching}
+          errorMessage={statusErrorMessage}
+          onManualCheck={() => statusQuery.refetch()}
+          onRegenerate={() => {
+            setCheckout(null);
+            setStep("plan");
+            pixMutation.mutate();
+          }}
         />
       )}
     </Dialog>

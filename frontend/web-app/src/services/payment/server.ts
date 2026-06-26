@@ -1,6 +1,10 @@
 import "server-only";
 
-import type { PixCheckoutResponse, PixProviderResponse } from "@/types/payment";
+import type {
+  PixCheckoutResponse,
+  PixProviderResponse,
+  PixStatusResponse
+} from "@/types/payment";
 
 const DEFAULT_PAYMENT_SERVICE_URL = "http://localhost:8083";
 
@@ -53,17 +57,30 @@ function buildStorePixTransactionBody(input: CreatePixInput) {
 function normalizePixResponse(payload: PixProviderResponse): PixCheckoutResponse {
   const transaction = payload.transaction;
 
-  if (!transaction?.pix?.url || !transaction.pix.code || !transaction.uuid) {
+  if (!transaction?.pix?.url || !transaction.pix.code || !transaction.uuid || transaction.id == null) {
     throw new PaymentApiError("O provedor Pix retornou uma transacao incompleta.", 502);
   }
 
   return {
     transactionId: transaction.uuid,
+    numericId: String(transaction.id),
     qrCodeImage: `data:image/png;base64,${transaction.pix.url}`,
     copyPaste: transaction.pix.code,
     amount: transaction.amount ?? 0,
     status: transaction.status ?? "processing",
     expiresAt: transaction.expired_in ?? ""
+  };
+}
+
+function normalizePixStatus(payload: PixProviderResponse): PixStatusResponse {
+  // O show/:id pode retornar status/confirmed no topo ou aninhado em `transaction`.
+  const status = payload.status ?? payload.transaction?.status ?? "processing";
+  const confirmed = payload.confirmed ?? payload.transaction?.confirmed ?? false;
+
+  return {
+    status,
+    confirmed,
+    paid: status === "succeeded" || confirmed === true
   };
 }
 
@@ -92,6 +109,22 @@ export async function createPixTransaction(input: CreatePixInput): Promise<PixCh
 
   const payload = await parsePaymentResponse(response);
   return normalizePixResponse(payload);
+}
+
+export async function getPixTransactionStatus(transactionId: string): Promise<PixStatusResponse> {
+  const response = await fetch(
+    getPaymentServiceEndpoint(`/api/payments/pix/transactions/${encodeURIComponent(transactionId)}`),
+    {
+      method: "GET",
+      cache: "no-store",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    }
+  );
+
+  const payload = await parsePaymentResponse(response);
+  return normalizePixStatus(payload);
 }
 
 export function getPaymentApiErrorMessage(error: unknown) {

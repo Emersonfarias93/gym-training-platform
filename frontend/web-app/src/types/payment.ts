@@ -11,7 +11,10 @@ export type Plan = {
  * Derivada de `transaction` retornado pela Confrapix.
  */
 export type PixCheckoutResponse = {
+  /** Identificador uuid da transacao (referencia/exibicao). */
   transactionId: string;
+  /** Id numerico da transacao, usado no polling (show/:id da Confrapix). */
+  numericId: string;
   /** Data-URI pronta para `<img src>` (PNG base64). */
   qrCodeImage: string;
   /** Codigo Pix copia-e-cola (EMV). */
@@ -21,11 +24,19 @@ export type PixCheckoutResponse = {
   expiresAt: string;
 };
 
+/** Status normalizado consumido pelo polling do checkout. */
+export type PixStatusResponse = {
+  status: string;
+  confirmed: boolean;
+  paid: boolean;
+};
+
 /**
  * Forma parcial da resposta crua do provider (Confrapix) em
  * `POST /api/payments/pix/transactions`. Tipada apenas no que o front usa.
  */
 export type PixProviderTransaction = {
+  id?: number;
   uuid?: string;
   amount?: number;
   status?: string;
@@ -41,6 +52,9 @@ export type PixProviderTransaction = {
 export type PixProviderResponse = {
   success?: boolean;
   message?: string;
+  /** Status/confirmed podem vir no topo (show) ou aninhados em `transaction`. */
+  status?: string;
+  confirmed?: boolean;
   transaction?: PixProviderTransaction;
 };
 

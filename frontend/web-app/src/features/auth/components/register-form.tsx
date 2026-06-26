@@ -3,8 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, LoaderCircle, Mail, UserRound } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { startTransition, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
@@ -16,7 +15,6 @@ import { register } from "@/services/auth/client";
 import { registerSchema, type RegisterFormValues } from "@/features/auth/schema";
 
 export function RegisterForm() {
-  const router = useRouter();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const form = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
@@ -32,10 +30,9 @@ export function RegisterForm() {
     mutationFn: register,
     onSuccess: () => {
       setSuccessMessage("Conta criada com sucesso. Redirecionando para o painel...");
-      startTransition(() => {
-        router.replace("/");
-        router.refresh();
-      });
+      // Navegacao "hard": requisicao nova ao servidor com o cookie de sessao,
+      // evitando o cache de rota do App Router (que exigia um segundo clique).
+      window.location.replace("/");
     }
   });
 

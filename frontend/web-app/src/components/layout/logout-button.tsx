@@ -1,9 +1,7 @@
 "use client";
 
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { LoaderCircle, LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { startTransition } from "react";
 
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -20,16 +18,11 @@ export function LogoutButton({
   label = "Sair",
   variant = "ghost"
 }: LogoutButtonProps) {
-  const queryClient = useQueryClient();
-  const router = useRouter();
   const mutation = useMutation({
     mutationFn: logout,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["auth", "session"] });
-      startTransition(() => {
-        router.replace("/login");
-        router.refresh();
-      });
+    onSuccess: () => {
+      // Navegacao "hard" para garantir estado deslogado limpo (sem cache de rota).
+      window.location.replace("/login");
     }
   });
 

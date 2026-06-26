@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,11 @@ public class PaymentController {
     @PostMapping("/transactions")
     public ResponseEntity<JsonNode> storeTransaction(@Valid @RequestBody StorePixTransactionRequest request) {
         return ResponseEntity.ok(pixPaymentService.storeTransaction(request));
+    }
+
+    @GetMapping("/transactions/{transactionId}")
+    public ResponseEntity<JsonNode> showTransaction(@PathVariable String transactionId) {
+        return ResponseEntity.ok(pixPaymentService.showTransaction(transactionId));
     }
 
     @GetMapping("/confrapix/version")

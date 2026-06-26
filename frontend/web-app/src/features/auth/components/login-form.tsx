@@ -3,8 +3,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle, Mail } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { startTransition, useState } from "react";
+import { useState } from "react";
 import { useForm } from "react-hook-form";
 
 import { login } from "@/services/auth/client";
@@ -21,7 +20,6 @@ const demoAccounts = [
 ] as const;
 
 export function LoginForm() {
-  const router = useRouter();
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [showForgotHint, setShowForgotHint] = useState(false);
   const form = useForm<LoginFormValues>({
@@ -37,10 +35,10 @@ export function LoginForm() {
     mutationFn: login,
     onSuccess: () => {
       setSuccessMessage("Login realizado. Redirecionando para o painel...");
-      startTransition(() => {
-        router.replace("/");
-        router.refresh();
-      });
+      // Navegacao "hard": garante uma requisicao nova ao servidor ja com o cookie
+      // de sessao recem-definido, evitando o cache de rota do App Router (que
+      // exigia um segundo clique para a navegacao "pegar").
+      window.location.replace("/");
     }
   });
 
