@@ -40,11 +40,11 @@ export const pageIntro: Record<AppView, PageIntro> = {
     filters: []
   },
   diet: {
-    eyebrow: "Nutrition Control",
-    title: "Painel nutricional com macros, timing e consistencia diaria",
+    eyebrow: "Dieta",
+    title: "Experiencia de dieta em refatoracao",
     description:
-      "Conecte refeicoes, deficits e distribuicao de macros em uma interface compacta e objetiva.",
-    filters: ["Hoje", "Semana", "Cutting", "Bulking"]
+      "Essa area sera reorganizada para o fluxo do usuario final. Por enquanto, ela permanece como um aviso de transicao.",
+    filters: []
   },
   evolution: {
     eyebrow: "Body Analytics",
@@ -54,11 +54,11 @@ export const pageIntro: Record<AppView, PageIntro> = {
     filters: ["30 dias", "90 dias", "1 ano", "Comparativos"]
   },
   assessments: {
-    eyebrow: "Assessment Timeline",
-    title: "Avaliacoes fisicas organizadas em historico e sinais de tendencia",
+    eyebrow: "Avaliacoes",
+    title: "Area de avaliacoes em transicao",
     description:
-      "Visualize checkpoints clinicos e esportivos com alertas para reavaliacao e ajuste de plano.",
-    filters: ["Recentes", "Pendentes", "Risco", "Performance"]
+      "Estamos substituindo a estrutura atual por uma tela mais adequada ao acompanhamento individual do usuario.",
+    filters: []
   },
   "ai-coach": {
     eyebrow: "FitAI Assistant",
@@ -68,11 +68,11 @@ export const pageIntro: Record<AppView, PageIntro> = {
     filters: ["Insights", "Treino", "Dieta", "Mensagens"]
   },
   schedule: {
-    eyebrow: "Schedule Hub",
-    title: "Agenda inteligente para sessoes, consultas e checkpoints",
+    eyebrow: "Agenda",
+    title: "Agenda em refatoracao",
     description:
-      "Distribua compromissos com contexto de prioridade, capacidade e status em tempo real.",
-    filters: ["Hoje", "Semana", "Plano ativo", "Capacidade"]
+      "Essa experiencia sera refeita para apresentar compromissos e lembretes do usuario de forma mais simples.",
+    filters: []
   },
   account: {
     eyebrow: "Conta e assinatura",
