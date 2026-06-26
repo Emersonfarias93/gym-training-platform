@@ -23,9 +23,15 @@ export async function POST() {
   }
 
   try {
-    const checkout = await createPixTransaction({
-      amount: FITAI_PREMIUM_PLAN.priceBRL
-    });
+    const checkout = await createPixTransaction(
+      { amount: FITAI_PREMIUM_PLAN.priceBRL },
+      {
+        userId: session.user.userId,
+        email: session.user.email,
+        fullName: session.user.fullName,
+        planName: FITAI_PREMIUM_PLAN.name
+      }
+    );
 
     return NextResponse.json(checkout);
   } catch (error) {

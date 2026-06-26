@@ -4,9 +4,15 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.gym.training.payment.client.ConfrapixTransactionClient;
 import com.gym.training.payment.config.ConfrapixProperties;
 import com.gym.training.payment.controller.request.StorePixTransactionRequest;
+import com.gym.training.payment.domain.PixTransaction;
+import com.gym.training.payment.event.PaymentEventPublisher;
+import com.gym.training.payment.repository.PixTransactionRepository;
+import java.time.Instant;
+import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 @Service
@@ -16,15 +22,27 @@ public class PixPaymentService {
 
     private final ConfrapixTransactionClient confrapixTransactionClient;
     private final ConfrapixProperties properties;
+    private final PixTransactionRepository pixTransactionRepository;
+    private final PaymentEventPublisher paymentEventPublisher;
 
-    public PixPaymentService(ConfrapixTransactionClient confrapixTransactionClient, ConfrapixProperties properties) {
+    public PixPaymentService(
+            ConfrapixTransactionClient confrapixTransactionClient,
+            ConfrapixProperties properties,
+            PixTransactionRepository pixTransactionRepository,
+            PaymentEventPublisher paymentEventPublisher
+    ) {
         this.confrapixTransactionClient = confrapixTransactionClient;
         this.properties = properties;
+        this.pixTransactionRepository = pixTransactionRepository;
+        this.paymentEventPublisher = paymentEventPublisher;
     }
 
-    public JsonNode storeTransaction(StorePixTransactionRequest request) {
+    @Transactional
+    public JsonNode storeTransaction(StorePixTransactionRequest request, PaymentRequester requester) {
         applyDefaultCallbackUrl(request);
-        return confrapixTransactionClient.store(request);
+        JsonNode response = confrapixTransactionClient.store(request);
+        persistTransaction(response, request, requester);
+        return response;
     }
 
     public JsonNode showTransaction(String transactionId) {
@@ -35,21 +53,68 @@ public class PixPaymentService {
         return confrapixTransactionClient.version();
     }
 
+    @Transactional
     public void handleTransactionCallback(JsonNode payload) {
         String uuid = payload.path("uuid").asText(null);
         String status = payload.path("status").asText(null);
         boolean confirmed = payload.path("confirmed").asBoolean(false);
 
-        LOGGER.info(
-                "Callback Confrapix recebido. uuid={}, status={}, confirmed={}",
-                uuid,
-                status,
-                confirmed
-        );
+        LOGGER.info("Callback Confrapix recebido. uuid={}, status={}, confirmed={}", uuid, status, confirmed);
 
-        if ("succeeded".equals(status) || confirmed) {
-            LOGGER.info("Pagamento Pix confirmado pela Confrapix. uuid={}", uuid);
+        boolean paid = "succeeded".equals(status) || confirmed;
+        if (!paid || uuid == null) {
+            return;
         }
+
+        pixTransactionRepository.findByConfrapixUuid(uuid).ifPresentOrElse(
+                transaction -> confirmTransaction(transaction, status),
+                () -> LOGGER.warn("Callback de pagamento sem transacao correspondente. uuid={}", uuid)
+        );
+    }
+
+    private void confirmTransaction(PixTransaction transaction, String status) {
+        if (transaction.isProcessed()) {
+            // Idempotencia: o mesmo callback pode chegar mais de uma vez.
+            LOGGER.info("Pagamento ja processado, ignorando reentrega. uuid={}", transaction.getConfrapixUuid());
+            return;
+        }
+
+        transaction.setStatus(status != null ? status : "succeeded");
+        transaction.setPaidAt(Instant.now());
+        transaction.setProcessed(true);
+        pixTransactionRepository.save(transaction);
+
+        paymentEventPublisher.publishPaymentConfirmed(transaction);
+        LOGGER.info("Pagamento Pix confirmado e evento publicado. uuid={}", transaction.getConfrapixUuid());
+    }
+
+    private void persistTransaction(JsonNode response, StorePixTransactionRequest request, PaymentRequester requester) {
+        if (requester == null || !requester.hasUserId()) {
+            // Sem identidade (ex.: chamada sem header) nao da para correlacionar o pagamento.
+            LOGGER.warn("Transacao Pix criada sem userId; webhook nao podera ativar premium.");
+            return;
+        }
+
+        JsonNode transaction = response.path("transaction");
+        String uuid = transaction.path("uuid").asText(null);
+        if (uuid == null) {
+            LOGGER.warn("Resposta da Confrapix sem uuid; transacao nao persistida.");
+            return;
+        }
+
+        PixTransaction entity = new PixTransaction();
+        entity.setId(UUID.randomUUID());
+        entity.setConfrapixUuid(uuid);
+        entity.setConfrapixTransactionId(transaction.path("id").asText(null));
+        entity.setAuthUserId(requester.userId());
+        entity.setUserEmail(requester.email());
+        entity.setUserFullName(requester.fullName());
+        entity.setPlanName(requester.planName());
+        entity.setAmount(request.getAmount());
+        entity.setStatus(transaction.path("status").asText("processing"));
+        entity.setProcessed(false);
+
+        pixTransactionRepository.save(entity);
     }
 
     private void applyDefaultCallbackUrl(StorePixTransactionRequest request) {

@@ -32,6 +32,14 @@ type CreatePixInput = {
   expiresInHours?: number;
 };
 
+/** Identidade enviada por header ao payment-service (não vai para a Confrapix). */
+type PixRequester = {
+  userId: string;
+  email: string;
+  fullName: string;
+  planName: string;
+};
+
 /** Formata a validade no padrao aceito pela Confrapix: "YYYY-MM-DD HH:mm:ss". */
 function formatExpirationDate(hoursFromNow: number) {
   const date = new Date(Date.now() + hoursFromNow * 60 * 60 * 1000);
@@ -97,12 +105,19 @@ async function parsePaymentResponse(response: Response): Promise<PixProviderResp
   return payload;
 }
 
-export async function createPixTransaction(input: CreatePixInput): Promise<PixCheckoutResponse> {
+export async function createPixTransaction(
+  input: CreatePixInput,
+  requester: PixRequester
+): Promise<PixCheckoutResponse> {
   const response = await fetch(getPaymentServiceEndpoint("/api/payments/pix/transactions"), {
     method: "POST",
     cache: "no-store",
     headers: {
-      "Content-Type": "application/json"
+      "Content-Type": "application/json",
+      "X-User-Id": requester.userId,
+      "X-User-Email": requester.email,
+      "X-User-Full-Name": requester.fullName,
+      "X-Plan-Name": requester.planName
     },
     body: JSON.stringify(buildStorePixTransactionBody(input))
   });

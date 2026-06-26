@@ -12,10 +12,11 @@ import {
   RefreshCw
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
+import { getSession } from "@/services/auth/client";
 import { FITAI_PREMIUM_PLAN, formatBRL } from "@/lib/payment";
 import { cn } from "@/lib/utils";
 import { activateMockPremium, createPixCheckout, getPixStatus } from "@/services/payment/client";
@@ -30,6 +31,11 @@ type Step = "plan" | "pix";
 type PixState = "waiting" | "paid" | "expired";
 
 const POLL_INTERVAL_MS = 4000;
+const SESSION_POLL_MS = 3000;
+// Carencia ate cair no fallback mock (cobre usuarios mockados, que nao passam
+// pelo user-service). Usuarios reais ativam via Kafka antes disso.
+const ACTIVATION_GRACE_MS = 10000;
+const MOCK_FALLBACK_ENABLED = process.env.NEXT_PUBLIC_ENABLE_MOCK_CHECKOUT !== "false";
 
 function formatExpiry(value: string) {
   if (!value) {
@@ -274,6 +280,8 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("plan");
   const [checkout, setCheckout] = useState<PixCheckoutResponse | null>(null);
+  const paidAtRef = useRef<number | null>(null);
+  const finishedRef = useRef(false);
 
   const pixMutation = useMutation({
     mutationFn: createPixCheckout,
@@ -283,52 +291,91 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
     }
   });
 
-  const activateMutation = useMutation({
-    mutationFn: activateMockPremium,
-    onSuccess: () => {
-      onOpenChange(false);
-      router.refresh();
-    }
-  });
+  // Fallback mock (usuarios mockados que nao passam pelo user-service).
+  const mockMutation = useMutation({ mutationFn: activateMockPremium });
 
   const expired = checkout ? isExpired(checkout.expiresAt) : false;
 
+  const finish = useCallback(() => {
+    if (finishedRef.current) {
+      return;
+    }
+    finishedRef.current = true;
+    onOpenChange(false);
+    router.refresh();
+  }, [onOpenChange, router]);
+
+  // 1) Polling do status do Pix na Confrapix (via payment-service).
   const statusQuery = useQuery({
     queryKey: ["pix-status", checkout?.numericId],
     queryFn: () => getPixStatus(checkout!.numericId),
-    enabled: step === "pix" && !!checkout && !expired && !activateMutation.isSuccess,
+    enabled: step === "pix" && !!checkout && !expired,
     refetchInterval: (query) => (query.state.data?.paid ? false : POLL_INTERVAL_MS),
     refetchOnWindowFocus: true
   });
-
   const paid = statusQuery.data?.paid ?? false;
 
-  // Quando o pagamento e confirmado, dispara a ativacao (mock nesta fase).
+  // 2) Apos confirmado, faz poll da sessao real ate o premium ativar (via Kafka).
+  const sessionQuery = useQuery({
+    queryKey: ["checkout-session"],
+    queryFn: getSession,
+    enabled: paid,
+    refetchInterval: (query) =>
+      query.state.data?.user?.planStatus === "ACTIVE_PLAN" ? false : SESSION_POLL_MS,
+    refetchOnWindowFocus: false
+  });
+  const sessionActive = sessionQuery.data?.user?.planStatus === "ACTIVE_PLAN";
+
+  // Marca o instante do pagamento confirmado.
   useEffect(() => {
-    if (paid && !activateMutation.isPending && !activateMutation.isSuccess) {
-      activateMutation.mutate();
+    if (paid && paidAtRef.current === null) {
+      paidAtRef.current = Date.now();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paid]);
 
+  // Conclui quando a sessao real vira premium; senao cai no fallback mock apos a carencia.
+  useEffect(() => {
+    if (!paid || finishedRef.current) {
+      return;
+    }
+
+    if (sessionActive) {
+      finish();
+      return;
+    }
+
+    const elapsed = paidAtRef.current ? Date.now() - paidAtRef.current : 0;
+    if (
+      MOCK_FALLBACK_ENABLED &&
+      elapsed > ACTIVATION_GRACE_MS &&
+      !mockMutation.isPending &&
+      !mockMutation.isSuccess
+    ) {
+      mockMutation.mutate(undefined, { onSuccess: finish });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [paid, sessionActive, sessionQuery.dataUpdatedAt]);
+
+  // Reset ao fechar o modal.
   useEffect(() => {
     if (open) {
       return;
     }
 
-    // Reseta o fluxo ao fechar o modal.
     setStep("plan");
     setCheckout(null);
+    paidAtRef.current = null;
+    finishedRef.current = false;
     pixMutation.reset();
-    activateMutation.reset();
+    mockMutation.reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const pixState: PixState = paid ? "paid" : expired ? "expired" : "waiting";
   const statusErrorMessage = statusQuery.isError
     ? (statusQuery.error as Error).message
-    : activateMutation.isError
-      ? (activateMutation.error as Error).message
+    : mockMutation.isError
+      ? (mockMutation.error as Error).message
       : null;
 
   return (
@@ -352,13 +399,15 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
         <PixStep
           checkout={checkout}
           state={pixState}
-          isActivating={activateMutation.isPending || activateMutation.isSuccess}
+          isActivating={paid}
           isChecking={statusQuery.isFetching}
           errorMessage={statusErrorMessage}
           onManualCheck={() => statusQuery.refetch()}
           onRegenerate={() => {
             setCheckout(null);
             setStep("plan");
+            paidAtRef.current = null;
+            finishedRef.current = false;
             pixMutation.mutate();
           }}
         />
