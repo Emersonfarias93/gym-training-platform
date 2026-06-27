@@ -9,5 +9,7 @@ public interface PixTransactionRepository extends JpaRepository<PixTransaction, 
 
     Optional<PixTransaction> findByConfrapixUuid(String confrapixUuid);
 
+    Optional<PixTransaction> findByConfrapixTransactionId(String confrapixTransactionId);
+
     Optional<PixTransaction> findTopByAuthUserIdAndProcessedTrueOrderByPaidAtDescCreatedAtDesc(UUID authUserId);
 }

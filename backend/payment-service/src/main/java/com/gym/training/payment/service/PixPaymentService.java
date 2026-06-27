@@ -10,6 +10,9 @@ import com.gym.training.payment.repository.PixTransactionRepository;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,6 +26,7 @@ public class PixPaymentService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(PixPaymentService.class);
     private static final DateTimeFormatter EXPIRATION_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    private static final Set<String> PAID_STATUSES = Set.of("succeeded", "paid", "confirmed", "approved", "completed");
 
     private final ConfrapixTransactionClient confrapixTransactionClient;
     private final ConfrapixProperties properties;
@@ -66,20 +70,31 @@ public class PixPaymentService {
 
     @Transactional
     public void handleTransactionCallback(JsonNode payload) {
-        String uuid = payload.path("uuid").asText(null);
-        String status = payload.path("status").asText(null);
-        boolean confirmed = payload.path("confirmed").asBoolean(false);
+        String uuid = extractText(payload, "/uuid", "/transaction/uuid", "/data/uuid");
+        String transactionId = extractText(payload, "/transaction/id", "/id", "/transaction/transaction_id", "/data/id");
+        String status = extractText(payload, "/status", "/transaction/status", "/data/status");
+        boolean confirmed = extractBoolean(payload, "/confirmed", "/transaction/confirmed", "/data/confirmed");
 
-        LOGGER.info("Callback Confrapix recebido. uuid={}, status={}, confirmed={}", uuid, status, confirmed);
+        LOGGER.info(
+                "Callback Confrapix recebido. uuid={}, transactionId={}, status={}, confirmed={}",
+                uuid,
+                transactionId,
+                status,
+                confirmed
+        );
 
-        boolean paid = "succeeded".equals(status) || confirmed;
-        if (!paid || uuid == null) {
+        boolean paid = isPaidStatus(status) || confirmed;
+        if (!paid || (!StringUtils.hasText(uuid) && !StringUtils.hasText(transactionId))) {
             return;
         }
 
-        pixTransactionRepository.findByConfrapixUuid(uuid).ifPresentOrElse(
+        findTransactionByCallbackReference(uuid, transactionId).ifPresentOrElse(
                 transaction -> confirmTransaction(transaction, status),
-                () -> LOGGER.warn("Callback de pagamento sem transacao correspondente. uuid={}", uuid)
+                () -> LOGGER.warn(
+                        "Callback de pagamento sem transacao correspondente. uuid={}, transactionId={}",
+                        uuid,
+                        transactionId
+                )
         );
     }
 
@@ -140,5 +155,53 @@ public class PixPaymentService {
         // Politica de expiracao imposta pelo backend (nao confia no valor do cliente).
         String expiration = LocalDateTime.now().plusMinutes(expirationMinutes).format(EXPIRATION_FORMATTER);
         request.setExpiredIn(expiration);
+    }
+
+    private Optional<PixTransaction> findTransactionByCallbackReference(String uuid, String transactionId) {
+        if (StringUtils.hasText(uuid)) {
+            Optional<PixTransaction> byUuid = pixTransactionRepository.findByConfrapixUuid(uuid);
+            if (byUuid.isPresent()) {
+                return byUuid;
+            }
+        }
+
+        if (StringUtils.hasText(transactionId)) {
+            return pixTransactionRepository.findByConfrapixTransactionId(transactionId);
+        }
+
+        return Optional.empty();
+    }
+
+    private boolean isPaidStatus(String status) {
+        if (!StringUtils.hasText(status)) {
+            return false;
+        }
+
+        return PAID_STATUSES.contains(status.toLowerCase(Locale.ROOT));
+    }
+
+    private static String extractText(JsonNode payload, String... jsonPointers) {
+        for (String jsonPointer : jsonPointers) {
+            JsonNode node = payload.at(jsonPointer);
+            if (node != null && !node.isMissingNode() && !node.isNull()) {
+                String value = node.asText(null);
+                if (StringUtils.hasText(value)) {
+                    return value;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static boolean extractBoolean(JsonNode payload, String... jsonPointers) {
+        for (String jsonPointer : jsonPointers) {
+            JsonNode node = payload.at(jsonPointer);
+            if (node != null && !node.isMissingNode() && !node.isNull()) {
+                return node.asBoolean(false);
+            }
+        }
+
+        return false;
     }
 }

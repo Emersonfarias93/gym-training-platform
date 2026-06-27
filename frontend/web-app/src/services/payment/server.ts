@@ -49,6 +49,14 @@ function buildStorePixTransactionBody(input: CreatePixInput) {
   };
 }
 
+function isPaidStatus(status?: string | null) {
+  if (!status) {
+    return false;
+  }
+
+  return ["succeeded", "paid", "confirmed", "approved", "completed"].includes(status.toLowerCase());
+}
+
 function normalizePixResponse(payload: PixProviderResponse): PixCheckoutResponse {
   const transaction = payload.transaction;
 
@@ -77,7 +85,7 @@ function normalizePixStatus(payload: PixProviderResponse): PixStatusResponse {
   return {
     status,
     confirmed,
-    paid: status === "succeeded" || confirmed === true
+    paid: isPaidStatus(status) || confirmed === true
   };
 }
 
