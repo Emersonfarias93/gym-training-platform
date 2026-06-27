@@ -21,6 +21,14 @@ jobs:
             cd /opt/gym-training-platform
             
             cat > .env <<EOF
+            AUTH_SERVICE_URL=http://auth-service:8080
+            USER_SERVICE_URL=http://user-service:8080
+            PAYMENT_SERVICE_URL=http://payment-service:8080
+            WORKOUT_SERVICE_URL=http://workout-service:8080
+            LLM_SERVICE_URL=http://llm-service:8080
+            POSTGRES_HOST=${{ vars.POSTGRES_HOST }}
+            PUBLIC_HOST=${{ vars.PUBLIC_HOST }}
+            NEXT_PUBLIC_ENABLE_MOCK_CHECKOUT=false
             GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
             GROQ_BASE_URL=${{ secrets.GROQ_BASE_URL }}
             EOF
