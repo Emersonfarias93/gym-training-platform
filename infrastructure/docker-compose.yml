@@ -68,6 +68,7 @@ services:
     networks:
       - gym-network
     environment:
+      SERVER_PORT: ${BACKEND_SERVER_PORT:-8080}
       SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres}:5432/gym_training
       SPRING_DATASOURCE_USERNAME: gym_user
       SPRING_DATASOURCE_PASSWORD: gym_pass
@@ -85,6 +86,7 @@ services:
     networks:
       - gym-network
     environment:
+      SERVER_PORT: ${BACKEND_SERVER_PORT:-8080}
       SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres}:5432/gym_training
       SPRING_DATASOURCE_USERNAME: gym_user
       SPRING_DATASOURCE_PASSWORD: gym_pass
@@ -102,6 +104,7 @@ services:
     networks:
       - gym-network
     environment:
+      SERVER_PORT: ${BACKEND_SERVER_PORT:-8080}
       SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres}:5432/gym_training
       SPRING_DATASOURCE_USERNAME: gym_user
       SPRING_DATASOURCE_PASSWORD: gym_pass
@@ -119,6 +122,7 @@ services:
     networks:
       - gym-network
     environment:
+      SERVER_PORT: ${BACKEND_SERVER_PORT:-8080}
       SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres}:5432/gym_training
       SPRING_DATASOURCE_USERNAME: gym_user
       SPRING_DATASOURCE_PASSWORD: gym_pass
@@ -170,6 +174,7 @@ services:
       GROQ_BASE_URL: ${GROQ_BASE_URL:-https://api.groq.com/openai}
       GROQ_MODEL: ${GROQ_MODEL:-llama-3.3-70b-versatile}
       GROQ_TEMPERATURE: ${GROQ_TEMPERATURE:-0.7}
+      SERVER_PORT: ${BACKEND_SERVER_PORT:-8080}
       SPRING_DATASOURCE_URL: jdbc:postgresql://${POSTGRES_HOST:-postgres}:5432/gym_training
       SPRING_DATASOURCE_USERNAME: gym_user
       SPRING_DATASOURCE_PASSWORD: gym_pass
