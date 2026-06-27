@@ -55,6 +55,12 @@ public class PixPaymentService {
     public JsonNode storeTransaction(StorePixTransactionRequest request, PaymentRequester requester) {
         applyDefaultCallbackUrl(request);
         applyExpiration(request);
+        LOGGER.info(
+                "Criando cobranca Pix. userId={}, callbackConfigurado={}, callbackUrl={}",
+                requester != null ? requester.userId() : null,
+                StringUtils.hasText(request.getCallbackUrl()),
+                maskCallbackUrl(request.getCallbackUrl())
+        );
         JsonNode response = confrapixTransactionClient.store(request);
         persistTransaction(response, request, requester);
         return response;
@@ -203,5 +209,18 @@ public class PixPaymentService {
         }
 
         return false;
+    }
+
+    private static String maskCallbackUrl(String callbackUrl) {
+        if (!StringUtils.hasText(callbackUrl)) {
+            return null;
+        }
+
+        int tokenIndex = callbackUrl.indexOf("token=");
+        if (tokenIndex < 0) {
+            return callbackUrl;
+        }
+
+        return callbackUrl.substring(0, tokenIndex) + "token=***";
     }
 }
