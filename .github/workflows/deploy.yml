@@ -19,7 +19,16 @@ jobs:
           port: ${{ secrets.SERVER_PORT }}
           script: |
             cd /opt/gym-training-platform
+            
+            cat > .env <<EOF
+            GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
+            GROQ_BASE_URL=${{ secrets.GROQ_BASE_URL }}
+            EOF
+      
             git pull origin main
             docker compose -f infrastructure/docker-compose.yml down
-            docker compose -f infrastructure/docker-compose.yml up -d --build
+            docker compose \
+              --env-file .env \
+              -f infrastructure/docker-compose.yml \
+              up -d --build
             docker image prune -f
