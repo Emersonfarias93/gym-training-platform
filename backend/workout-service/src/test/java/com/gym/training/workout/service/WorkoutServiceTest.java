@@ -2,11 +2,14 @@ package com.gym.training.workout.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.gym.training.workout.controller.request.CreateManualWorkoutRequest;
 import com.gym.training.workout.controller.request.ManualWorkoutExerciseRequest;
 import com.gym.training.workout.controller.request.ManualWorkoutSessionRequest;
 import com.gym.training.workout.controller.request.UpdateWorkoutPlanRequest;
@@ -25,6 +28,7 @@ import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -180,5 +184,78 @@ class WorkoutServiceTest {
         verify(workoutExerciseRepository).deleteBySession_Id(oldSession.getId());
         verify(workoutSessionRepository).deleteByPlan_Id(planId);
         verify(workoutExerciseRepository).save(any());
+    }
+
+    @Test
+    void createManualPrimeiroTreinoFicaEmUso() {
+        when(workoutPlanRepository.countByUserIdAndStatus(userId, WorkoutPlanStatus.ACTIVE)).thenReturn(0L);
+        when(workoutPlanRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(workoutSessionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        stubEmptyOverview();
+
+        workoutService.createManualWorkout(user, manualRequest());
+
+        ArgumentCaptor<WorkoutPlan> captor = ArgumentCaptor.forClass(WorkoutPlan.class);
+        verify(workoutPlanRepository).save(captor.capture());
+        assertEquals(WorkoutPlanStatus.ACTIVE, captor.getValue().getStatus());
+    }
+
+    @Test
+    void createManualComTreinoEmUsoFicaSalvo() {
+        when(workoutPlanRepository.countByUserIdAndStatus(userId, WorkoutPlanStatus.ACTIVE)).thenReturn(1L);
+        when(workoutPlanRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(workoutSessionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        stubEmptyOverview();
+
+        workoutService.createManualWorkout(user, manualRequest());
+
+        ArgumentCaptor<WorkoutPlan> captor = ArgumentCaptor.forClass(WorkoutPlan.class);
+        verify(workoutPlanRepository).save(captor.capture());
+        assertEquals(WorkoutPlanStatus.ARCHIVED, captor.getValue().getStatus());
+    }
+
+    @Test
+    void generateWithAiArquivaOutrosEFicaEmUso() {
+        WorkoutPlan existing = plan(UUID.randomUUID(), WorkoutPlanStatus.ACTIVE, WorkoutGenerationStatus.MANUAL);
+        when(userContextClient.getAiCoachContext(user)).thenReturn(UserAiCoachContext.empty(user));
+        when(llmWorkoutClient.generateWorkout(eq(user), any(), any())).thenReturn("");
+        when(workoutPlanRepository.findByUserIdAndStatus(userId, WorkoutPlanStatus.ACTIVE)).thenReturn(List.of(existing));
+        when(workoutPlanRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        when(workoutSessionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
+        stubEmptyOverview();
+
+        workoutService.generateWithAi(user, null);
+
+        assertEquals(WorkoutPlanStatus.ARCHIVED, existing.getStatus());
+        ArgumentCaptor<WorkoutPlan> captor = ArgumentCaptor.forClass(WorkoutPlan.class);
+        verify(workoutPlanRepository, atLeastOnce()).save(captor.capture());
+        boolean novoPlanoEmUso = captor.getAllValues().stream()
+                .anyMatch(saved -> saved != existing && saved.getStatus() == WorkoutPlanStatus.ACTIVE);
+        assertTrue(novoPlanoEmUso);
+    }
+
+    private void stubEmptyOverview() {
+        when(workoutPlanRepository.findFirstByUserIdAndStatusOrderByCreatedAtDesc(userId, WorkoutPlanStatus.ACTIVE))
+                .thenReturn(Optional.empty());
+        when(workoutSessionRepository.findTop3ByUserIdOrderByScheduledDateAscSortOrderAsc(userId)).thenReturn(List.of());
+        when(workoutSessionRepository.findByUserIdAndScheduledDateBetweenOrderByScheduledDateAscSortOrderAsc(
+                eq(userId),
+                any(),
+                any()
+        )).thenReturn(List.of());
+    }
+
+    private CreateManualWorkoutRequest manualRequest() {
+        return new CreateManualWorkoutRequest(
+                "Meu treino",
+                "HYPERTROPHY",
+                new ManualWorkoutSessionRequest(
+                        "Treino A",
+                        LocalDate.now(),
+                        50,
+                        "Alta",
+                        List.of(new ManualWorkoutExerciseRequest("Supino", "4", "8", 90, null, null))
+                )
+        );
     }
 }

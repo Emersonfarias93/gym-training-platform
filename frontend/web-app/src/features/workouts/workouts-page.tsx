@@ -206,7 +206,7 @@ export function WorkoutsPage({ user }: WorkoutsPageProps) {
     onMutate: () => setFeedback(null),
     onSuccess: (overviewData) => {
       refreshAfterChange(overviewData);
-      setFeedback({ message: "Novo treino com IA gerado e salvo na sua lista.", tone: "success" });
+      setFeedback({ message: "Novo treino com IA gerado e em uso.", tone: "success" });
     },
     onError: (error) => setFeedback({ message: (error as Error).message, tone: "error" })
   });
