@@ -5,13 +5,13 @@ WORKDIR /app
 COPY pom.xml .
 COPY backend ./backend
 
-RUN mvn -pl backend/$service -am clean package -DskipTests
+RUN mvn -pl backend/realtime-service -am clean package -DskipTests
 
 FROM eclipse-temurin:17-jre-alpine
 
 WORKDIR /app
 
-COPY --from=build /app/backend/$service/target/*.jar app.jar
+COPY --from=build /app/backend/realtime-service/target/*.jar app.jar
 
 EXPOSE 8080
 
