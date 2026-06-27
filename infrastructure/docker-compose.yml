@@ -200,6 +200,7 @@ services:
       PAYMENT_SERVICE_URL: ${PAYMENT_SERVICE_URL:-http://payment-service:8080}
       WORKOUT_SERVICE_URL: ${WORKOUT_SERVICE_URL:-http://workout-service:8080}
       LLM_SERVICE_URL: ${LLM_SERVICE_URL:-http://llm-service:8080}
+      AUTH_COOKIE_SECURE: ${AUTH_COOKIE_SECURE:-false}
       NEXT_PUBLIC_ENABLE_MOCK_CHECKOUT: ${NEXT_PUBLIC_ENABLE_MOCK_CHECKOUT:-false}
 
 volumes:

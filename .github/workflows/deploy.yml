@@ -29,6 +29,7 @@ jobs:
             BACKEND_SERVER_PORT=8080
             POSTGRES_HOST=${{ vars.POSTGRES_HOST }}
             PUBLIC_HOST=${{ vars.PUBLIC_HOST }}
+            AUTH_COOKIE_SECURE=false
             NEXT_PUBLIC_ENABLE_MOCK_CHECKOUT=false
             GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
             GROQ_BASE_URL=${{ secrets.GROQ_BASE_URL }}
