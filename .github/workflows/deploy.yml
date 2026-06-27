@@ -27,5 +27,8 @@ jobs:
       
             git pull origin main
             docker compose -f infrastructure/docker-compose.yml down
-            docker compose -f infrastructure/docker-compose.yml up -d --build
+            docker compose \
+              --env-file .env \
+              -f infrastructure/docker-compose.yml \
+              up -d --build
             docker image prune -f
