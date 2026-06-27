@@ -22,11 +22,11 @@ export const sidebarItems: NavItem[] = [
 
 export const pageIntro: Record<AppView, PageIntro> = {
   dashboard: {
-    eyebrow: "FitAI Operating System",
-    title: "Sua academia com inteligencia aplicada ao detalhe",
+    eyebrow: "Visao geral",
+    title: "Seu resumo de treino e evolucao",
     description:
-      "Visao consolidada de treino, dieta, agenda e insights para elevar consistencia e resultado.",
-    filters: ["Hoje", "Semana", "Mensal", "Plano ativo"]
+      "Acompanhe seus treinos, sua sessao atual e o que da para desbloquear com o plano ativo.",
+    filters: []
   },
   workouts: {
     eyebrow: "Training Engine",
