@@ -7,6 +7,8 @@ services:
       POSTGRES_DB: gym_training
       POSTGRES_USER: gym_user
       POSTGRES_PASSWORD: gym_pass
+    networks:
+      - gym-network
     ports:
       - "5432:5432"
     volumes:
@@ -19,6 +21,8 @@ services:
     environment:
       ZOOKEEPER_CLIENT_PORT: 2181
       ZOOKEEPER_TICK_TIME: 2000
+    networks:
+      - gym-network
     ports:
       - "2181:2181"
 
@@ -26,6 +30,8 @@ services:
     image: confluentinc/cp-kafka:7.7.1
     depends_on:
       - zookeeper
+    networks:
+      - gym-network
     ports:
       - "9092:9092"
       - "29092:29092"
@@ -42,6 +48,8 @@ services:
     image: provectuslabs/kafka-ui:latest
     depends_on:
       - kafka
+    networks:
+      - gym-network
     ports:
       - "8089:8080"
     environment:
@@ -57,6 +65,8 @@ services:
     depends_on:
       - postgres
       - kafka
+    networks:
+      - gym-network
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
       SPRING_DATASOURCE_USERNAME: gym_user
@@ -72,6 +82,8 @@ services:
     depends_on:
       - postgres
       - kafka
+    networks:
+      - gym-network
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
       SPRING_DATASOURCE_USERNAME: gym_user
@@ -87,6 +99,8 @@ services:
     depends_on:
       - postgres
       - kafka
+    networks:
+      - gym-network
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
       SPRING_DATASOURCE_USERNAME: gym_user
@@ -102,6 +116,8 @@ services:
     depends_on:
       - postgres
       - kafka
+    networks:
+      - gym-network
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
       SPRING_DATASOURCE_USERNAME: gym_user
@@ -147,6 +163,8 @@ services:
     depends_on:
       - postgres
       - kafka
+    networks:
+      - gym-network
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
       SPRING_DATASOURCE_USERNAME: gym_user
@@ -163,8 +181,14 @@ services:
       - auth-service
       - user-service
       - workout-service
+    networks:
+      - gym-network
     environment:
       NEXT_PUBLIC_API_URL: http://177.87.121.189:8081
 
 volumes:
   postgres_data:
+
+networks:
+  gym-network:
+    driver: bridge
