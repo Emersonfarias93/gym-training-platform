@@ -227,7 +227,7 @@ function PixStep({
         </div>
       </div>
 
-      <StatusBanner state={isActivating ? "activating" : state} />
+      <StatusBanner state={isActivating || sessionActive ? "activating" : state} />
 
       {errorMessage ? (
         <p className="flex items-center gap-2 rounded-xl border border-[var(--fitai-danger)]/40 bg-[var(--fitai-danger)]/10 px-3 py-2 text-sm text-[var(--fitai-danger)]">
@@ -300,7 +300,7 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
   const sessionQuery = useQuery({
     queryKey: ["checkout-session"],
     queryFn: getSession,
-    enabled: paid,
+    enabled: step === "pix" && !!checkout && !expired,
     refetchInterval: (query) =>
       query.state.data?.user?.planStatus === "ACTIVE_PLAN" ? false : SESSION_POLL_MS,
     refetchOnWindowFocus: false
@@ -363,7 +363,7 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
           state={pixState}
           countdownLabel={countdownLabel}
           isWarning={isWarning}
-          isActivating={paid}
+          isActivating={paid || sessionActive}
           isChecking={statusQuery.isFetching}
           errorMessage={statusErrorMessage}
           onManualCheck={() => statusQuery.refetch()}

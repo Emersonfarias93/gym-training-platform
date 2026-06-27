@@ -1,6 +1,5 @@
 import "server-only";
 
-import { cache } from "react";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -189,7 +188,7 @@ export function clearAuthCookies(response: NextResponse) {
   response.cookies.set(MOCK_PREMIUM_COOKIE, "", { ...getCookieOptions(), maxAge: 0 });
 }
 
-export const getServerAuthSession = cache(async () => {
+export async function getServerAuthSession() {
   const cookieStore = await cookies();
   const token = cookieStore.get(AUTH_TOKEN_COOKIE)?.value;
 
@@ -249,7 +248,7 @@ export const getServerAuthSession = cache(async () => {
   } catch {
     return null;
   }
-});
+}
 
 export function getAuthApiErrorMessage(error: unknown) {
   if (error instanceof AuthApiError) {
