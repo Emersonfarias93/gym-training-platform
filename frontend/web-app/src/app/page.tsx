@@ -10,8 +10,7 @@ const validViews: AppView[] = [
   "diet",
   "evolution",
   "ai-coach",
-  "account",
-  "settings"
+  "account"
 ];
 
 type HomeProps = {

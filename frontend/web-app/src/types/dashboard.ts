@@ -6,8 +6,7 @@ export type AppView =
   | "diet"
   | "evolution"
   | "ai-coach"
-  | "account"
-  | "settings";
+  | "account";
 
 export type NavItem = {
   id: AppView;
