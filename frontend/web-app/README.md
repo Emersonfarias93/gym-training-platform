@@ -18,6 +18,7 @@ O projeto usa variáveis de ambiente no diretório `frontend/web-app` para separ
 - `PAYMENT_SERVICE_URL`
 - `WORKOUT_SERVICE_URL`
 - `LLM_SERVICE_URL`
+- `AUTH_COOKIE_SECURE`
 - `NEXT_PUBLIC_ENABLE_MOCK_CHECKOUT`
 
 ### Regras
