@@ -16,26 +16,6 @@ export type NavItem = {
   badge?: string;
 };
 
-export type Metric = {
-  label: string;
-  value: string;
-  delta: string;
-  helper: string;
-  trend: "up" | "down";
-};
-
-export type Session = {
-  title: string;
-  time: string;
-  source: string;
-  status: "Hoje" | "A seguir" | "Recuperacao";
-};
-
-export type Insight = {
-  title: string;
-  body: string;
-};
-
 export type PageIntro = {
   eyebrow: string;
   title: string;

@@ -31,6 +31,6 @@ export function AppViewContent({ user, view }: AppViewProps) {
       return <SettingsPage />;
     case "dashboard":
     default:
-      return <DashboardPage />;
+      return <DashboardPage user={user} />;
   }
 }
