@@ -90,6 +90,9 @@ public class WorkoutService {
         String aiResponse = llmWorkoutClient.generateWorkout(user, context, focus);
         boolean aiGenerated = StringUtils.hasText(aiResponse);
 
+        // O treino gerado pela IA passa a ser o "em uso"; arquiva os demais.
+        archiveActivePlans(user.userId(), null);
+
         WorkoutPlan plan = workoutPlanRepository.save(WorkoutPlan.builder()
                 .userId(user.userId())
                 .title("Treino FitAI Coach")
@@ -109,15 +112,18 @@ public class WorkoutService {
 
     @Transactional
     public WorkoutOverviewResponse createManualWorkout(AuthenticatedUser user, CreateManualWorkoutRequest request) {
+        // So entra "em uso" se o usuario ainda nao tem nenhum treino em uso; os demais ficam salvos.
+        boolean inUse = workoutPlanRepository.countByUserIdAndStatus(user.userId(), WorkoutPlanStatus.ACTIVE) == 0;
+
         WorkoutPlan plan = workoutPlanRepository.save(WorkoutPlan.builder()
                 .userId(user.userId())
                 .title(request.title().trim())
                 .goal(request.goal().trim())
-                .status(WorkoutPlanStatus.ACTIVE)
+                .status(inUse ? WorkoutPlanStatus.ACTIVE : WorkoutPlanStatus.ARCHIVED)
                 .generationStatus(WorkoutGenerationStatus.MANUAL)
                 .build());
 
-        WorkoutSession session = createManualSession(plan, user, request.session(), 0);
+        WorkoutSession session = createManualSession(plan, user, request.session(), 0, inUse);
         createManualExercises(session, request.session().exercises());
         return getOverview(user);
     }
@@ -142,10 +148,11 @@ public class WorkoutService {
         workoutPlanRepository.save(plan);
 
         // Substitui as sessoes/exercicios do plano pelo conteudo enviado.
+        boolean inUse = plan.getStatus() == WorkoutPlanStatus.ACTIVE;
         deleteSessionsOfPlan(plan.getId());
         List<ManualWorkoutSessionRequest> sessions = request.sessions();
         for (int index = 0; index < sessions.size(); index++) {
-            WorkoutSession session = createManualSession(plan, user, sessions.get(index), index);
+            WorkoutSession session = createManualSession(plan, user, sessions.get(index), index, inUse);
             createManualExercises(session, sessions.get(index).exercises());
         }
         return toPlanDetail(plan);
@@ -163,12 +170,7 @@ public class WorkoutService {
         WorkoutPlan plan = requireOwnedPlan(user, planId);
 
         // Garante exatamente um plano ativo por usuario.
-        for (WorkoutPlan active : workoutPlanRepository.findByUserIdAndStatus(user.userId(), WorkoutPlanStatus.ACTIVE)) {
-            if (!active.getId().equals(planId)) {
-                active.setStatus(WorkoutPlanStatus.ARCHIVED);
-                workoutPlanRepository.save(active);
-            }
-        }
+        archiveActivePlans(user.userId(), planId);
         plan.setStatus(WorkoutPlanStatus.ACTIVE);
         workoutPlanRepository.save(plan);
 
@@ -185,6 +187,16 @@ public class WorkoutService {
     private WorkoutPlan requireOwnedPlan(AuthenticatedUser user, UUID planId) {
         return workoutPlanRepository.findByIdAndUserId(planId, user.userId())
                 .orElseThrow(() -> new WorkoutNotFoundException("Treino nao encontrado"));
+    }
+
+    /** Arquiva todos os planos em uso do usuario, exceto o informado (mantem 1 ativo por usuario). */
+    private void archiveActivePlans(UUID userId, UUID exceptPlanId) {
+        for (WorkoutPlan active : workoutPlanRepository.findByUserIdAndStatus(userId, WorkoutPlanStatus.ACTIVE)) {
+            if (!active.getId().equals(exceptPlanId)) {
+                active.setStatus(WorkoutPlanStatus.ARCHIVED);
+                workoutPlanRepository.save(active);
+            }
+        }
     }
 
     private void deleteSessionsOfPlan(UUID planId) {
@@ -380,16 +392,17 @@ public class WorkoutService {
             WorkoutPlan plan,
             AuthenticatedUser user,
             ManualWorkoutSessionRequest request,
-            int sortOrder
+            int sortOrder,
+            boolean inUse
     ) {
+        // So o plano em uso tem uma sessao "em andamento"; planos salvos ficam agendados.
+        boolean started = inUse && sortOrder == 0 && !request.scheduledDate().isAfter(LocalDate.now());
         return workoutSessionRepository.save(WorkoutSession.builder()
                 .plan(plan)
                 .userId(user.userId())
                 .title(request.title().trim())
                 .scheduledDate(request.scheduledDate())
-                .status(request.scheduledDate().isAfter(LocalDate.now())
-                        ? WorkoutSessionStatus.SCHEDULED
-                        : WorkoutSessionStatus.IN_PROGRESS)
+                .status(started ? WorkoutSessionStatus.IN_PROGRESS : WorkoutSessionStatus.SCHEDULED)
                 .estimatedDurationMinutes(request.estimatedDurationMinutes())
                 .intensity(request.intensity().trim())
                 .sortOrder(sortOrder)
