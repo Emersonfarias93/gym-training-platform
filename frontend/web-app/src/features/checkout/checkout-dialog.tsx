@@ -227,7 +227,7 @@ function PixStep({
         </div>
       </div>
 
-      <StatusBanner state={isActivating || sessionActive ? "activating" : state} />
+      <StatusBanner state={isActivating ? "activating" : state} />
 
       {errorMessage ? (
         <p className="flex items-center gap-2 rounded-xl border border-[var(--fitai-danger)]/40 bg-[var(--fitai-danger)]/10 px-3 py-2 text-sm text-[var(--fitai-danger)]">
