@@ -19,7 +19,6 @@ import {
 import { SectionHeading } from "@/components/shared/section-heading";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Dialog } from "@/components/ui/dialog";
-import { Progress } from "@/components/ui/progress";
 import { CheckoutDialog } from "@/features/checkout/checkout-dialog";
 import { OverviewCard } from "@/features/shared/components/overview-card";
 import { WorkoutCard } from "@/features/workouts/workout-card";
@@ -158,14 +157,10 @@ function CurrentSessionPanel({ overview }: { overview: WorkoutOverviewResponse }
               key={exercise.id}
               className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-4"
             >
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="font-medium text-[var(--fitai-text-primary)]">{exercise.name}</p>
-                  <p className="mt-1 text-sm text-[var(--fitai-text-secondary)]">{exercise.sets}</p>
-                </div>
-                <span className="text-sm text-[var(--fitai-primary)]">{exercise.progress}%</span>
+              <div>
+                <p className="font-medium text-[var(--fitai-text-primary)]">{exercise.name}</p>
+                <p className="mt-1 text-sm text-[var(--fitai-text-secondary)]">{exercise.sets}</p>
               </div>
-              <Progress value={exercise.progress} className="mt-4 h-2.5" />
             </div>
           ))}
         </div>

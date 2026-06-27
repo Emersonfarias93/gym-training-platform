@@ -74,7 +74,7 @@ public class WorkoutService {
                 .orElseGet(List::of);
 
         return new WorkoutOverviewResponse(
-                workoutSessionRepository.countByUserIdAndStatusIn(user.userId(), ACTIVE_SESSION_STATUSES),
+                workoutPlanRepository.countByUserIdAndStatus(user.userId(), WorkoutPlanStatus.ACTIVE),
                 weeklyVolumeLabel(user),
                 averageDurationLabel(user),
                 averageIntensityLabel(programmedSessions),

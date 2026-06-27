@@ -82,6 +82,24 @@ class WorkoutServiceTest {
     }
 
     @Test
+    void getOverviewContaTreinosAtivosDoUsuario() {
+        when(workoutPlanRepository.countByUserIdAndStatus(userId, WorkoutPlanStatus.ACTIVE)).thenReturn(2L);
+        when(workoutSessionRepository.findTop3ByUserIdOrderByScheduledDateAscSortOrderAsc(userId)).thenReturn(List.of());
+        when(workoutPlanRepository.findFirstByUserIdAndStatusOrderByCreatedAtDesc(userId, WorkoutPlanStatus.ACTIVE))
+                .thenReturn(Optional.empty());
+        when(workoutSessionRepository.findByUserIdAndScheduledDateBetweenOrderByScheduledDateAscSortOrderAsc(
+                eq(userId),
+                any(),
+                any()
+        )).thenReturn(List.of());
+
+        var overview = workoutService.getOverview(user);
+
+        assertEquals(2, overview.activeSessions());
+        verify(workoutPlanRepository).countByUserIdAndStatus(userId, WorkoutPlanStatus.ACTIVE);
+    }
+
+    @Test
     void getPlanDetailDeOutroUsuarioRetorna404() {
         UUID planId = UUID.randomUUID();
         when(workoutPlanRepository.findByIdAndUserId(planId, userId)).thenReturn(Optional.empty());
