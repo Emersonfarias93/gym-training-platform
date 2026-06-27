@@ -108,35 +108,35 @@ services:
       SPRING_DATASOURCE_PASSWORD: gym_pass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
 
-  email-service:
-    build:
-      context: ..
-      dockerfile: backend/email-service/Dockerfile
-    ports:
-      - "8085:8080"
-    depends_on:
-      - postgres
-      - kafka
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
-      SPRING_DATASOURCE_USERNAME: gym_user
-      SPRING_DATASOURCE_PASSWORD: gym_pass
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+#  email-service:
+#    build:
+#      context: ..
+#      dockerfile: backend/email-service/Dockerfile
+#    ports:
+#      - "8085:8080"
+#    depends_on:
+#      - postgres
+#      - kafka
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
+#      SPRING_DATASOURCE_USERNAME: gym_user
+#      SPRING_DATASOURCE_PASSWORD: gym_pass
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
 
-  realtime-service:
-    build:
-      context: ..
-      dockerfile: backend/realtime-service/Dockerfile
-    ports:
-      - "8086:8080"
-    depends_on:
-      - postgres
-      - kafka
-    environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
-      SPRING_DATASOURCE_USERNAME: gym_user
-      SPRING_DATASOURCE_PASSWORD: gym_pass
-      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+#  realtime-service:
+#    build:
+#      context: ..
+#      dockerfile: backend/realtime-service/Dockerfile
+#    ports:
+#      - "8086:8080"
+#    depends_on:
+#      - postgres
+#      - kafka
+#    environment:
+#      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
+#      SPRING_DATASOURCE_USERNAME: gym_user
+#      SPRING_DATASOURCE_PASSWORD: gym_pass
+#      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
 
   llm-service:
     build:
