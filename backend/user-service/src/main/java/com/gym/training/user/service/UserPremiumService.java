@@ -8,6 +8,7 @@ import com.gym.training.user.repository.UserPremiumSnapshotRepository;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,7 @@ public class UserPremiumService {
 
     private final UserProfileService userProfileService;
     private final UserPremiumSnapshotRepository userPremiumSnapshotRepository;
+    private final PaymentAccessClient paymentAccessClient;
 
     @Transactional
     public UserPremiumStatusResponse getPremiumStatus(AuthenticatedUser authenticatedUser) {
@@ -29,8 +31,8 @@ public class UserPremiumService {
 
     @Transactional
     public UserPremiumSnapshot getOrCreatePremiumSnapshot(AuthenticatedUser authenticatedUser) {
-        return userPremiumSnapshotRepository.findByUserProfileAuthUserId(authenticatedUser.userId())
-                .orElseGet(() -> createPremiumSnapshot(authenticatedUser));
+        UserPremiumSnapshot snapshot = getOrCreatePremiumSnapshotWithoutSync(authenticatedUser);
+        return syncWithPaymentAccess(authenticatedUser, snapshot);
     }
 
     /**
@@ -48,7 +50,7 @@ public class UserPremiumService {
                 log.warn("Ativacao premium sem snapshot e sem dados de perfil. userId={}", userId);
                 return;
             }
-            snapshot = getOrCreatePremiumSnapshot(new AuthenticatedUser(userId, email, fullName));
+            snapshot = getOrCreatePremiumSnapshotWithoutSync(new AuthenticatedUser(userId, email, fullName));
         }
 
         if (snapshot.isPremiumActive() && snapshot.getStatus() == PremiumStatus.ACTIVE) {
@@ -65,6 +67,65 @@ public class UserPremiumService {
         snapshot.setLastSyncedAt(Instant.now());
         userPremiumSnapshotRepository.save(snapshot);
         log.info("Premium ativado para o usuario {}.", userId);
+    }
+
+    private UserPremiumSnapshot getOrCreatePremiumSnapshotWithoutSync(AuthenticatedUser authenticatedUser) {
+        return userPremiumSnapshotRepository.findByUserProfileAuthUserId(authenticatedUser.userId())
+                .orElseGet(() -> createPremiumSnapshot(authenticatedUser));
+    }
+
+    private UserPremiumSnapshot syncWithPaymentAccess(AuthenticatedUser authenticatedUser, UserPremiumSnapshot snapshot) {
+        var access = paymentAccessClient.getAccessStatus(authenticatedUser);
+        if (access == null) {
+            return snapshot;
+        }
+        return access
+                .map(accessStatus -> applyPaymentAccess(snapshot, accessStatus))
+                .orElse(snapshot);
+    }
+
+    private UserPremiumSnapshot applyPaymentAccess(UserPremiumSnapshot snapshot, PaymentAccessStatusResponse access) {
+        if (access.userId() == null || !access.userId().equals(snapshot.getUserProfile().getAuthUserId())) {
+            return snapshot;
+        }
+
+        PremiumStatus status = mapPremiumStatus(access.status(), access.premiumActive());
+        boolean active = access.premiumActive() && status == PremiumStatus.ACTIVE;
+        boolean changed = false;
+
+        if (snapshot.isPremiumActive() != active) {
+            snapshot.setPremiumActive(active);
+            changed = true;
+        }
+        if (snapshot.getStatus() != status) {
+            snapshot.setStatus(status);
+            changed = true;
+        }
+        if (access.planName() != null && !Objects.equals(snapshot.getPlanName(), access.planName())) {
+            snapshot.setPlanName(access.planName());
+            changed = true;
+        }
+        if (!Objects.equals(snapshot.getCurrentPeriodEnd(), access.currentPeriodEnd())) {
+            snapshot.setCurrentPeriodEnd(access.currentPeriodEnd());
+            changed = true;
+        }
+        if (access.lastSyncedAt() != null && !Objects.equals(snapshot.getLastSyncedAt(), access.lastSyncedAt())) {
+            snapshot.setLastSyncedAt(access.lastSyncedAt());
+            changed = true;
+        }
+
+        return changed ? userPremiumSnapshotRepository.save(snapshot) : snapshot;
+    }
+
+    private PremiumStatus mapPremiumStatus(String status, boolean premiumActive) {
+        if (status != null) {
+            try {
+                return PremiumStatus.valueOf(status);
+            } catch (IllegalArgumentException exception) {
+                log.warn("Status premium desconhecido recebido do payment-service: {}", status);
+            }
+        }
+        return premiumActive ? PremiumStatus.ACTIVE : PremiumStatus.NONE;
     }
 
     private UserPremiumSnapshot createPremiumSnapshot(AuthenticatedUser authenticatedUser) {

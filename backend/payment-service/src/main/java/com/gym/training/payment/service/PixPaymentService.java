@@ -28,6 +28,7 @@ public class PixPaymentService {
     private final ConfrapixProperties properties;
     private final PixTransactionRepository pixTransactionRepository;
     private final PaymentEventPublisher paymentEventPublisher;
+    private final PremiumAccessService premiumAccessService;
 
     @Value("${payment.pix.expiration-minutes:15}")
     private long expirationMinutes;
@@ -36,12 +37,14 @@ public class PixPaymentService {
             ConfrapixTransactionClient confrapixTransactionClient,
             ConfrapixProperties properties,
             PixTransactionRepository pixTransactionRepository,
-            PaymentEventPublisher paymentEventPublisher
+            PaymentEventPublisher paymentEventPublisher,
+            PremiumAccessService premiumAccessService
     ) {
         this.confrapixTransactionClient = confrapixTransactionClient;
         this.properties = properties;
         this.pixTransactionRepository = pixTransactionRepository;
         this.paymentEventPublisher = paymentEventPublisher;
+        this.premiumAccessService = premiumAccessService;
     }
 
     @Transactional
@@ -84,6 +87,7 @@ public class PixPaymentService {
         if (transaction.isProcessed()) {
             // Idempotencia: o mesmo callback pode chegar mais de uma vez.
             LOGGER.info("Pagamento ja processado, ignorando reentrega. uuid={}", transaction.getConfrapixUuid());
+            premiumAccessService.grantMonthlyAccess(transaction);
             return;
         }
 
@@ -92,6 +96,7 @@ public class PixPaymentService {
         transaction.setProcessed(true);
         pixTransactionRepository.save(transaction);
 
+        premiumAccessService.grantMonthlyAccess(transaction);
         paymentEventPublisher.publishPaymentConfirmed(transaction);
         LOGGER.info("Pagamento Pix confirmado e evento publicado. uuid={}", transaction.getConfrapixUuid());
     }

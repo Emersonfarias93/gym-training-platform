@@ -38,6 +38,9 @@ class PixPaymentServiceTest {
     @Mock
     private PaymentEventPublisher publisher;
 
+    @Mock
+    private PremiumAccessService premiumAccessService;
+
     @InjectMocks
     private PixPaymentService service;
 
@@ -60,6 +63,7 @@ class PixPaymentServiceTest {
 
         assertTrue(transaction.isProcessed());
         verify(repository).save(transaction);
+        verify(premiumAccessService).grantMonthlyAccess(transaction);
         verify(publisher).publishPaymentConfirmed(transaction);
     }
 
@@ -73,6 +77,7 @@ class PixPaymentServiceTest {
         service.handleTransactionCallback(callback("u1", "succeeded", true));
 
         verify(repository, never()).save(any());
+        verify(premiumAccessService).grantMonthlyAccess(transaction);
         verify(publisher, never()).publishPaymentConfirmed(any());
     }
 

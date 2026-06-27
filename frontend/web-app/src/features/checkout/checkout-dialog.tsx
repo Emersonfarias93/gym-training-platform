@@ -21,7 +21,7 @@ import { usePixCountdown } from "@/features/checkout/use-pix-countdown";
 import { getSession } from "@/services/auth/client";
 import { FITAI_PREMIUM_PLAN, formatBRL } from "@/lib/payment";
 import { cn } from "@/lib/utils";
-import { activateMockPremium, createPixCheckout, getPixStatus } from "@/services/payment/client";
+import { createPixCheckout, getPixStatus } from "@/services/payment/client";
 import type { PixCheckoutResponse } from "@/types/payment";
 
 type CheckoutDialogProps = {
@@ -34,10 +34,7 @@ type PixState = "waiting" | "paid" | "expired";
 
 const POLL_INTERVAL_MS = 4000;
 const SESSION_POLL_MS = 3000;
-// Carencia ate cair no fallback mock (cobre usuarios mockados, que nao passam
-// pelo user-service). Usuarios reais ativam via Kafka antes disso.
-const ACTIVATION_GRACE_MS = 10000;
-const MOCK_FALLBACK_ENABLED = process.env.NEXT_PUBLIC_ENABLE_MOCK_CHECKOUT !== "false";
+// Consulta a sessao ate o user-service refletir o acesso persistido no payment-service.
 
 function PlanStep({
   isGenerating,
@@ -278,9 +275,6 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
     }
   });
 
-  // Fallback mock (usuarios mockados que nao passam pelo user-service).
-  const mockMutation = useMutation({ mutationFn: activateMockPremium });
-
   const { label: countdownLabel, expired, isWarning } = usePixCountdown(checkout?.expiresAt);
 
   const finish = useCallback(() => {
@@ -320,28 +314,14 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
     }
   }, [paid]);
 
-  // Conclui quando a sessao real vira premium; senao cai no fallback mock apos a carencia.
+  // Conclui somente quando a sessao real vira premium via user-service/payment-service.
   useEffect(() => {
-    if (!paid || finishedRef.current) {
+    if (!paid || finishedRef.current || !sessionActive) {
       return;
     }
 
-    if (sessionActive) {
-      finish();
-      return;
-    }
-
-    const elapsed = paidAtRef.current ? Date.now() - paidAtRef.current : 0;
-    if (
-      MOCK_FALLBACK_ENABLED &&
-      elapsed > ACTIVATION_GRACE_MS &&
-      !mockMutation.isPending &&
-      !mockMutation.isSuccess
-    ) {
-      mockMutation.mutate(undefined, { onSuccess: finish });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [paid, sessionActive, sessionQuery.dataUpdatedAt]);
+    finish();
+  }, [paid, sessionActive, finish]);
 
   // Reset ao fechar o modal.
   useEffect(() => {
@@ -354,16 +334,11 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
     paidAtRef.current = null;
     finishedRef.current = false;
     pixMutation.reset();
-    mockMutation.reset();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const pixState: PixState = paid ? "paid" : expired ? "expired" : "waiting";
-  const statusErrorMessage = statusQuery.isError
-    ? (statusQuery.error as Error).message
-    : mockMutation.isError
-      ? (mockMutation.error as Error).message
-      : null;
+  const statusErrorMessage = statusQuery.isError ? (statusQuery.error as Error).message : null;
 
   return (
     <Dialog

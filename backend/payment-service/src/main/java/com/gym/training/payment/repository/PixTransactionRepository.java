@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface PixTransactionRepository extends JpaRepository<PixTransaction, UUID> {
 
     Optional<PixTransaction> findByConfrapixUuid(String confrapixUuid);
+
+    Optional<PixTransaction> findTopByAuthUserIdAndProcessedTrueOrderByPaidAtDescCreatedAtDesc(UUID authUserId);
 }
