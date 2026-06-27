@@ -59,22 +59,31 @@ function createDefaultValues(
   objective: WorkoutObjective
 ): WorkoutEditorValues {
   if (mode === "edit" && plan) {
+    // Sessoes sem exercicios sao placeholders (ex.: dias extras da geracao por IA).
+    // O editor exige >=1 exercicio por dia (e o backend tambem), entao so editamos
+    // os dias que tem conteudo. Se nenhum tiver, mantem o primeiro com uma linha vazia.
+    const filledSessions = plan.sessions.filter((session) => session.exercises.length > 0);
+    const editableSessions = filledSessions.length > 0 ? filledSessions : plan.sessions.slice(0, 1);
+
     return {
       title: plan.title,
       goal: plan.goal,
-      sessions: plan.sessions.map((session) => ({
+      sessions: editableSessions.map((session) => ({
         title: session.title,
         scheduledDate: session.scheduledDate,
         estimatedDurationMinutes: session.estimatedDurationMinutes ?? 50,
         intensity: session.intensity ?? objective.recommendedIntensity,
-        exercises: session.exercises.map((exercise) => ({
-          name: exercise.name,
-          setsDescription: exercise.setsDescription,
-          repsDescription: exercise.repsDescription,
-          restSeconds: exercise.restSeconds ?? 60,
-          loadSuggestion: exercise.loadSuggestion ?? "",
-          executionNotes: exercise.executionNotes ?? ""
-        }))
+        exercises:
+          session.exercises.length > 0
+            ? session.exercises.map((exercise) => ({
+                name: exercise.name,
+                setsDescription: exercise.setsDescription,
+                repsDescription: exercise.repsDescription,
+                restSeconds: exercise.restSeconds ?? 60,
+                loadSuggestion: exercise.loadSuggestion ?? "",
+                executionNotes: exercise.executionNotes ?? ""
+              }))
+            : [createEmptyExercise()]
       }))
     };
   }
