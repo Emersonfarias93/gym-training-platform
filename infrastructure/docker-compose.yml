@@ -33,7 +33,7 @@ services:
       KAFKA_BROKER_ID: 1
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
       KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092,PLAINTEXT_HOST://0.0.0.0:29092
-      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://177.87.121.189:29092
       KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
       KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
@@ -47,6 +47,124 @@ services:
     environment:
       KAFKA_CLUSTERS_0_NAME: gym-training-cluster
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+
+  auth-service:
+    build:
+      context: ..
+      dockerfile: backend/auth-service/Dockerfile
+    ports:
+      - "8081:8080"
+    depends_on:
+      - postgres
+      - kafka
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
+      SPRING_DATASOURCE_USERNAME: gym_user
+      SPRING_DATASOURCE_PASSWORD: gym_pass
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+  user-service:
+    build:
+      context: ..
+      dockerfile: backend/user-service/Dockerfile
+    ports:
+      - "8082:8080"
+    depends_on:
+      - postgres
+      - kafka
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
+      SPRING_DATASOURCE_USERNAME: gym_user
+      SPRING_DATASOURCE_PASSWORD: gym_pass
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+  workout-service:
+    build:
+      context: ..
+      dockerfile: backend/workout-service/Dockerfile
+    ports:
+      - "8083:8080"
+    depends_on:
+      - postgres
+      - kafka
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
+      SPRING_DATASOURCE_USERNAME: gym_user
+      SPRING_DATASOURCE_PASSWORD: gym_pass
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+  payment-service:
+    build:
+      context: ..
+      dockerfile: backend/payment-service/Dockerfile
+    ports:
+      - "8084:8080"
+    depends_on:
+      - postgres
+      - kafka
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
+      SPRING_DATASOURCE_USERNAME: gym_user
+      SPRING_DATASOURCE_PASSWORD: gym_pass
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+  email-service:
+    build:
+      context: ..
+      dockerfile: backend/email-service/Dockerfile
+    ports:
+      - "8085:8080"
+    depends_on:
+      - postgres
+      - kafka
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
+      SPRING_DATASOURCE_USERNAME: gym_user
+      SPRING_DATASOURCE_PASSWORD: gym_pass
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+  realtime-service:
+    build:
+      context: ..
+      dockerfile: backend/realtime-service/Dockerfile
+    ports:
+      - "8086:8080"
+    depends_on:
+      - postgres
+      - kafka
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
+      SPRING_DATASOURCE_USERNAME: gym_user
+      SPRING_DATASOURCE_PASSWORD: gym_pass
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+  llm-service:
+    build:
+      context: ..
+      dockerfile: backend/llm-service/Dockerfile
+    ports:
+      - "8087:8080"
+    depends_on:
+      - postgres
+      - kafka
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/gym_training
+      SPRING_DATASOURCE_USERNAME: gym_user
+      SPRING_DATASOURCE_PASSWORD: gym_pass
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+
+  web-app:
+    build:
+      context: ../frontend/web-app
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    depends_on:
+      - auth-service
+      - user-service
+      - workout-service
+    environment:
+      NEXT_PUBLIC_API_URL: http://177.87.121.189:8081
 
 volumes:
   postgres_data:

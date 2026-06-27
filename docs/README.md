@@ -1,8 +1,14 @@
-# Docs
+# Documentação
 
-Documentação inicial sugerida:
+Índice principal da documentação do projeto.
 
-- visão de arquitetura
-- diagramas de integração
-- contratos de eventos Kafka
-- convenções de desenvolvimento
+## Guias
+
+- [TAP do MVP](tap-mvp.md)
+- [Cronograma do MVP](cronograma-mvp.md)
+- [Arquitetura do Projeto](arquitetura-projeto.md)
+
+## Complementos úteis
+
+- `frontend/web-app/README.md`: contexto do frontend.
+- `infrastructure/*/README.md`: apoio para Kafka, PostgreSQL e monitoramento.
