@@ -131,7 +131,7 @@ export function AccountPage({ user }: AccountPageProps) {
   const activePlan = hasActivePlan(user);
   const premiumStatus = user.premiumStatus ?? (activePlan ? "ACTIVE" : "NONE");
   const statusMeta = STATUS_META[premiumStatus] ?? STATUS_META.NONE;
-  const planName = activePlan ? user.planName ?? FITAI_PREMIUM_PLAN.name : "Plano comum";
+  const planName = activePlan ? user.planName ?? FITAI_PREMIUM_PLAN.name : "Plano Free";
   const periodEnd = parseDate(user.currentPeriodEnd);
   const periodStart = getMonthlyPeriodStart(periodEnd);
   const paymentHistory = getPaymentHistory(user, periodEnd);
@@ -171,7 +171,7 @@ export function AccountPage({ user }: AccountPageProps) {
               <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--fitai-text-secondary)]">
                 {activePlan
                   ? "Sua assinatura mensal esta ativa e libera o AI Coach, recomendacoes inteligentes e experiencias avancadas."
-                  : "Sua conta esta no plano comum. Ative a assinatura mensal para liberar a experiencia completa com AI Coach."}
+                  : "Sua conta esta no plano Free. Ative a assinatura mensal para liberar a experiencia completa com AI Coach."}
               </p>
             </div>
 

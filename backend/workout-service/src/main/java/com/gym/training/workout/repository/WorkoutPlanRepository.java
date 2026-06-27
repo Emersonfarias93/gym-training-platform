@@ -14,4 +14,10 @@ public interface WorkoutPlanRepository extends JpaRepository<WorkoutPlan, UUID> 
     long countByUserIdAndStatus(UUID userId, WorkoutPlanStatus status);
 
     List<WorkoutPlan> findTop3ByUserIdOrderByCreatedAtDesc(UUID userId);
+
+    List<WorkoutPlan> findByUserIdOrderByCreatedAtDesc(UUID userId);
+
+    Optional<WorkoutPlan> findByIdAndUserId(UUID id, UUID userId);
+
+    List<WorkoutPlan> findByUserIdAndStatus(UUID userId, WorkoutPlanStatus status);
 }

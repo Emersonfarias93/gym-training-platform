@@ -50,3 +50,62 @@ export type CreateManualWorkoutInput = {
   goal: string;
   session: ManualWorkoutSessionInput;
 };
+
+export type WorkoutOrigin = "AI" | "MANUAL";
+
+export type WorkoutPlanStatus = "ACTIVE" | "ARCHIVED";
+
+export type WorkoutPlanSummary = {
+  id: string;
+  title: string;
+  goal: string;
+  origin: WorkoutOrigin;
+  status: WorkoutPlanStatus;
+  active: boolean;
+  scheduledDate: string | null;
+  intensity: string | null;
+  estimatedDurationMinutes: number | null;
+  sessionCount: number;
+  exerciseCount: number;
+  createdAt: string;
+};
+
+export type WorkoutExerciseDetail = {
+  id: string;
+  name: string;
+  setsDescription: string;
+  repsDescription: string;
+  restSeconds: number | null;
+  loadSuggestion: string | null;
+  executionNotes: string | null;
+  progressPercent: number;
+  sortOrder: number;
+};
+
+export type WorkoutSessionDetail = {
+  id: string;
+  title: string;
+  scheduledDate: string;
+  status: string;
+  estimatedDurationMinutes: number | null;
+  intensity: string | null;
+  sortOrder: number;
+  exercises: WorkoutExerciseDetail[];
+};
+
+export type WorkoutPlanDetail = {
+  id: string;
+  title: string;
+  goal: string;
+  origin: WorkoutOrigin;
+  status: WorkoutPlanStatus;
+  active: boolean;
+  createdAt: string;
+  sessions: WorkoutSessionDetail[];
+};
+
+export type UpdateWorkoutInput = {
+  title: string;
+  goal: string;
+  sessions: ManualWorkoutSessionInput[];
+};

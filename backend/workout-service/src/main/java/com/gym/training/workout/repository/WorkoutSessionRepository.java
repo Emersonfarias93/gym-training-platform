@@ -25,4 +25,8 @@ public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, 
             LocalDate start,
             LocalDate end
     );
+
+    List<WorkoutSession> findByPlan_IdOrderBySortOrderAsc(UUID planId);
+
+    void deleteByPlan_Id(UUID planId);
 }

@@ -41,7 +41,7 @@ export function hasActivePlan(user: AuthUser) {
 }
 
 export function getPlanLabel(user: AuthUser) {
-  return hasActivePlan(user) ? "Plano ativo" : "Plano comum";
+  return hasActivePlan(user) ? "Plano ativo" : "Plano Free";
 }
 
 export function getMonthlyPlanPeriodEndIso(from = new Date()) {

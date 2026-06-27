@@ -197,7 +197,7 @@ export const getServerAuthSession = cache(async () => {
 
   const mockUser = findMockUserByToken(token);
   if (mockUser) {
-    // MOCK: aplica a ativacao simulada do plano tambem ao usuario comum mockado.
+    // MOCK: aplica a ativacao simulada do plano tambem ao usuario free mockado.
     if (mockUser.planStatus !== "ACTIVE_PLAN" && (await hasMockPremiumCookie())) {
       return {
         accessToken: token,

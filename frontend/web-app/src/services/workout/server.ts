@@ -4,7 +4,10 @@ import type { AuthUser } from "@/types/auth";
 import type {
   CreateManualWorkoutInput,
   GenerateWorkoutInput,
-  WorkoutOverviewResponse
+  UpdateWorkoutInput,
+  WorkoutOverviewResponse,
+  WorkoutPlanDetail,
+  WorkoutPlanSummary
 } from "@/types/workout";
 
 const DEFAULT_WORKOUT_SERVICE_URL = "http://localhost:8085";
@@ -83,6 +86,86 @@ export async function createManualWorkout(
     headers: getUserHeaders(user),
     body: JSON.stringify(input)
   });
+
+  return parseWorkoutResponse<WorkoutOverviewResponse>(response);
+}
+
+export async function listWorkoutPlans(user: Pick<AuthUser, "userId" | "email" | "fullName">) {
+  const response = await fetch(getWorkoutServiceEndpoint("/api/v1/workouts/me/plans"), {
+    method: "GET",
+    cache: "no-store",
+    headers: getUserHeaders(user)
+  });
+
+  return parseWorkoutResponse<WorkoutPlanSummary[]>(response);
+}
+
+export async function getWorkoutPlan(
+  user: Pick<AuthUser, "userId" | "email" | "fullName">,
+  planId: string
+) {
+  const response = await fetch(
+    getWorkoutServiceEndpoint(`/api/v1/workouts/me/plans/${encodeURIComponent(planId)}`),
+    {
+      method: "GET",
+      cache: "no-store",
+      headers: getUserHeaders(user)
+    }
+  );
+
+  return parseWorkoutResponse<WorkoutPlanDetail>(response);
+}
+
+export async function updateWorkoutPlan(
+  user: Pick<AuthUser, "userId" | "email" | "fullName">,
+  planId: string,
+  input: UpdateWorkoutInput
+) {
+  const response = await fetch(
+    getWorkoutServiceEndpoint(`/api/v1/workouts/me/plans/${encodeURIComponent(planId)}`),
+    {
+      method: "PUT",
+      cache: "no-store",
+      headers: getUserHeaders(user),
+      body: JSON.stringify(input)
+    }
+  );
+
+  return parseWorkoutResponse<WorkoutPlanDetail>(response);
+}
+
+export async function deleteWorkoutPlan(
+  user: Pick<AuthUser, "userId" | "email" | "fullName">,
+  planId: string
+) {
+  const response = await fetch(
+    getWorkoutServiceEndpoint(`/api/v1/workouts/me/plans/${encodeURIComponent(planId)}`),
+    {
+      method: "DELETE",
+      cache: "no-store",
+      headers: getUserHeaders(user)
+    }
+  );
+
+  // 204 No Content: sem corpo para parsear; só validamos o status.
+  if (!response.ok) {
+    const payload = (await response.json().catch(() => ({}))) as { message?: string };
+    throw new WorkoutApiError(payload.message ?? "Nao foi possivel excluir o treino.", response.status);
+  }
+}
+
+export async function activateWorkoutPlan(
+  user: Pick<AuthUser, "userId" | "email" | "fullName">,
+  planId: string
+) {
+  const response = await fetch(
+    getWorkoutServiceEndpoint(`/api/v1/workouts/me/plans/${encodeURIComponent(planId)}/activate`),
+    {
+      method: "POST",
+      cache: "no-store",
+      headers: getUserHeaders(user)
+    }
+  );
 
   return parseWorkoutResponse<WorkoutOverviewResponse>(response);
 }

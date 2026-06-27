@@ -7,7 +7,7 @@ export const MOCK_AUTH_CREDENTIALS = {
 } as const;
 
 export const MOCK_COMMON_CREDENTIALS = {
-  email: "comum@fitai.com",
+  email: "free@fitai.com",
   password: "fitai1234"
 } as const;
 
@@ -31,10 +31,10 @@ export const mockAuthUser: AuthUser = {
   expiresAt: mockExpiresAt
 };
 
-// Usuario mockado comum (sem plano) - util para testar o checkout/upgrade.
+// Usuario mockado free (sem plano) - util para testar o checkout/upgrade.
 export const mockCommonUser: AuthUser = {
   userId: "00000000-0000-4000-8000-000000000002",
-  fullName: "Usuario Comum",
+  fullName: "Usuario Free",
   email: MOCK_COMMON_CREDENTIALS.email,
   cpfMasked: "***.***.***-42",
   planStatus: "COMMON",

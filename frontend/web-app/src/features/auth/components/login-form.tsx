@@ -16,7 +16,7 @@ import { MOCK_AUTH_CREDENTIALS, MOCK_COMMON_CREDENTIALS } from "@/lib/mock-auth"
 
 const demoAccounts = [
   { label: "Demo · plano ativo", credentials: MOCK_AUTH_CREDENTIALS },
-  { label: "Comum", credentials: MOCK_COMMON_CREDENTIALS }
+  { label: "Free", credentials: MOCK_COMMON_CREDENTIALS }
 ] as const;
 
 export function LoginForm() {

@@ -4,15 +4,21 @@ import com.gym.training.workout.controller.request.CreateManualWorkoutRequest;
 import com.gym.training.workout.controller.request.GenerateWorkoutRequest;
 import com.gym.training.workout.controller.request.ManualWorkoutExerciseRequest;
 import com.gym.training.workout.controller.request.ManualWorkoutSessionRequest;
+import com.gym.training.workout.controller.request.UpdateWorkoutPlanRequest;
 import com.gym.training.workout.controller.response.WorkoutBlockResponse;
+import com.gym.training.workout.controller.response.WorkoutExerciseDetailResponse;
 import com.gym.training.workout.controller.response.WorkoutExerciseProgressResponse;
 import com.gym.training.workout.controller.response.WorkoutOverviewResponse;
+import com.gym.training.workout.controller.response.WorkoutPlanDetailResponse;
+import com.gym.training.workout.controller.response.WorkoutPlanSummaryResponse;
+import com.gym.training.workout.controller.response.WorkoutSessionDetailResponse;
 import com.gym.training.workout.domain.WorkoutExercise;
 import com.gym.training.workout.domain.WorkoutGenerationStatus;
 import com.gym.training.workout.domain.WorkoutPlan;
 import com.gym.training.workout.domain.WorkoutPlanStatus;
 import com.gym.training.workout.domain.WorkoutSession;
 import com.gym.training.workout.domain.WorkoutSessionStatus;
+import com.gym.training.workout.exception.WorkoutNotFoundException;
 import com.gym.training.workout.repository.WorkoutExerciseRepository;
 import com.gym.training.workout.repository.WorkoutPlanRepository;
 import com.gym.training.workout.repository.WorkoutSessionRepository;
@@ -22,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
@@ -59,12 +66,12 @@ public class WorkoutService {
     public WorkoutOverviewResponse getOverview(AuthenticatedUser user) {
         List<WorkoutSession> programmedSessions =
                 workoutSessionRepository.findTop3ByUserIdOrderByScheduledDateAscSortOrderAsc(user.userId());
-        WorkoutSession currentSession = workoutSessionRepository
-                .findFirstByUserIdAndStatusInOrderByScheduledDateAscSortOrderAsc(user.userId(), ACTIVE_SESSION_STATUSES)
-                .orElse(null);
-        List<WorkoutExercise> currentExercises = currentSession == null
-                ? List.of()
-                : workoutExerciseRepository.findBySession_IdOrderBySortOrderAsc(currentSession.getId());
+        // "Sessao atual" reflete o plano que o usuario escolheu como ativo.
+        List<WorkoutExercise> currentExercises = workoutPlanRepository
+                .findFirstByUserIdAndStatusOrderByCreatedAtDesc(user.userId(), WorkoutPlanStatus.ACTIVE)
+                .flatMap(plan -> workoutSessionRepository.findByPlan_IdOrderBySortOrderAsc(plan.getId()).stream().findFirst())
+                .map(session -> workoutExerciseRepository.findBySession_IdOrderBySortOrderAsc(session.getId()))
+                .orElseGet(List::of);
 
         return new WorkoutOverviewResponse(
                 workoutSessionRepository.countByUserIdAndStatusIn(user.userId(), ACTIVE_SESSION_STATUSES),
@@ -110,9 +117,155 @@ public class WorkoutService {
                 .generationStatus(WorkoutGenerationStatus.MANUAL)
                 .build());
 
-        WorkoutSession session = createManualSession(plan, user, request.session());
+        WorkoutSession session = createManualSession(plan, user, request.session(), 0);
         createManualExercises(session, request.session().exercises());
         return getOverview(user);
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkoutPlanSummaryResponse> listPlans(AuthenticatedUser user) {
+        return workoutPlanRepository.findByUserIdOrderByCreatedAtDesc(user.userId()).stream()
+                .map(this::toPlanSummary)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public WorkoutPlanDetailResponse getPlanDetail(AuthenticatedUser user, UUID planId) {
+        return toPlanDetail(requireOwnedPlan(user, planId));
+    }
+
+    @Transactional
+    public WorkoutPlanDetailResponse updatePlan(AuthenticatedUser user, UUID planId, UpdateWorkoutPlanRequest request) {
+        WorkoutPlan plan = requireOwnedPlan(user, planId);
+        plan.setTitle(request.title().trim());
+        plan.setGoal(request.goal().trim());
+        workoutPlanRepository.save(plan);
+
+        // Substitui as sessoes/exercicios do plano pelo conteudo enviado.
+        deleteSessionsOfPlan(plan.getId());
+        List<ManualWorkoutSessionRequest> sessions = request.sessions();
+        for (int index = 0; index < sessions.size(); index++) {
+            WorkoutSession session = createManualSession(plan, user, sessions.get(index), index);
+            createManualExercises(session, sessions.get(index).exercises());
+        }
+        return toPlanDetail(plan);
+    }
+
+    @Transactional
+    public void deletePlan(AuthenticatedUser user, UUID planId) {
+        WorkoutPlan plan = requireOwnedPlan(user, planId);
+        deleteSessionsOfPlan(plan.getId());
+        workoutPlanRepository.delete(plan);
+    }
+
+    @Transactional
+    public WorkoutOverviewResponse activatePlan(AuthenticatedUser user, UUID planId) {
+        WorkoutPlan plan = requireOwnedPlan(user, planId);
+
+        // Garante exatamente um plano ativo por usuario.
+        for (WorkoutPlan active : workoutPlanRepository.findByUserIdAndStatus(user.userId(), WorkoutPlanStatus.ACTIVE)) {
+            if (!active.getId().equals(planId)) {
+                active.setStatus(WorkoutPlanStatus.ARCHIVED);
+                workoutPlanRepository.save(active);
+            }
+        }
+        plan.setStatus(WorkoutPlanStatus.ACTIVE);
+        workoutPlanRepository.save(plan);
+
+        // A primeira sessao do plano escolhido vira a "sessao atual".
+        List<WorkoutSession> sessions = workoutSessionRepository.findByPlan_IdOrderBySortOrderAsc(planId);
+        for (int index = 0; index < sessions.size(); index++) {
+            WorkoutSession session = sessions.get(index);
+            session.setStatus(index == 0 ? WorkoutSessionStatus.IN_PROGRESS : WorkoutSessionStatus.SCHEDULED);
+            workoutSessionRepository.save(session);
+        }
+        return getOverview(user);
+    }
+
+    private WorkoutPlan requireOwnedPlan(AuthenticatedUser user, UUID planId) {
+        return workoutPlanRepository.findByIdAndUserId(planId, user.userId())
+                .orElseThrow(() -> new WorkoutNotFoundException("Treino nao encontrado"));
+    }
+
+    private void deleteSessionsOfPlan(UUID planId) {
+        for (WorkoutSession session : workoutSessionRepository.findByPlan_IdOrderBySortOrderAsc(planId)) {
+            workoutExerciseRepository.deleteBySession_Id(session.getId());
+        }
+        workoutSessionRepository.deleteByPlan_Id(planId);
+    }
+
+    private WorkoutPlanSummaryResponse toPlanSummary(WorkoutPlan plan) {
+        List<WorkoutSession> sessions = workoutSessionRepository.findByPlan_IdOrderBySortOrderAsc(plan.getId());
+        WorkoutSession first = sessions.isEmpty() ? null : sessions.get(0);
+        int exerciseCount = sessions.stream()
+                .mapToInt(session -> workoutExerciseRepository.findBySession_IdOrderBySortOrderAsc(session.getId()).size())
+                .sum();
+        return new WorkoutPlanSummaryResponse(
+                plan.getId(),
+                plan.getTitle(),
+                plan.getGoal(),
+                originOf(plan.getGenerationStatus()),
+                plan.getStatus().name(),
+                plan.getStatus() == WorkoutPlanStatus.ACTIVE,
+                first == null ? null : first.getScheduledDate(),
+                first == null ? null : first.getIntensity(),
+                first == null ? null : first.getEstimatedDurationMinutes(),
+                sessions.size(),
+                exerciseCount,
+                plan.getCreatedAt()
+        );
+    }
+
+    private WorkoutPlanDetailResponse toPlanDetail(WorkoutPlan plan) {
+        List<WorkoutSessionDetailResponse> sessions =
+                workoutSessionRepository.findByPlan_IdOrderBySortOrderAsc(plan.getId()).stream()
+                        .map(this::toSessionDetail)
+                        .toList();
+        return new WorkoutPlanDetailResponse(
+                plan.getId(),
+                plan.getTitle(),
+                plan.getGoal(),
+                originOf(plan.getGenerationStatus()),
+                plan.getStatus().name(),
+                plan.getStatus() == WorkoutPlanStatus.ACTIVE,
+                plan.getCreatedAt(),
+                sessions
+        );
+    }
+
+    private WorkoutSessionDetailResponse toSessionDetail(WorkoutSession session) {
+        List<WorkoutExerciseDetailResponse> exercises =
+                workoutExerciseRepository.findBySession_IdOrderBySortOrderAsc(session.getId()).stream()
+                        .map(this::toExerciseDetail)
+                        .toList();
+        return new WorkoutSessionDetailResponse(
+                session.getId(),
+                session.getTitle(),
+                session.getScheduledDate(),
+                session.getStatus().name(),
+                session.getEstimatedDurationMinutes(),
+                session.getIntensity(),
+                session.getSortOrder(),
+                exercises
+        );
+    }
+
+    private WorkoutExerciseDetailResponse toExerciseDetail(WorkoutExercise exercise) {
+        return new WorkoutExerciseDetailResponse(
+                exercise.getId(),
+                exercise.getName(),
+                exercise.getSetsDescription(),
+                exercise.getRepsDescription(),
+                exercise.getRestSeconds(),
+                exercise.getLoadSuggestion(),
+                exercise.getExecutionNotes(),
+                exercise.getProgressPercent(),
+                exercise.getSortOrder()
+        );
+    }
+
+    private String originOf(WorkoutGenerationStatus status) {
+        return status == WorkoutGenerationStatus.MANUAL ? "MANUAL" : "AI";
     }
 
     private String weeklyVolumeLabel(AuthenticatedUser user) {
@@ -226,7 +379,8 @@ public class WorkoutService {
     private WorkoutSession createManualSession(
             WorkoutPlan plan,
             AuthenticatedUser user,
-            ManualWorkoutSessionRequest request
+            ManualWorkoutSessionRequest request,
+            int sortOrder
     ) {
         return workoutSessionRepository.save(WorkoutSession.builder()
                 .plan(plan)
@@ -238,7 +392,7 @@ public class WorkoutService {
                         : WorkoutSessionStatus.IN_PROGRESS)
                 .estimatedDurationMinutes(request.estimatedDurationMinutes())
                 .intensity(request.intensity().trim())
-                .sortOrder(0)
+                .sortOrder(sortOrder)
                 .build());
     }
 
