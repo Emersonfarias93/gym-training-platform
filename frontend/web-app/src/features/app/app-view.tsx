@@ -21,7 +21,7 @@ export function AppViewContent({ user, view }: AppViewProps) {
     case "diet":
       return <DietPage />;
     case "evolution":
-      return <EvolutionPage />;
+      return <EvolutionPage user={user} />;
     case "ai-coach":
       return <AICoachPage user={user} />;
     case "account":

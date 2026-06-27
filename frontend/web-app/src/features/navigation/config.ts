@@ -41,11 +41,11 @@ export const pageIntro: Record<AppView, PageIntro> = {
     filters: []
   },
   evolution: {
-    eyebrow: "Body Analytics",
-    title: "Evolucao corporal orientada por tendencias e comparativos",
+    eyebrow: "Evolucao",
+    title: "Evolucao dos seus treinos",
     description:
-      "Leia peso, gordura, massa magra e fotos de progresso com historico pronto para decisao.",
-    filters: ["30 dias", "90 dias", "1 ano", "Comparativos"]
+      "Acompanhe treino ativo, exercicios cadastrados e historico a partir das fichas salvas na sua conta.",
+    filters: []
   },
   "ai-coach": {
     eyebrow: "FitAI Assistant",
