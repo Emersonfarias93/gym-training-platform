@@ -41,13 +41,11 @@ function getCookieExpiry(expiresAt: string) {
 }
 
 function getCookieOptions(expiresAt?: string) {
-  const cookieSecure = process.env.AUTH_COOKIE_SECURE;
-
   return {
     httpOnly: true,
     path: "/",
     sameSite: "lax" as const,
-    secure: cookieSecure == null ? process.env.NODE_ENV === "production" : cookieSecure !== "false",
+    secure: process.env.NODE_ENV === "production",
     ...(expiresAt ? { expires: getCookieExpiry(expiresAt) } : {})
   };
 }

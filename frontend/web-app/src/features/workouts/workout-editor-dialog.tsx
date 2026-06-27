@@ -33,6 +33,8 @@ type WorkoutEditorDialogProps = {
   plan?: WorkoutPlanDetail | null;
   /** Foco inicial para um novo treino manual (mode === "create"). */
   initialObjective?: WorkoutObjective;
+  canCreate?: boolean;
+  onCreateLimitReached?: () => void;
   onSaved: () => void;
 };
 
@@ -301,6 +303,8 @@ export function WorkoutEditorDialog({
   mode,
   plan,
   initialObjective,
+  canCreate = true,
+  onCreateLimitReached,
   onSaved
 }: WorkoutEditorDialogProps) {
   const queryClient = useQueryClient();
@@ -349,7 +353,14 @@ export function WorkoutEditorDialog({
     }
   });
 
-  const onSubmit = form.handleSubmit((values) => mutation.mutate(values));
+  const onSubmit = form.handleSubmit((values) => {
+    if (mode === "create" && !canCreate) {
+      onCreateLimitReached?.();
+      return;
+    }
+
+    mutation.mutate(values);
+  });
   const allowMultipleSessions = mode === "edit";
 
   return (
@@ -444,7 +455,7 @@ export function WorkoutEditorDialog({
           </Button>
           <Button disabled={mutation.isPending} type="submit">
             {mutation.isPending ? <LoaderCircle className="size-4 animate-spin" /> : null}
-            {mode === "edit" ? "Salvar alteracoes" : "Salvar treino"}
+            {mode === "edit" ? "Salvar alteracoes" : canCreate ? "Salvar treino" : "Ativar plano"}
           </Button>
         </div>
       </form>

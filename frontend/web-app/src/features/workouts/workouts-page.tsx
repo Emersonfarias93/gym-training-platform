@@ -50,6 +50,8 @@ const EMPTY_OVERVIEW: WorkoutOverviewResponse = {
   currentSession: []
 };
 
+const FREE_WORKOUT_LIMIT = 2;
+
 type WorkoutsPageProps = {
   user: AuthUser;
 };
@@ -191,6 +193,7 @@ export function WorkoutsPage({ user }: WorkoutsPageProps) {
 
   const overview = overviewQuery.data ?? EMPTY_OVERVIEW;
   const plans = plansQuery.data ?? [];
+  const freeWorkoutLimitReached = !canUseAi && !plansQuery.isLoading && plans.length >= FREE_WORKOUT_LIMIT;
 
   function refreshAfterChange(overviewData?: WorkoutOverviewResponse) {
     if (overviewData) {
@@ -255,6 +258,17 @@ export function WorkoutsPage({ user }: WorkoutsPageProps) {
     }
   }
 
+  function openManualWorkoutEditor() {
+    setFeedback(null);
+
+    if (freeWorkoutLimitReached) {
+      setCheckoutOpen(true);
+      return;
+    }
+
+    setEditor({ open: true, mode: "create", plan: null });
+  }
+
   const listError = plansQuery.isError ? (plansQuery.error as Error).message : null;
 
   return (
@@ -268,7 +282,7 @@ export function WorkoutsPage({ user }: WorkoutsPageProps) {
               description={
                 canUseAi
                   ? "Crie treinos com IA ou manualmente, escolha qual fica ativo, edite os exercicios e exclua o que nao usa mais."
-                  : "Cadastre seus treinos, escolha qual fica ativo, edite os exercicios e exclua quando quiser."
+                  : `Cadastre ate ${FREE_WORKOUT_LIMIT} treinos manuais, escolha qual fica ativo e edite quando quiser. Para criar mais, ative o plano.`
               }
             />
 
@@ -297,14 +311,21 @@ export function WorkoutsPage({ user }: WorkoutsPageProps) {
                   </Button>
                 ) : null}
                 <Button
-                  onClick={() => setEditor({ open: true, mode: "create", plan: null })}
+                  onClick={openManualWorkoutEditor}
                   type="button"
                   variant={canUseAi ? "secondary" : "primary"}
                 >
-                  <Plus className="size-4" />
-                  Novo treino manual
+                  {freeWorkoutLimitReached ? <Crown className="size-4" /> : <Plus className="size-4" />}
+                  {freeWorkoutLimitReached ? "Ativar plano para criar mais" : "Novo treino manual"}
                 </Button>
               </div>
+              {!canUseAi ? (
+                <p className="mt-4 text-sm leading-6 text-[var(--fitai-text-secondary)]">
+                  {freeWorkoutLimitReached
+                    ? `Voce ja criou ${FREE_WORKOUT_LIMIT} treinos no plano Free. O plano ativo libera novos treinos e geracao com IA.`
+                    : `Plano Free: ${plans.length}/${FREE_WORKOUT_LIMIT} treinos criados.`}
+                </p>
+              ) : null}
             </div>
           </div>
 
@@ -334,7 +355,8 @@ export function WorkoutsPage({ user }: WorkoutsPageProps) {
                 Libere a geracao de treinos com IA
               </h3>
               <p className="mt-3 text-sm leading-6 text-[var(--fitai-text-secondary)]">
-                Voce ja pode criar, editar e organizar treinos manuais. Com o plano ativo, a IA monta a ficha por voce.
+                Voce pode criar ate {FREE_WORKOUT_LIMIT} treinos manuais no plano Free. Com o plano ativo, libera mais
+                treinos e a IA monta a ficha por voce.
               </p>
               <div className="mt-6 flex flex-col gap-3">
                 <Button onClick={() => setCheckoutOpen(true)} type="button">
@@ -375,7 +397,7 @@ export function WorkoutsPage({ user }: WorkoutsPageProps) {
               <p className="mt-2 text-sm leading-6 text-[var(--fitai-text-secondary)]">
                 {canUseAi
                   ? "Use \"Criar treino com IA\" ou \"Novo treino manual\" para salvar seu primeiro treino."
-                  : "Use \"Novo treino manual\" para salvar seu primeiro treino e comecar a organizar sua rotina."}
+                  : `Use "Novo treino manual" para salvar seu primeiro treino. O plano Free permite ate ${FREE_WORKOUT_LIMIT} treinos.`}
               </p>
             </div>
           ) : (
@@ -403,6 +425,8 @@ export function WorkoutsPage({ user }: WorkoutsPageProps) {
         mode={editor.mode}
         plan={editor.plan}
         initialObjective={selectedObjective}
+        canCreate={!freeWorkoutLimitReached}
+        onCreateLimitReached={() => setCheckoutOpen(true)}
         onSaved={() =>
           setFeedback({
             message: editor.mode === "edit" ? "Treino atualizado." : "Treino manual salvo com sucesso.",
