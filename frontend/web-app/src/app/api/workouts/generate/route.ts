@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 
-import { hasActivePlan } from "@/lib/auth";
 import { getServerAuthSession } from "@/services/auth/server";
+import { resolveUserPlanStatus } from "@/services/user/server";
 import {
   generateWorkoutWithAi,
   getWorkoutApiErrorMessage,
@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!hasActivePlan(session.user)) {
+  if ((await resolveUserPlanStatus(session.user)) !== "ACTIVE_PLAN") {
     return NextResponse.json(
       { message: "Os treinos com IA estao disponiveis apenas para usuarios com plano ativo." },
       { status: 403 }
