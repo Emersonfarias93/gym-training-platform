@@ -37,6 +37,12 @@ public class PixPaymentService {
     @Value("${payment.pix.expiration-minutes:15}")
     private long expirationMinutes;
 
+    @Value("${PUBLIC_HOST:}")
+    private String publicHost;
+
+    @Value("${CONFRAPIX_WEBHOOK_SECRET:http://177.87.121.189:8084/api/payments/pix/webhook?token=um-secret-forte}")
+    private String webhookSecret;
+
     public PixPaymentService(
             ConfrapixTransactionClient confrapixTransactionClient,
             ConfrapixProperties properties,
@@ -146,9 +152,23 @@ public class PixPaymentService {
     }
 
     private void applyDefaultCallbackUrl(StorePixTransactionRequest request) {
-        if (!StringUtils.hasText(request.getCallbackUrl()) && StringUtils.hasText(properties.callbackUrl())) {
-            request.setCallbackUrl(properties.callbackUrl());
+        if (StringUtils.hasText(request.getCallbackUrl())) {
+            return;
         }
+
+        if (StringUtils.hasText(properties.callbackUrl())) {
+            request.setCallbackUrl(properties.callbackUrl());
+            return;
+        }
+
+        String generatedCallbackUrl = buildCallbackUrlFromPublicEndpoint();
+        if (StringUtils.hasText(generatedCallbackUrl)) {
+            request.setCallbackUrl(generatedCallbackUrl);
+            LOGGER.info("Callback Confrapix configurado automaticamente via URL publica.");
+            return;
+        }
+
+        LOGGER.warn("Callback Confrapix nao configurado; webhook nao sera disparado.");
     }
 
     private void applyExpiration(StorePixTransactionRequest request) {
@@ -203,5 +223,19 @@ public class PixPaymentService {
         }
 
         return false;
+    }
+
+    private String buildCallbackUrlFromPublicEndpoint() {
+        if (!StringUtils.hasText(publicHost)) {
+            return null;
+        }
+
+        String callbackUrl = "http://" + publicHost.trim().replaceAll("/+$", "") + ":8084/api/payments/pix/webhook";
+
+        if (StringUtils.hasText(webhookSecret)) {
+            return callbackUrl + "?token=" + webhookSecret;
+        }
+
+        return callbackUrl;
     }
 }
