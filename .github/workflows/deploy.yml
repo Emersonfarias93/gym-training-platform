@@ -31,6 +31,11 @@ jobs:
             PUBLIC_HOST=${{ vars.PUBLIC_HOST }}
             AUTH_COOKIE_SECURE=false
             NEXT_PUBLIC_ENABLE_MOCK_CHECKOUT=false
+            CONFRAPIX_BASE_URL=${{ vars.CONFRAPIX_BASE_URL }}
+            CONFRAPIX_TOKEN=${{ secrets.CONFRAPIX_TOKEN }}
+            CONFRAPIX_CALLBACK_URL=${{ vars.CONFRAPIX_CALLBACK_URL }}
+            CONFRAPIX_WEBHOOK_SECRET=${{ secrets.CONFRAPIX_WEBHOOK_SECRET }}
+            PIX_EXPIRATION_MINUTES=${{ vars.PIX_EXPIRATION_MINUTES }}
             GROQ_API_KEY=${{ secrets.GROQ_API_KEY }}
             GROQ_BASE_URL=${{ secrets.GROQ_BASE_URL }}
             EOF
