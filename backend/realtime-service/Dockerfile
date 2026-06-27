@@ -2,6 +2,8 @@ FROM maven:3.9-eclipse-temurin-17 AS build
 
 WORKDIR /app
 
+ENTRYPOINT ["java", "-Xmx192m", "-jar", "app.jar"]
+
 COPY pom.xml .
 COPY backend ./backend
 
@@ -15,4 +17,4 @@ COPY --from=build /app/backend/realtime-service/target/*.jar app.jar
 
 EXPOSE 8080
 
-ENTRYPOINT ["java", "-jar", "app.jar"]
+ENTRYPOINT ["java", "-Xmx192m", "-jar", "app.jar"]
