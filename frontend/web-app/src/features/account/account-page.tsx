@@ -5,7 +5,6 @@ import {
   CreditCard,
   FileText,
   IdCard,
-  LockKeyhole,
   Mail,
   ReceiptText,
   UserRound
@@ -222,13 +221,6 @@ export function AccountPage({ user }: AccountPageProps) {
             ) : (
               <UpgradePlanButton className="w-full sm:w-auto" size="md" withIcon />
             )}
-            <Link
-              className={cn(buttonVariants({ variant: "secondary", size: "md" }), "w-full sm:w-auto")}
-              href="/?view=settings"
-            >
-              <LockKeyhole className="size-4" />
-              Configuracoes de seguranca
-            </Link>
           </div>
         </div>
 

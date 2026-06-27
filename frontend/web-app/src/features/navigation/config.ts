@@ -4,7 +4,6 @@ import {
   CreditCard,
   Dumbbell,
   Gauge,
-  Settings,
   UtensilsCrossed
 } from "lucide-react";
 
@@ -16,8 +15,7 @@ export const sidebarItems: NavItem[] = [
   { id: "diet", label: "Dieta", icon: UtensilsCrossed },
   { id: "evolution", label: "Evolucao", icon: BarChart3 },
   { id: "ai-coach", label: "AI Coach", icon: BrainCircuit, badge: "Live" },
-  { id: "account", label: "Conta", icon: CreditCard },
-  { id: "settings", label: "Configuracoes", icon: Settings }
+  { id: "account", label: "Conta", icon: CreditCard }
 ];
 
 export const pageIntro: Record<AppView, PageIntro> = {
@@ -62,12 +60,5 @@ export const pageIntro: Record<AppView, PageIntro> = {
     description:
       "Acompanhe sua assinatura mensal, vencimento do plano, dados basicos e historico de cobrancas.",
     filters: ["Plano", "Pagamentos", "LGPD", "Perfil"]
-  },
-  settings: {
-    eyebrow: "Workspace Settings",
-    title: "Configuracoes de operacao, automacao e experiencia do produto",
-    description:
-      "Controle perfil, notificacoes, integrações e preferencias do ecossistema FitAI.",
-    filters: ["Perfil", "Plano", "Automacoes", "Seguranca"]
   }
 };
