@@ -4,7 +4,7 @@ import { useMutation } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, LoaderCircle, Mail, UserRound } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -37,7 +37,7 @@ export function RegisterForm() {
   });
 
   const isBusy = form.formState.isSubmitting || mutation.isPending;
-  const passwordValue = form.watch("password");
+  const passwordValue = useWatch({ control: form.control, name: "password" }) ?? "";
   const passwordChecks = [
     { label: "Minimo de 8 caracteres", done: passwordValue.length >= 8 },
     { label: "Letras e numeros", done: /[A-Za-z]/.test(passwordValue) && /\d/.test(passwordValue) }
@@ -45,7 +45,7 @@ export function RegisterForm() {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setSuccessMessage(null);
-    await mutation.mutateAsync(values);
+    mutation.mutate(values);
   });
 
   return (

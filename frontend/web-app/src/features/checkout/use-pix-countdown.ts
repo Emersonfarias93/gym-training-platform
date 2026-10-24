@@ -46,20 +46,17 @@ export function usePixCountdown(expiresAt: string | undefined): PixCountdown {
       return;
     }
 
-    setNow(Date.now());
-    if (Date.now() >= expiresAtMs) {
-      return;
-    }
-
-    const intervalId = window.setInterval(() => {
+    const tick = () => {
       const current = Date.now();
       setNow(current);
-      if (current >= expiresAtMs) {
-        window.clearInterval(intervalId);
-      }
-    }, 1000);
-
-    return () => window.clearInterval(intervalId);
+      if (current >= expiresAtMs) window.clearInterval(intervalId);
+    };
+    const initialTick = window.setTimeout(tick, 0);
+    const intervalId = window.setInterval(tick, 1000);
+    return () => {
+      window.clearTimeout(initialTick);
+      window.clearInterval(intervalId);
+    };
   }, [expiresAtMs]);
 
   if (expiresAtMs === null) {

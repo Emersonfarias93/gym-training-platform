@@ -19,6 +19,8 @@ type DialogProps = {
 export function Dialog({ open, onOpenChange, title, description, children, className }: DialogProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
+  const onOpenChangeRef = useRef(onOpenChange);
+  useEffect(() => { onOpenChangeRef.current = onOpenChange; }, [onOpenChange]);
   const titleId = useId();
   const descriptionId = useId();
 
@@ -33,7 +35,22 @@ export function Dialog({ open, onOpenChange, title, description, children, class
 
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        onOpenChange(false);
+        onOpenChangeRef.current(false);
+        return;
+      }
+      if (event.key === "Tab") {
+        const panel = panelRef.current;
+        const focusable = Array.from(panel?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])'
+        ) ?? []).filter((element) => element.getClientRects().length > 0);
+        const first = focusable[0];
+        const last = focusable.at(-1);
+        if (!first) { event.preventDefault(); panel?.focus(); return; }
+        if (event.shiftKey && (document.activeElement === first || document.activeElement === panel)) {
+          event.preventDefault(); last?.focus();
+        } else if (!event.shiftKey && (document.activeElement === last || document.activeElement === panel)) {
+          event.preventDefault(); first.focus();
+        }
       }
     };
 
@@ -45,7 +62,7 @@ export function Dialog({ open, onOpenChange, title, description, children, class
       document.body.style.overflow = overflow;
       previousFocus.current?.focus?.();
     };
-  }, [open, onOpenChange]);
+  }, [open]);
 
   if (typeof document === "undefined") {
     return null;
@@ -72,7 +89,7 @@ export function Dialog({ open, onOpenChange, title, description, children, class
             aria-describedby={description ? descriptionId : undefined}
             tabIndex={-1}
             className={cn(
-              "relative z-10 w-full max-w-md overflow-hidden rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface)] shadow-[0_40px_120px_-48px_rgba(0,0,0,0.95)] focus:outline-none",
+              "relative z-10 max-h-[calc(100dvh-2rem)] w-full max-w-md overflow-y-auto overscroll-contain rounded-xl border border-[var(--fitai-border)] bg-[var(--fitai-surface)] shadow-[0_40px_120px_-48px_rgba(0,0,0,0.95)] focus:outline-none",
               className
             )}
             initial={{ opacity: 0, scale: 0.96, y: 12 }}

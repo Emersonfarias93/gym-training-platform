@@ -20,7 +20,7 @@ export async function sendAiCoachMessage(payload: AiCoachRequest) {
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify(payload)
+    body: JSON.stringify({ ...payload, history: payload.history.slice(-8) })
   });
 
   return parseClientResponse<AiCoachResponse>(response);

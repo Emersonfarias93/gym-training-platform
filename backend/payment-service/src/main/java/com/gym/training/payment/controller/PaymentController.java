@@ -39,18 +39,19 @@ public class PaymentController {
     @PostMapping("/transactions")
     public ResponseEntity<JsonNode> storeTransaction(
             @Valid @RequestBody StorePixTransactionRequest request,
-            @RequestHeader(value = "X-User-Id", required = false) String userId,
+            @RequestHeader("X-User-Id") UUID userId,
             @RequestHeader(value = "X-User-Email", required = false) String email,
             @RequestHeader(value = "X-User-Full-Name", required = false) String fullName,
             @RequestHeader(value = "X-Plan-Name", required = false) String planName
     ) {
-        PaymentRequester requester = new PaymentRequester(parseUuid(userId), email, fullName, planName);
+        PaymentRequester requester = new PaymentRequester(userId, email, fullName, "FitAI Premium");
         return ResponseEntity.ok(pixPaymentService.storeTransaction(request, requester));
     }
 
     @GetMapping("/transactions/{transactionId}")
-    public ResponseEntity<JsonNode> showTransaction(@PathVariable String transactionId) {
-        return ResponseEntity.ok(pixPaymentService.showTransaction(transactionId));
+    public ResponseEntity<JsonNode> showTransaction(@PathVariable String transactionId,
+            @RequestHeader("X-User-Id") UUID userId) {
+        return ResponseEntity.ok(pixPaymentService.showTransaction(transactionId, userId));
     }
 
     @GetMapping("/confrapix/version")
@@ -73,21 +74,10 @@ public class PaymentController {
     }
 
     private boolean isWebhookAuthorized(String token) {
-        // Sem secret configurado (ex.: dev local), nao exige token.
-        if (!StringUtils.hasText(webhookSecret)) {
-            return true;
-        }
-        return webhookSecret.equals(token);
+        return StringUtils.hasText(webhookSecret) && token != null
+                && java.security.MessageDigest.isEqual(
+                        webhookSecret.getBytes(java.nio.charset.StandardCharsets.UTF_8),
+                        token.getBytes(java.nio.charset.StandardCharsets.UTF_8));
     }
 
-    private static UUID parseUuid(String value) {
-        if (!StringUtils.hasText(value)) {
-            return null;
-        }
-        try {
-            return UUID.fromString(value);
-        } catch (IllegalArgumentException exception) {
-            return null;
-        }
-    }
 }

@@ -7,7 +7,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "FitAI Coach",
-  description: "Plataforma SaaS premium para treino, nutricao e acompanhamento com IA."
+  description: "Organize seus treinos e acompanhe seu planejamento no seu ritmo."
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {

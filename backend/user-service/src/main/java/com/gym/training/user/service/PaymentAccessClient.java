@@ -17,9 +17,10 @@ public class PaymentAccessClient {
 
     public PaymentAccessClient(
             RestClient.Builder builder,
+            @Value("${INTERNAL_API_KEY:}") String internalApiKey,
             @Value("${fitai.services.payment-service-url:${PAYMENT_SERVICE_URL:http://localhost:8083}}") String paymentServiceUrl
     ) {
-        this.restClient = builder.baseUrl(paymentServiceUrl).build();
+        this.restClient = builder.defaultHeader("X-Internal-Api-Key", internalApiKey).baseUrl(paymentServiceUrl).build();
     }
 
     public Optional<PaymentAccessStatusResponse> getAccessStatus(AuthenticatedUser user) {

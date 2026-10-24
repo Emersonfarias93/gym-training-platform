@@ -1,5 +1,7 @@
 import "server-only";
 
+import { internalApiHeaders } from "@/lib/internal-api";
+
 import type { AuthUser } from "@/types/auth";
 import type {
   CreateManualWorkoutInput,
@@ -32,6 +34,7 @@ function getWorkoutServiceEndpoint(path: string) {
 
 function getUserHeaders(user: Pick<AuthUser, "userId" | "email" | "fullName">) {
   return {
+    ...internalApiHeaders(),
     "Content-Type": "application/json",
     "X-User-Id": user.userId,
     "X-User-Email": user.email,
@@ -56,6 +59,7 @@ export async function getWorkoutOverview(user: Pick<AuthUser, "userId" | "email"
   const response = await fetch(getWorkoutServiceEndpoint("/api/v1/workouts/me/overview"), {
     method: "GET",
     cache: "no-store",
+    signal: AbortSignal.timeout(90000),
     headers: getUserHeaders(user)
   });
 
@@ -69,6 +73,7 @@ export async function generateWorkoutWithAi(
   const response = await fetch(getWorkoutServiceEndpoint("/api/v1/workouts/me/generate-with-ai"), {
     method: "POST",
     cache: "no-store",
+    signal: AbortSignal.timeout(90000),
     headers: getUserHeaders(user),
     body: JSON.stringify(input)
   });
@@ -83,6 +88,7 @@ export async function createManualWorkout(
   const response = await fetch(getWorkoutServiceEndpoint("/api/v1/workouts/me/manual"), {
     method: "POST",
     cache: "no-store",
+    signal: AbortSignal.timeout(90000),
     headers: getUserHeaders(user),
     body: JSON.stringify(input)
   });
@@ -94,6 +100,7 @@ export async function listWorkoutPlans(user: Pick<AuthUser, "userId" | "email" |
   const response = await fetch(getWorkoutServiceEndpoint("/api/v1/workouts/me/plans"), {
     method: "GET",
     cache: "no-store",
+    signal: AbortSignal.timeout(90000),
     headers: getUserHeaders(user)
   });
 
@@ -109,6 +116,7 @@ export async function getWorkoutPlan(
     {
       method: "GET",
       cache: "no-store",
+    signal: AbortSignal.timeout(90000),
       headers: getUserHeaders(user)
     }
   );
@@ -126,6 +134,7 @@ export async function updateWorkoutPlan(
     {
       method: "PUT",
       cache: "no-store",
+    signal: AbortSignal.timeout(90000),
       headers: getUserHeaders(user),
       body: JSON.stringify(input)
     }
@@ -143,6 +152,7 @@ export async function deleteWorkoutPlan(
     {
       method: "DELETE",
       cache: "no-store",
+    signal: AbortSignal.timeout(90000),
       headers: getUserHeaders(user)
     }
   );
@@ -163,6 +173,7 @@ export async function activateWorkoutPlan(
     {
       method: "POST",
       cache: "no-store",
+    signal: AbortSignal.timeout(90000),
       headers: getUserHeaders(user)
     }
   );

@@ -8,6 +8,9 @@ import com.gym.training.payment.domain.PixTransaction;
 import com.gym.training.payment.event.PaymentEventPublisher;
 import com.gym.training.payment.repository.PixTransactionRepository;
 import java.time.Instant;
+import java.math.BigDecimal;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -37,6 +40,9 @@ public class PixPaymentService {
     @Value("${payment.pix.expiration-minutes:15}")
     private long expirationMinutes;
 
+    @Value("${payment.premium.monthly-price:1.00}")
+    private BigDecimal monthlyPrice = new BigDecimal("1.00");
+
     public PixPaymentService(
             ConfrapixTransactionClient confrapixTransactionClient,
             ConfrapixProperties properties,
@@ -53,6 +59,12 @@ public class PixPaymentService {
 
     @Transactional
     public JsonNode storeTransaction(StorePixTransactionRequest request, PaymentRequester requester) {
+        if (requester == null || !requester.hasUserId()) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Usuário não informado.");
+        }
+        request.setAmount(monthlyPrice);
+        request.setPaymentType("pix");
+        request.setType("payment");
         applyDefaultCallbackUrl(request);
         applyExpiration(request);
         LOGGER.info(
@@ -66,7 +78,13 @@ public class PixPaymentService {
         return response;
     }
 
-    public JsonNode showTransaction(String transactionId) {
+    public JsonNode showTransaction(String transactionId, UUID userId) {
+        boolean owned = pixTransactionRepository
+                .existsByConfrapixUuidAndAuthUserId(transactionId, userId)
+                || pixTransactionRepository.existsByConfrapixTransactionIdAndAuthUserId(transactionId, userId);
+        if (!owned) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Pagamento não encontrado.");
+        }
         return confrapixTransactionClient.show(transactionId);
     }
 
@@ -108,7 +126,6 @@ public class PixPaymentService {
         if (transaction.isProcessed()) {
             // Idempotencia: o mesmo callback pode chegar mais de uma vez.
             LOGGER.info("Pagamento ja processado, ignorando reentrega. uuid={}", transaction.getConfrapixUuid());
-            premiumAccessService.grantMonthlyAccess(transaction);
             return;
         }
 
@@ -152,9 +169,7 @@ public class PixPaymentService {
     }
 
     private void applyDefaultCallbackUrl(StorePixTransactionRequest request) {
-        if (!StringUtils.hasText(request.getCallbackUrl()) && StringUtils.hasText(properties.callbackUrl())) {
-            request.setCallbackUrl(properties.callbackUrl());
-        }
+        request.setCallbackUrl(properties.callbackUrl());
     }
 
     private void applyExpiration(StorePixTransactionRequest request) {

@@ -14,13 +14,13 @@ export default async function LoginPage() {
   return (
     <AuthShell
       alternateHref="/register"
-      alternateLabel="Ainda nao tem conta?"
+      alternateLabel="Ainda não tem conta?"
       alternateText="Criar conta"
-      description="Autentique sua operacao, valide seu acesso e retome treinos, dieta e acompanhamento com a mesma linguagem premium do ecossistema FitAI."
-      eyebrow="FitAI Access"
-      formSubtitle="Entre com suas credenciais para abrir seu ambiente de treino e IA."
+      description="Organize seus treinos e encontre espaço para cuidar de você. Uma rotina que faz sentido, no seu ritmo."
+      eyebrow="Treino com propósito"
+      formSubtitle="Acesse sua conta para continuar de onde parou."
       formTitle="Bem-vindo de volta"
-      title="Entre para continuar no cockpit de performance."
+      title="Seu próximo treino começa aqui."
     >
       <LoginForm />
     </AuthShell>

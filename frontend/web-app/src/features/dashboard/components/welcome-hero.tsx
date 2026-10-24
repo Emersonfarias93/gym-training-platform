@@ -1,71 +1,46 @@
 import Link from "next/link";
-import { BrainCircuit, Dumbbell, Sparkles } from "lucide-react";
-
-import { Badge } from "@/components/ui/badge";
-import { buttonVariants } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { UpgradePlanButton } from "@/features/checkout/upgrade-plan-button";
-import { getPlanLabel } from "@/lib/auth";
-import { cn } from "@/lib/utils";
+import { ArrowRight, MessageSquare } from "lucide-react";
 import type { AuthUser } from "@/types/auth";
 
-type WelcomeHeroProps = {
-  user: AuthUser;
-  isActivePlan: boolean;
-};
-
-function getFirstName(fullName: string) {
-  const first = fullName.trim().split(/\s+/)[0];
-  return first || "atleta";
-}
-
-export function WelcomeHero({ user, isActivePlan }: WelcomeHeroProps) {
+export function WelcomeHero({ user, isActivePlan }: { user: AuthUser; isActivePlan: boolean }) {
+  const firstName = user.fullName.trim().split(/\s+/)[0] || "atleta";
   return (
-    <Card className="overflow-hidden p-6 md:p-8">
-      <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="max-w-2xl">
-          <Badge>{isActivePlan ? "Plano ativo" : "Plano Free"}</Badge>
-          <h2 className="mt-4 text-3xl font-semibold tracking-normal text-[var(--fitai-text-primary)] md:text-4xl">
-            Ola, {getFirstName(user.fullName)}
-          </h2>
-          <p className="mt-3 text-sm leading-7 text-[var(--fitai-text-secondary)] md:text-base">
-            {isActivePlan
-              ? "Aqui esta o resumo do seu treino. Gere novas fichas com IA, acompanhe sua sessao e fale com o AI Coach."
-              : "Organize seus treinos e acompanhe sua rotina. Ative o plano para liberar a IA, o AI Coach e mais."}
-          </p>
-
-          <div className="mt-6 flex flex-wrap items-center gap-3">
-            {isActivePlan ? (
-              <>
-                <Link className={cn(buttonVariants({}))} href="/?view=workouts">
-                  <Sparkles className="size-4" />
-                  Gerar treino com IA
-                </Link>
-                <Link className={cn(buttonVariants({ variant: "secondary" }))} href="/?view=ai-coach">
-                  <BrainCircuit className="size-4" />
-                  Falar com AI Coach
-                </Link>
-              </>
-            ) : (
-              <>
-                <UpgradePlanButton withIcon size="md" />
-                <Link className={cn(buttonVariants({ variant: "secondary" }))} href="/?view=workouts">
-                  <Dumbbell className="size-4" />
-                  Criar treino manual
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-5">
-          <p className="text-sm text-[var(--fitai-text-secondary)]">Seu plano</p>
-          <p className="mt-2 text-xl font-semibold text-[var(--fitai-text-primary)]">{getPlanLabel(user)}</p>
-          <p className={cn("mt-1 text-sm", isActivePlan ? "text-[var(--fitai-success)]" : "text-[var(--fitai-text-muted)]")}>
-            {isActivePlan ? user.planName ?? "Assinatura mensal ativa" : "Recursos essenciais liberados"}
-          </p>
+    <section className="relative overflow-hidden rounded-xl bg-[#e2e8d9] px-6 py-8 text-[#1d3025] md:px-8 md:py-9">
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -right-10 -top-20 hidden size-80 rounded-full border-[32px] border-[#ced9c5] md:block"
+      />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute -bottom-24 right-16 hidden size-64 rounded-full border border-[#b6c7aa] md:block"
+      />
+      <div className="relative max-w-xl">
+        <p className="text-xs font-medium text-[#4b604e]">Olá, {firstName}.</p>
+        <h2 className="mt-3 text-3xl font-semibold leading-tight tracking-tight md:text-[36px]">
+          Constância começa
+          <br />
+          com um bom plano.
+        </h2>
+        <p className="mt-4 max-w-sm text-sm leading-6 text-[#4b604e]">
+          Separe um tempo para você. Organize o próximo treino e siga no seu ritmo.
+        </p>
+        <div className="mt-6 flex flex-wrap items-center gap-4">
+          <Link
+            href="/?view=workouts"
+            className="inline-flex min-h-11 items-center gap-6 rounded-lg bg-[#253e2f] px-5 text-sm font-medium text-white transition-colors hover:bg-[#355641]"
+          >
+            Meus treinos <ArrowRight className="size-4" />
+          </Link>
+          {isActivePlan ? (
+            <Link
+              href="/?view=ai-coach"
+              className="inline-flex min-h-11 items-center gap-2 text-sm font-medium hover:underline"
+            >
+              <MessageSquare className="size-4" /> Conversar com meu coach
+            </Link>
+          ) : null}
         </div>
       </div>
-    </Card>
+    </section>
   );
 }

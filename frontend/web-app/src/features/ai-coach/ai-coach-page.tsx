@@ -2,16 +2,10 @@
 
 import {
   Bot,
-  Copy,
   Crown,
-  ImageIcon,
   LockKeyhole,
   LoaderCircle,
-  MoreHorizontal,
-  Paperclip,
-  Send,
-  ThumbsDown,
-  ThumbsUp
+  Send
 } from "lucide-react";
 import { useMutation } from "@tanstack/react-query";
 import { FormEvent, useEffect, useRef, useState, useTransition } from "react";
@@ -39,8 +33,8 @@ function renderMessageContent(content: string) {
     .split("\n")
     .map((line) => line.trim())
     .filter(Boolean)
-    .map((line) => (
-      <p className="whitespace-pre-wrap" key={line}>
+    .map((line, index) => (
+      <p className="whitespace-pre-wrap" key={index}>
         {line}
       </p>
     ));
@@ -62,8 +56,7 @@ function AiCoachUpgradeState() {
           AI Coach disponivel para usuarios com plano ativo
         </h2>
         <p className="mt-4 text-sm leading-7 text-[var(--fitai-text-secondary)]">
-          Usuarios comuns continuam com acesso ao dashboard, treinos, dieta, evolucao e agenda. O plano ativo libera
-          conversas com IA, analises contextuais e proximos passos personalizados.
+          Converse sobre sua rotina, tire dúvidas e explore ajustes no seu planejamento com o plano Premium.
         </p>
         <Button className="mt-6" onClick={() => setCheckoutOpen(true)}>
           <Crown className="size-4" />
@@ -155,13 +148,6 @@ export function AICoachPage({ user }: AICoachPageProps) {
     <div className="mx-auto flex min-h-[calc(100dvh-10rem)] max-w-4xl flex-col overflow-hidden rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-bg-shell)] lg:min-h-[calc(100dvh-8rem)]">
       <header className="flex items-center justify-between border-b border-[var(--fitai-border)] bg-[var(--fitai-bg-shell)] px-4 py-3">
         <div className="flex items-center gap-3">
-          <button
-            aria-label="Abrir conversas"
-            className="grid size-9 place-items-center rounded-2xl bg-[var(--fitai-surface-elevated)] text-[var(--fitai-text-secondary)]"
-            type="button"
-          >
-            <Bot className="size-4" />
-          </button>
           <div className="grid size-9 place-items-center rounded-2xl fitai-ai-gradient text-white">
             <Bot className="size-4" />
           </div>
@@ -169,20 +155,13 @@ export function AICoachPage({ user }: AICoachPageProps) {
             <h2 className="text-sm font-semibold text-[var(--fitai-text-primary)]">FitAI Coach</h2>
             <p className="mt-0.5 flex items-center gap-1.5 text-[11px] font-medium text-[var(--fitai-success)]">
               <span className="size-1.5 rounded-full bg-[var(--fitai-success)]" />
-              Online · LLM Service
+              Assistente de treino com IA
             </p>
           </div>
         </div>
-        <button
-          aria-label="Mais opcoes do chat"
-          className="grid size-9 place-items-center rounded-2xl text-[var(--fitai-text-secondary)]"
-          type="button"
-        >
-          <MoreHorizontal className="size-5" />
-        </button>
       </header>
 
-      <section className="flex-1 space-y-5 overflow-y-auto px-4 py-5">
+      <section role="log" aria-label="Conversa com o coach" aria-live="polite" className="flex-1 space-y-5 overflow-y-auto px-4 py-5">
         {messages.map((message) => {
           const isUser = message.author === "user";
 
@@ -197,7 +176,7 @@ export function AICoachPage({ user }: AICoachPageProps) {
                 </div>
               ) : null}
 
-              <div className={cn("max-w-[82%]", isUser ? "items-end" : "items-start")}>
+              <div className={cn("min-w-0 max-w-[85%] break-words", isUser ? "items-end" : "items-start")}>
                 <div
                   className={cn(
                     "text-sm leading-6",
@@ -222,14 +201,8 @@ export function AICoachPage({ user }: AICoachPageProps) {
                     isUser ? "justify-end" : "justify-start"
                   )}
                 >
-                  <span>{formatMessageTime(message.createdAt)}</span>
-                  {!isUser ? (
-                    <>
-                      <Copy className="size-3.5" />
-                      <ThumbsUp className="size-3.5" />
-                      <ThumbsDown className="size-3.5" />
-                    </>
-                  ) : null}
+                  {message.id !== "welcome" ? <span>{formatMessageTime(message.createdAt)}</span> : null}
+
                 </div>
               </div>
 
@@ -274,11 +247,11 @@ export function AICoachPage({ user }: AICoachPageProps) {
         <div ref={scrollRef} />
       </section>
 
-      <footer className="sticky bottom-0 border-t border-[var(--fitai-border)] bg-[linear-gradient(180deg,rgba(10,12,16,0.75),var(--fitai-bg-shell))] px-4 pb-4 pt-3 backdrop-blur-xl">
+      <footer className="sticky bottom-0 border-t border-[var(--fitai-border)] bg-[var(--fitai-surface)] px-4 pb-4 pt-3 backdrop-blur-xl">
         <div className="mb-3 flex gap-2 overflow-x-auto pb-1">
           {quickPrompts.map((prompt) => (
             <button
-              className="shrink-0 rounded-full border border-[rgba(79,124,255,0.28)] bg-[rgba(79,124,255,0.08)] px-3 py-2 text-xs font-medium text-[var(--fitai-primary)] transition-colors hover:bg-[rgba(79,124,255,0.14)] disabled:opacity-50"
+              className="shrink-0 rounded-full border border-[rgba(50,107,77,0.28)] bg-[rgba(50,107,77,0.08)] px-3 py-2 text-xs font-medium text-[var(--fitai-primary)] transition-colors hover:bg-[rgba(50,107,77,0.14)] disabled:opacity-50"
               disabled={isThinking}
               key={prompt}
               onClick={() => sendMessage(prompt)}
@@ -293,20 +266,6 @@ export function AICoachPage({ user }: AICoachPageProps) {
           className="flex min-h-14 items-center gap-3 rounded-2xl border border-[var(--fitai-border-strong)] bg-[var(--fitai-surface)] px-3 py-2"
           onSubmit={handleSubmit}
         >
-          <button
-            aria-label="Anexar imagem"
-            className="grid size-9 shrink-0 place-items-center rounded-full text-[var(--fitai-text-secondary)]"
-            type="button"
-          >
-            <ImageIcon className="size-5" />
-          </button>
-          <button
-            aria-label="Anexar arquivo"
-            className="grid size-9 shrink-0 place-items-center rounded-full text-[var(--fitai-text-secondary)]"
-            type="button"
-          >
-            <Paperclip className="size-5" />
-          </button>
           <input
             aria-label="Mensagem para o FitAI Coach"
             className="min-w-0 flex-1 bg-transparent text-sm text-[var(--fitai-text-primary)] outline-none placeholder:text-[var(--fitai-text-muted)]"

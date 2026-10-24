@@ -8,16 +8,17 @@ import type { WorkoutExerciseProgress } from "@/types/workout";
 type CurrentSessionCardProps = {
   exercises: WorkoutExerciseProgress[];
   isLoading: boolean;
+  isError?: boolean;
 };
 
-export function CurrentSessionCard({ exercises, isLoading }: CurrentSessionCardProps) {
+export function CurrentSessionCard({ exercises, isLoading, isError = false }: CurrentSessionCardProps) {
   return (
     <Card className="p-6">
       <div className="flex items-center justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold text-[var(--fitai-text-primary)]">Sua sessao atual</h3>
+          <h3 className="text-lg font-semibold text-[var(--fitai-text-primary)]">Sua sessão atual</h3>
           <p className="mt-1 text-sm text-[var(--fitai-text-secondary)]">
-            Reflete o treino que voce escolheu como ativo.
+            Os exercícios do treino escolhido para sua rotina.
           </p>
         </div>
         <Link className={cn(buttonVariants({ variant: "secondary", size: "sm" }))} href="/?view=workouts">
@@ -25,7 +26,7 @@ export function CurrentSessionCard({ exercises, isLoading }: CurrentSessionCardP
         </Link>
       </div>
 
-      {isLoading ? (
+      {isError ? <p className="mt-6 rounded-lg bg-[var(--fitai-surface-elevated)] p-5 text-sm leading-6 text-[var(--fitai-text-secondary)]">Sua sessão está indisponível no momento. Tente carregar os dados novamente.</p> : isLoading ? (
         <div className="mt-6 space-y-3">
           {[0, 1, 2].map((index) => (
             <div
@@ -48,7 +49,7 @@ export function CurrentSessionCard({ exercises, isLoading }: CurrentSessionCardP
         </div>
       ) : (
         <div className="mt-6 rounded-2xl border border-dashed border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-5 text-sm leading-6 text-[var(--fitai-text-secondary)]">
-          Voce ainda nao escolheu um treino ativo. Va em Treinos, crie ou escolha um treino para acompanhar a sessao
+          Você ainda não escolheu um treino ativo. Em Meus treinos, crie ou escolha uma ficha para acompanhar a sessão
           aqui.
         </div>
       )}

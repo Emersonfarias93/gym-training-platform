@@ -1,30 +1,30 @@
 @import "tailwindcss";
 
 :root {
-  --font-sans: "Geist", "Inter", "Segoe UI Variable Text", "Segoe UI", sans-serif;
-  --font-display: "Geist", "Inter", "Segoe UI Variable Text", "Segoe UI", sans-serif;
+  --font-sans: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
+  --font-display: "Segoe UI Variable Text", "Segoe UI", system-ui, sans-serif;
 
-  --fitai-bg-shell: #0A0C10;
-  --fitai-bg-page: #0F1117;
-  --fitai-surface: #1A1D24;
-  --fitai-surface-elevated: #15181F;
-  --fitai-surface-secondary: #21252E;
+  --fitai-bg-shell: #f8faf6;
+  --fitai-bg-page: #f3f5ef;
+  --fitai-surface: #ffffff;
+  --fitai-surface-elevated: #f7f9f5;
+  --fitai-surface-secondary: #edf1e9;
 
-  --fitai-primary: #4F7CFF;
-  --fitai-primary-hover: #3055D8;
-  --fitai-success: #00D084;
-  --fitai-warning: #FF9F43;
-  --fitai-purple: #9B59FF;
-  --fitai-danger: #FF6B6B;
+  --fitai-primary: #326b4d;
+  --fitai-primary-hover: #255339;
+  --fitai-success: #326b4d;
+  --fitai-warning: #886121;
+  --fitai-purple: #62618a;
+  --fitai-danger: #b34134;
 
-  --fitai-text-primary: rgba(255,255,255,0.92);
-  --fitai-text-secondary: rgba(255,255,255,0.62);
-  --fitai-text-muted: rgba(255,255,255,0.38);
-  --fitai-text-disabled: rgba(255,255,255,0.28);
+  --fitai-text-primary: #202c22;
+  --fitai-text-secondary: #556451;
+  --fitai-text-muted: #6c7967;
+  --fitai-text-disabled: #7d8878;
 
-  --fitai-border-subtle: rgba(255,255,255,0.055);
-  --fitai-border: rgba(255,255,255,0.07);
-  --fitai-border-strong: rgba(255,255,255,0.10);
+  --fitai-border-subtle: #e2e7dc;
+  --fitai-border: #d9e0d3;
+  --fitai-border-strong: #becbb6;
 
   --background: var(--fitai-bg-page);
   --foreground: var(--fitai-text-primary);
@@ -39,13 +39,13 @@
   --secondary-foreground: var(--fitai-text-primary);
   --muted: var(--fitai-surface-secondary);
   --muted-foreground: var(--fitai-text-secondary);
-  --accent: rgba(79,124,255,0.10);
+  --accent: rgba(50,107,77,0.08);
   --accent-foreground: var(--fitai-primary);
   --destructive: var(--fitai-danger);
   --destructive-foreground: #ffffff;
   --border: var(--fitai-border);
   --input: var(--fitai-surface);
-  --ring: rgba(79,124,255,0.45);
+  --ring: rgba(50,107,77,0.45);
 
   --chart-1: var(--fitai-primary);
   --chart-2: var(--fitai-success);
@@ -57,10 +57,10 @@
   --sidebar-foreground: var(--fitai-text-secondary);
   --sidebar-primary: var(--fitai-primary);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: rgba(79,124,255,0.07);
+  --sidebar-accent: rgba(50,107,77,0.09);
   --sidebar-accent-foreground: var(--fitai-primary);
   --sidebar-border: var(--fitai-border-subtle);
-  --sidebar-ring: rgba(79,124,255,0.45);
+  --sidebar-ring: rgba(50,107,77,0.45);
 }
 
 * {
@@ -88,17 +88,6 @@ h6 {
   font-family: var(--font-display), sans-serif;
 }
 
-button,
-input,
-textarea,
-select {
-  font: inherit;
-}
-
-a {
-  color: inherit;
-  text-decoration: none;
-}
 
 @layer utilities {
   .fitai-shell {
@@ -157,14 +146,23 @@ a {
   }
 
   .fitai-primary-gradient {
-    background: linear-gradient(135deg, var(--fitai-primary), var(--fitai-primary-hover));
+    background: #326b4d;
   }
 
   .fitai-ai-gradient {
-    background: linear-gradient(135deg, var(--fitai-primary), var(--fitai-success));
+    background: #326b4d;
   }
 
   .fitai-progress-gradient {
-    background: linear-gradient(90deg, var(--fitai-primary), var(--fitai-success));
+    background: var(--fitai-primary);
   }
+}
+
+::selection { background: #d9e8d2; color: #142218; }
+:focus-visible { outline: 2px solid var(--fitai-primary); outline-offset: 4px; }
+button:not(:disabled), a { -webkit-tap-highlight-color: transparent; }
+button:not(:disabled) { cursor: pointer; }
+input, textarea, select { color-scheme: light; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
 }

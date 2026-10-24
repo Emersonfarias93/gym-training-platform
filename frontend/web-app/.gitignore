@@ -17,4 +17,5 @@ skills/
 .skills/
 skills-lock.json
 .env**
+!.env.example
 tsconfig.tsbuildinfo

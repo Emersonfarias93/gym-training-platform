@@ -13,6 +13,7 @@ import { Input } from "@/components/ui/input";
 import { FormStatus } from "@/features/auth/components/form-status";
 import { PasswordInput } from "@/features/auth/components/password-input";
 import { MOCK_AUTH_CREDENTIALS, MOCK_COMMON_CREDENTIALS } from "@/lib/mock-auth";
+import { isDemoAuthEnabled } from "@/lib/auth";
 
 const demoAccounts = [
   { label: "Demo · plano ativo", credentials: MOCK_AUTH_CREDENTIALS },
@@ -46,7 +47,7 @@ export function LoginForm() {
 
   const onSubmit = form.handleSubmit(async (values) => {
     setSuccessMessage(null);
-    await mutation.mutateAsync(values);
+    mutation.mutate(values);
   });
 
   function fillDemo(credentials: { email: string; password: string }) {
@@ -84,7 +85,7 @@ export function LoginForm() {
             Senha
           </label>
           <button
-            className="text-sm text-[var(--fitai-primary)] transition-colors hover:text-white"
+            className="text-sm text-[var(--fitai-primary)] transition-colors hover:text-[var(--fitai-primary-hover)]"
             onClick={() => setShowForgotHint((current) => !current)}
             type="button"
           >
@@ -124,7 +125,7 @@ export function LoginForm() {
         Entrar na plataforma
       </Button>
 
-      <div className="flex items-center gap-3">
+      {isDemoAuthEnabled() ? <><div className="flex items-center gap-3">
         <span className="h-px flex-1 bg-[var(--fitai-border-subtle)]" />
         <span className="text-xs text-[var(--fitai-text-muted)]">ou entre com uma conta demo</span>
         <span className="h-px flex-1 bg-[var(--fitai-border-subtle)]" />
@@ -144,6 +145,7 @@ export function LoginForm() {
           </Button>
         ))}
       </div>
+      </> : null}
     </form>
   );
 }

@@ -2,7 +2,7 @@
 
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useFieldArray, useForm, type UseFormReturn } from "react-hook-form";
+import { useFieldArray, useForm, useWatch, type UseFormReturn } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AlertCircle, LoaderCircle, Plus, Trash2 } from "lucide-react";
 
@@ -161,7 +161,7 @@ function SessionFields({
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <div className="space-y-2 md:col-span-2">
-          <label className="text-sm font-medium text-[var(--fitai-text-primary)]">Titulo do dia</label>
+          <label className="text-sm font-medium text-[var(--fitai-text-primary)]">Título do dia</label>
           <Input
             placeholder="Ex.: Treino A - membros superiores"
             {...form.register(`sessions.${sessionIndex}.title`)}
@@ -176,7 +176,7 @@ function SessionFields({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-[var(--fitai-text-primary)]">Duracao (min)</label>
+          <label className="text-sm font-medium text-[var(--fitai-text-primary)]">Duração (min)</label>
           <Input
             min={15}
             max={240}
@@ -195,7 +195,7 @@ function SessionFields({
 
       <div className="mt-5 space-y-4">
         <div className="flex items-center justify-between gap-3">
-          <h4 className="text-sm font-semibold text-[var(--fitai-text-primary)]">Exercicios</h4>
+          <h4 className="text-sm font-semibold text-[var(--fitai-text-primary)]">Exercícios</h4>
           <Button
             disabled={exercises.fields.length >= 12}
             onClick={() => exercises.append(createEmptyExercise())}
@@ -241,7 +241,7 @@ function SessionFields({
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[var(--fitai-text-primary)]">Series</label>
+                  <label className="text-sm font-medium text-[var(--fitai-text-primary)]">Séries</label>
                   <Input
                     placeholder="Ex.: 4"
                     {...form.register(`sessions.${sessionIndex}.exercises.${exerciseIndex}.setsDescription`)}
@@ -250,7 +250,7 @@ function SessionFields({
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-[var(--fitai-text-primary)]">Repeticoes</label>
+                  <label className="text-sm font-medium text-[var(--fitai-text-primary)]">Repetições</label>
                   <Input
                     placeholder="Ex.: 8-10"
                     {...form.register(`sessions.${sessionIndex}.exercises.${exerciseIndex}.repsDescription`)}
@@ -281,7 +281,7 @@ function SessionFields({
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-medium text-[var(--fitai-text-primary)]">Observacoes</label>
+                  <label className="text-sm font-medium text-[var(--fitai-text-primary)]">Observações</label>
                   <Textarea
                     placeholder="Ex.: controlar a descida, evitar falha na ultima serie..."
                     {...form.register(`sessions.${sessionIndex}.exercises.${exerciseIndex}.executionNotes`)}
@@ -325,7 +325,7 @@ export function WorkoutEditorDialog({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, mode, plan?.id]);
 
-  const selectedGoal = form.watch("goal");
+  const selectedGoal = useWatch({ control: form.control, name: "goal" }) ?? "";
 
   const mutation = useMutation({
     mutationFn: async (values: WorkoutEditorValues) => {
@@ -379,7 +379,7 @@ export function WorkoutEditorDialog({
         <div className="max-h-[60vh] space-y-6 overflow-y-auto pr-1">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <label className="text-sm font-medium text-[var(--fitai-text-primary)]">Titulo do treino</label>
+              <label className="text-sm font-medium text-[var(--fitai-text-primary)]">Título do treino</label>
               <Input placeholder="Ex.: Plano de hipertrofia da semana" {...form.register("title")} />
               <FieldError message={form.formState.errors.title?.message} />
             </div>
@@ -398,7 +398,7 @@ export function WorkoutEditorDialog({
                       className={cn(
                         "rounded-full border px-3 py-1 text-xs font-semibold transition-colors",
                         isSelected
-                          ? "border-transparent bg-white text-[var(--fitai-bg-shell)]"
+                          ? "border-transparent bg-[var(--fitai-primary)] text-white"
                           : "border-[var(--fitai-border-strong)] text-[var(--fitai-text-secondary)] hover:text-[var(--fitai-text-primary)]"
                       )}
                     >

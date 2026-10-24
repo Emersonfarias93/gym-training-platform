@@ -15,7 +15,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ConfrapixApiException.class)
     @ResponseStatus(HttpStatus.BAD_GATEWAY)
     public ErrorResponse handleConfrapixApi(ConfrapixApiException exception, HttpServletRequest request) {
-        String message = exception.getMessage() + ": " + exception.getResponseBody();
+        String message = "Não foi possível concluir a operação com o provedor de pagamentos.";
         return buildResponse(HttpStatus.BAD_GATEWAY, message, request.getRequestURI());
     }
 

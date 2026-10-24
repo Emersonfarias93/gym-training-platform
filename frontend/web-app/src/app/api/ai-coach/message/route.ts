@@ -8,7 +8,7 @@ import {
   getLlmApiErrorStatus
 } from "@/services/llm/server";
 import { getUserAiCoachContext, resolveUserPlanStatus } from "@/services/user/server";
-import type { AiCoachRequest } from "@/types/ai-coach";
+import { aiCoachRequestSchema } from "@/features/ai-coach/schema";
 
 export async function POST(request: Request) {
   const session = await getServerAuthSession();
@@ -25,7 +25,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const payload = (await request.json()) as AiCoachRequest;
+    const parsed = aiCoachRequestSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ message: parsed.error.issues[0]?.message ?? "Mensagem inválida." }, { status: 400 });
+    }
+    const payload = parsed.data;
     const message = payload.message.trim();
 
     if (!message) {

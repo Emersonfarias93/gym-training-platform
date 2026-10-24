@@ -1,12 +1,14 @@
 name: Deploy SaveInCloud
 
 on:
-  push:
-    branches:
-      - main
+  workflow_run:
+    workflows: [CI]
+    branches: [main]
+    types: [completed]
 
 jobs:
   deploy:
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push'
     runs-on: ubuntu-latest
 
     steps:
@@ -21,6 +23,8 @@ jobs:
             cd /opt/gym-training-platform
             
             cat > .env <<EOF
+            INTERNAL_API_KEY=${{ secrets.INTERNAL_API_KEY }}
+            AUTH_JWT_SECRET=${{ secrets.AUTH_JWT_SECRET }}
             AUTH_SERVICE_URL=http://auth-service:8080
             USER_SERVICE_URL=http://user-service:8080
             PAYMENT_SERVICE_URL=http://payment-service:8080
@@ -40,8 +44,9 @@ jobs:
             GROQ_BASE_URL=${{ secrets.GROQ_BASE_URL }}
             EOF
       
-            git pull origin main
-            docker compose -f infrastructure/docker-compose.yml down
+            git fetch origin main
+            git checkout --detach ${{ github.event.workflow_run.head_sha }}
+            docker compose --env-file .env -f infrastructure/docker-compose.yml config --quiet
             docker compose \
               --env-file .env \
               -f infrastructure/docker-compose.yml \

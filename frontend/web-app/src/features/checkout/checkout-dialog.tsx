@@ -260,7 +260,11 @@ function PixStep({
   );
 }
 
-export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
+export function CheckoutDialog(props: CheckoutDialogProps) {
+  return props.open ? <CheckoutFlow {...props} /> : null;
+}
+
+function CheckoutFlow({ open, onOpenChange }: CheckoutDialogProps) {
   const router = useRouter();
   const [step, setStep] = useState<Step>("plan");
   const [checkout, setCheckout] = useState<PixCheckoutResponse | null>(null);
@@ -322,20 +326,6 @@ export function CheckoutDialog({ open, onOpenChange }: CheckoutDialogProps) {
 
     finish();
   }, [paid, sessionActive, finish]);
-
-  // Reset ao fechar o modal.
-  useEffect(() => {
-    if (open) {
-      return;
-    }
-
-    setStep("plan");
-    setCheckout(null);
-    paidAtRef.current = null;
-    finishedRef.current = false;
-    pixMutation.reset();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open]);
 
   const pixState: PixState = paid ? "paid" : expired ? "expired" : "waiting";
   const statusErrorMessage = statusQuery.isError ? (statusQuery.error as Error).message : null;

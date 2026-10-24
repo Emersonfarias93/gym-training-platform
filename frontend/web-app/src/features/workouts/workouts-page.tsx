@@ -43,7 +43,7 @@ import type { WorkoutOverviewResponse, WorkoutPlanDetail, WorkoutPlanSummary } f
 
 const EMPTY_OVERVIEW: WorkoutOverviewResponse = {
   activeSessions: 0,
-  weeklyVolumeLabel: "0 exercicios",
+  weeklyVolumeLabel: "0 exercícios",
   averageDurationLabel: "0 min",
   averageIntensityLabel: "Sem dados",
   programmedBlocks: [],
@@ -70,7 +70,7 @@ function StatusBanner({ message, tone }: { message: string; tone: "error" | "suc
         "flex items-center gap-2 rounded-2xl px-4 py-3 text-sm",
         tone === "error"
           ? "border border-[rgba(255,159,67,0.24)] bg-[rgba(255,159,67,0.10)] text-[var(--fitai-warning)]"
-          : "border border-[rgba(0,208,132,0.20)] bg-[rgba(0,208,132,0.10)] text-[var(--fitai-success)]"
+          : "border border-[rgba(50,107,77,0.20)] bg-[rgba(50,107,77,0.10)] text-[var(--fitai-success)]"
       )}
     >
       <Icon className="size-4 shrink-0" />
@@ -98,8 +98,8 @@ function WorkoutObjectiveSelector({
             className={cn(
               "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 py-2 text-sm font-semibold transition-colors",
               isSelected
-                ? "border-transparent bg-white text-[var(--fitai-bg-shell)]"
-                : "border-[var(--fitai-border-strong)] bg-[rgba(21,24,31,0.82)] text-[var(--fitai-text-secondary)] hover:text-[var(--fitai-text-primary)]"
+                ? "border-transparent bg-[var(--fitai-primary)] text-white"
+                : "border-[var(--fitai-border-strong)] bg-[var(--fitai-surface-secondary)] text-[var(--fitai-text-secondary)] hover:text-[var(--fitai-text-primary)]"
             )}
             onClick={() => onSelect(objective.id)}
             type="button"
@@ -125,13 +125,13 @@ function WorkoutsSummaryCards({ isLoading, overview }: { isLoading: boolean; ove
       <OverviewCard
         title="Volume da semana"
         value={isLoading ? "--" : overview.weeklyVolumeLabel}
-        helper="exercicios planejados no seu ciclo"
+        helper="exercícios planejados no seu ciclo"
         icon={Layers3}
       />
       <OverviewCard
-        title="Duracao media"
+        title="Duração media"
         value={isLoading ? "--" : overview.averageDurationLabel}
-        helper="tempo estimado por sessao"
+        helper="tempo estimado por sessão"
         icon={Clock3}
       />
       <OverviewCard
@@ -148,9 +148,9 @@ function CurrentSessionPanel({ overview }: { overview: WorkoutOverviewResponse }
   const hasCurrentSession = overview.currentSession.length > 0;
   return (
     <div className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface)] p-6">
-      <h3 className="text-lg font-semibold text-[var(--fitai-text-primary)]">Sua sessao atual</h3>
+      <h3 className="text-lg font-semibold text-[var(--fitai-text-primary)]">Sua sessão atual</h3>
       <p className="mt-2 text-sm leading-6 text-[var(--fitai-text-secondary)]">
-        Reflete o treino que voce escolheu como ativo. Use "Escolher" em qualquer treino para troca-lo.
+        Reflete o treino que você escolheu como ativo. Use “Escolher” em qualquer treino para troca-lo.
       </p>
       {hasCurrentSession ? (
         <div className="mt-6 space-y-4">
@@ -168,7 +168,7 @@ function CurrentSessionPanel({ overview }: { overview: WorkoutOverviewResponse }
         </div>
       ) : (
         <div className="mt-6 rounded-2xl border border-dashed border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-5 text-sm leading-6 text-[var(--fitai-text-secondary)]">
-          Escolha um treino da sua lista para ele aparecer aqui como sessao atual.
+          Escolha um treino da sua lista para ele aparecer aqui como sessão atual.
         </div>
       )}
     </div>
@@ -273,22 +273,22 @@ export function WorkoutsPage({ user }: WorkoutsPageProps) {
 
   return (
     <div className="space-y-6">
-      <section className="overflow-hidden rounded-[28px] border border-[var(--fitai-border)] bg-[linear-gradient(135deg,rgba(79,124,255,0.14),rgba(10,12,16,0.96)_42%,rgba(0,208,132,0.08))]">
+      <section className="overflow-hidden rounded-xl border border-[var(--fitai-border)] bg-[var(--fitai-surface)]">
         <div className="grid gap-6 p-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)] lg:p-8">
           <div className="space-y-6">
             <SectionHeading
               eyebrow="Meus treinos"
-              title={canUseAi ? "Gere, salve e gerencie seus treinos" : "Monte e gerencie seus treinos"}
+              title={canUseAi ? "Seu próximo treino" : "Monte sua ficha"}
               description={
                 canUseAi
-                  ? "Crie treinos com IA ou manualmente, escolha qual fica ativo, edite os exercicios e exclua o que nao usa mais."
+                  ? "Escolha seu objetivo e crie uma ficha manual ou assistida."
                   : `Cadastre ate ${FREE_WORKOUT_LIMIT} treinos manuais, escolha qual fica ativo e edite quando quiser. Para criar mais, ative o plano.`
               }
             />
 
             <WorkoutObjectiveSelector selectedObjectiveId={selectedObjectiveId} onSelect={setSelectedObjectiveId} />
 
-            <div className="rounded-2xl border border-[rgba(255,255,255,0.10)] bg-[rgba(10,12,16,0.42)] p-5">
+            <div className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-bg-page)] p-5">
               <div className="space-y-2">
                 <p className="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--fitai-primary)]">
                   {selectedObjective.label}
@@ -330,26 +330,26 @@ export function WorkoutsPage({ user }: WorkoutsPageProps) {
           </div>
 
           {canUseAi ? (
-            <div className="rounded-[24px] border border-[rgba(255,255,255,0.10)] bg-[rgba(10,12,16,0.55)] p-6">
+            <div className="rounded-xl border border-[var(--fitai-border)] bg-[var(--fitai-bg-page)] p-6">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--fitai-primary)]">Seu resumo</p>
               <div className="mt-5 space-y-4">
-                <div className="rounded-2xl border border-[var(--fitai-border)] bg-[rgba(255,255,255,0.03)] p-4">
+                <div className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-4">
                   <p className="text-sm text-[var(--fitai-text-secondary)]">Treinos salvos</p>
                   <p className="mt-2 text-3xl font-semibold text-[var(--fitai-text-primary)]">
-                    {plansQuery.isLoading ? "--" : plans.length}
+                    {plansQuery.isLoading || plansQuery.isError ? "--" : plans.length}
                   </p>
-                  <p className="mt-2 text-sm text-[var(--fitai-text-secondary)]">Disponiveis na sua lista pessoal.</p>
+                  <p className="mt-2 text-sm text-[var(--fitai-text-secondary)]">Disponíveis na sua lista pessoal.</p>
                 </div>
-                <div className="rounded-2xl border border-[var(--fitai-border)] bg-[rgba(255,255,255,0.03)] p-4">
+                <div className="rounded-2xl border border-[var(--fitai-border)] bg-[var(--fitai-surface-elevated)] p-4">
                   <p className="text-sm text-[var(--fitai-text-secondary)]">Leitura do foco atual</p>
                   <p className="mt-2 text-xl font-semibold text-[var(--fitai-text-primary)]">
-                    {overviewQuery.isLoading ? "--" : overview.averageIntensityLabel}
+                    {overviewQuery.isLoading || overviewQuery.isError ? "--" : overview.averageIntensityLabel}
                   </p>
                 </div>
               </div>
             </div>
           ) : (
-            <div className="rounded-[24px] border border-[rgba(255,255,255,0.10)] bg-[rgba(10,12,16,0.55)] p-6">
+            <div className="rounded-xl border border-[var(--fitai-border)] bg-[var(--fitai-bg-page)] p-6">
               <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--fitai-primary)]">Plano ativo</p>
               <h3 className="mt-4 text-2xl font-semibold text-[var(--fitai-text-primary)]">
                 Libere a geracao de treinos com IA
@@ -375,7 +375,7 @@ export function WorkoutsPage({ user }: WorkoutsPageProps) {
       {feedback ? <StatusBanner message={feedback.message} tone={feedback.tone} /> : null}
       {listError ? <StatusBanner message={listError} tone="error" /> : null}
 
-      <WorkoutsSummaryCards isLoading={overviewQuery.isLoading} overview={overview} />
+      <WorkoutsSummaryCards isLoading={overviewQuery.isLoading || overviewQuery.isError} overview={overview} />
 
       <section className="grid gap-6 xl:grid-cols-[minmax(0,1.15fr)_minmax(320px,0.85fr)]">
         <div className="space-y-4">
@@ -443,7 +443,7 @@ export function WorkoutsPage({ user }: WorkoutsPageProps) {
           }
         }}
         title="Excluir treino"
-        description={deleteTarget ? `"${deleteTarget.title}" sera removido com todos os exercicios.` : undefined}
+        description={deleteTarget ? `"${deleteTarget.title}" sera removido com todos os exercícios.` : undefined}
       >
         <div className="flex items-center justify-end gap-3">
           <Button onClick={() => setDeleteTarget(null)} type="button" variant="secondary">

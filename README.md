@@ -45,11 +45,12 @@ gym-training-platform/
 
 ## Como executar
 
-1. Suba a infraestrutura local com Docker:
-   - `docker compose -f infrastructure/docker-compose.yml up -d`
-2. Compile os módulos backend:
-   - `mvn clean package`
-3. Execute um serviço específico:
+1. Copie `.env.example` para `.env` e configure os segredos (veja `docs/code-review.md`).
+2. Suba a infraestrutura local com Docker:
+   - `docker compose --env-file .env -f infrastructure/docker-compose.yml up -d --build`
+3. Para executar os serviços fora do Docker, compile e instale os módulos backend:
+   - `mvn clean install`
+4. Execute um serviço específico:
    - `mvn -pl backend/auth-service spring-boot:run`
 
 ## Observações
@@ -57,3 +58,9 @@ gym-training-platform/
 - O `pom.xml` raiz centraliza Java 21 e agrega todos os serviços backend.
 - Os serviços críticos usam PostgreSQL e Kafka como base de integração.
 - O frontend consome a camada backend via rotas e serviços do Next.js.
+## Qualidade e interface
+
+- A interface usa tema claro, com componentes compartilhados e navegação adaptada a celular e desktop.
+- [Revisão técnica e pendências](docs/code-review.md).
+- [Execução do frontend](frontend/web-app/README.md).
+- O fluxo de CI verifica backend, lint, tipos, build e bloqueios de demonstração em produção. O deploy aguarda o CI.

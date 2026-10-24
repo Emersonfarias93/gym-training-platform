@@ -10,6 +10,7 @@ import com.gym.training.auth.domain.UserRole;
 import com.gym.training.auth.exception.DuplicateUserException;
 import com.gym.training.auth.repository.UserCredentialRepository;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -42,7 +43,7 @@ public class AuthService {
                 .fullName(request.fullName().trim())
                 .email(normalizedEmail)
                 .password(passwordEncoder.encode(request.password()))
-                .role(resolveRole(request.role()))
+                .role(UserRole.USER)
                 .active(true)
                 .build();
 
@@ -105,10 +106,6 @@ public class AuthService {
     }
 
     private String normalizeEmail(String email) {
-        return email.trim().toLowerCase();
-    }
-
-    private UserRole resolveRole(UserRole role) {
-        return role == null ? UserRole.USER : role;
+        return email.trim().toLowerCase(Locale.ROOT);
     }
 }
