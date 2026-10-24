@@ -7,11 +7,15 @@ import {
   getAuthApiErrorStatus,
   registerWithAuthService
 } from "@/services/auth/server";
-import type { RegisterInput } from "@/types/auth";
+import { registerSchema } from "@/features/auth/schema";
 
 export async function POST(request: Request) {
   try {
-    const payload = (await request.json()) as RegisterInput;
+    const parsed = registerSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ message: parsed.error.issues[0]?.message ?? "Dados inválidos." }, { status: 400 });
+    }
+    const payload = parsed.data;
     const authResponse = await registerWithAuthService(payload);
     const user = await createAuthUserFromResponse(authResponse);
     const response = NextResponse.json({

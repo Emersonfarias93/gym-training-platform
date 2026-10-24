@@ -20,7 +20,7 @@ export async function GET(_request: Request, context: RouteContext) {
   const { id } = await context.params;
 
   try {
-    const status = await getPixTransactionStatus(id);
+    const status = await getPixTransactionStatus(id, session.user.userId);
     return NextResponse.json(status);
   } catch (error) {
     // Loga o erro real sem expor detalhes ao usuario.

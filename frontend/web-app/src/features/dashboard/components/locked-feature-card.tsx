@@ -16,7 +16,7 @@ export function LockedFeatureCard({ icon: Icon, title, description, perks, ctaLa
   return (
     <Card className="flex h-full flex-col p-6">
       <div className="flex items-start justify-between gap-3">
-        <span className="rounded-2xl bg-[rgba(79,124,255,0.10)] p-3 text-[var(--fitai-primary)]">
+        <span className="rounded-2xl bg-[rgba(50,107,77,0.10)] p-3 text-[var(--fitai-primary)]">
           <Icon className="size-5" />
         </span>
         <span className="inline-flex items-center gap-1.5 rounded-full border border-[var(--fitai-border)] bg-[var(--fitai-surface-secondary)] px-3 py-1 text-xs font-semibold text-[var(--fitai-text-secondary)]">

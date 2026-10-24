@@ -1,5 +1,5 @@
 import type { AuthResponse, AuthUser, LoginInput } from "@/types/auth";
-import { getMonthlyPlanPeriodEndIso } from "@/lib/auth";
+import { getMonthlyPlanPeriodEndIso, isDemoAuthEnabled } from "@/lib/auth";
 
 export const MOCK_AUTH_CREDENTIALS = {
   email: "demo@fitai.com",
@@ -57,6 +57,7 @@ const MOCK_ACCOUNTS: MockAccount[] = [
 ];
 
 function findMockAccountByLogin(payload: LoginInput): MockAccount | null {
+  if (!isDemoAuthEnabled()) return null;
   const email = payload.email.trim().toLowerCase();
 
   return (
@@ -68,6 +69,7 @@ function findMockAccountByLogin(payload: LoginInput): MockAccount | null {
 }
 
 export function findMockUserByToken(token: string): AuthUser | null {
+  if (!isDemoAuthEnabled()) return null;
   return MOCK_ACCOUNTS.find((account) => account.token === token)?.user ?? null;
 }
 

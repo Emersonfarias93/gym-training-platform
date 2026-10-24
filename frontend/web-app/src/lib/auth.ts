@@ -8,7 +8,11 @@ export const AUTH_PROFILE_COOKIE = "fitai_profile";
 export const MOCK_PREMIUM_COOKIE = "fitai_mock_premium";
 
 export function isMockCheckoutEnabled() {
-  return process.env.NEXT_PUBLIC_ENABLE_MOCK_CHECKOUT !== "false";
+  return process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_ENABLE_MOCK_CHECKOUT === "true";
+}
+
+export function isDemoAuthEnabled() {
+  return process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_ENABLE_DEMO_AUTH === "true";
 }
 
 const DEFAULT_AUTH_SERVICE_URL = "http://localhost:8081";

@@ -25,11 +25,12 @@ import com.gym.training.workout.repository.WorkoutSessionRepository;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
@@ -47,25 +48,28 @@ public class WorkoutService {
     private final WorkoutExerciseRepository workoutExerciseRepository;
     private final UserContextClient userContextClient;
     private final LlmWorkoutClient llmWorkoutClient;
+    private final GeneratedWorkoutParser generatedWorkoutParser;
 
     public WorkoutService(
             WorkoutPlanRepository workoutPlanRepository,
             WorkoutSessionRepository workoutSessionRepository,
             WorkoutExerciseRepository workoutExerciseRepository,
             UserContextClient userContextClient,
-            LlmWorkoutClient llmWorkoutClient
+            LlmWorkoutClient llmWorkoutClient,
+            GeneratedWorkoutParser generatedWorkoutParser
     ) {
         this.workoutPlanRepository = workoutPlanRepository;
         this.workoutSessionRepository = workoutSessionRepository;
         this.workoutExerciseRepository = workoutExerciseRepository;
         this.userContextClient = userContextClient;
         this.llmWorkoutClient = llmWorkoutClient;
+        this.generatedWorkoutParser = generatedWorkoutParser;
     }
 
     @Transactional(readOnly = true)
     public WorkoutOverviewResponse getOverview(AuthenticatedUser user) {
         List<WorkoutSession> programmedSessions =
-                workoutSessionRepository.findTop3ByUserIdOrderByScheduledDateAscSortOrderAsc(user.userId());
+                workoutSessionRepository.findTop3ByUserIdAndPlan_StatusOrderByScheduledDateAscSortOrderAsc(user.userId(), WorkoutPlanStatus.ACTIVE);
         // "Sessao atual" reflete o plano que o usuario escolheu como ativo.
         List<WorkoutExercise> currentExercises = workoutPlanRepository
                 .findFirstByUserIdAndStatusOrderByCreatedAtDesc(user.userId(), WorkoutPlanStatus.ACTIVE)
@@ -86,32 +90,41 @@ public class WorkoutService {
     @Transactional
     public WorkoutOverviewResponse generateWithAi(AuthenticatedUser user, GenerateWorkoutRequest request) {
         UserAiCoachContext context = userContextClient.getAiCoachContext(user);
+        if (context == null || !context.premiumActive()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "A geração assistida exige um plano ativo.");
+        }
         String focus = request == null ? null : request.focus();
         String aiResponse = llmWorkoutClient.generateWorkout(user, context, focus);
-        boolean aiGenerated = StringUtils.hasText(aiResponse);
+        UpdateWorkoutPlanRequest generated = generatedWorkoutParser.parse(aiResponse);
 
         // O treino gerado pela IA passa a ser o "em uso"; arquiva os demais.
         archiveActivePlans(user.userId(), null);
 
         WorkoutPlan plan = workoutPlanRepository.save(WorkoutPlan.builder()
                 .userId(user.userId())
-                .title("Treino FitAI Coach")
-                .goal(valueOrFallback(context.mainGoal(), valueOrFallback(focus, "GENERAL_FITNESS")))
+                .title(generated.title().trim())
+                .goal(generated.goal().trim())
                 .status(WorkoutPlanStatus.ACTIVE)
-                .generationStatus(aiGenerated
-                        ? WorkoutGenerationStatus.AI_GENERATED
-                        : WorkoutGenerationStatus.FALLBACK_TEMPLATE)
-                .rawAiResponse(aiGenerated ? aiResponse : null)
+                .generationStatus(WorkoutGenerationStatus.AI_GENERATED)
+                .rawAiResponse(aiResponse)
                 .build());
 
-        List<WorkoutSession> sessions = createSessions(plan, user, context);
-        createExercises(sessions.get(0), context, aiResponse);
+        for (int index = 0; index < generated.sessions().size(); index++) {
+            ManualWorkoutSessionRequest sessionRequest = generated.sessions().get(index);
+            WorkoutSession session = createManualSession(plan, user, sessionRequest, index, true);
+            createManualExercises(session, sessionRequest.exercises());
+        }
 
         return getOverview(user);
     }
 
     @Transactional
     public WorkoutOverviewResponse createManualWorkout(AuthenticatedUser user, CreateManualWorkoutRequest request) {
+        UserAiCoachContext context = userContextClient.getAiCoachContext(user);
+        if ((context == null || !context.premiumActive())
+                && workoutPlanRepository.findByUserIdOrderByCreatedAtDesc(user.userId()).size() >= 2) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "O plano gratuito permite até dois treinos.");
+        }
         // So entra "em uso" se o usuario ainda nao tem nenhum treino em uso; os demais ficam salvos.
         boolean inUse = workoutPlanRepository.countByUserIdAndStatus(user.userId(), WorkoutPlanStatus.ACTIVE) == 0;
 
@@ -285,8 +298,9 @@ public class WorkoutService {
         LocalDate start = today.with(DayOfWeek.MONDAY);
         LocalDate end = today.with(DayOfWeek.SUNDAY);
         List<WorkoutSession> weekSessions =
-                workoutSessionRepository.findByUserIdAndScheduledDateBetweenOrderByScheduledDateAscSortOrderAsc(
+                workoutSessionRepository.findByUserIdAndPlan_StatusAndScheduledDateBetweenOrderByScheduledDateAscSortOrderAsc(
                         user.userId(),
+                        WorkoutPlanStatus.ACTIVE,
                         start,
                         end
                 );
@@ -299,7 +313,7 @@ public class WorkoutService {
     }
 
     private String averageDurationLabel(AuthenticatedUser user) {
-        List<WorkoutSession> sessions = workoutSessionRepository.findTop3ByUserIdOrderByScheduledDateAscSortOrderAsc(user.userId());
+        List<WorkoutSession> sessions = workoutSessionRepository.findTop3ByUserIdAndPlan_StatusOrderByScheduledDateAscSortOrderAsc(user.userId(), WorkoutPlanStatus.ACTIVE);
         double average = sessions.stream()
                 .filter(session -> session.getEstimatedDurationMinutes() != null)
                 .mapToInt(WorkoutSession::getEstimatedDurationMinutes)
@@ -337,55 +351,6 @@ public class WorkoutService {
                 exercise.getSetsDescription() + " x " + exercise.getRepsDescription(),
                 exercise.getProgressPercent()
         );
-    }
-
-    private List<WorkoutSession> createSessions(WorkoutPlan plan, AuthenticatedUser user, UserAiCoachContext context) {
-        LocalDate today = LocalDate.now();
-        List<WorkoutSession> sessions = new ArrayList<>();
-        sessions.add(createSession(plan, user, titleForGoal(context.mainGoal(), "Treino principal"), today, 0, "Moderada alta"));
-        sessions.add(createSession(plan, user, "Treino complementar", today.plusDays(2), 1, "Moderada"));
-        sessions.add(createSession(plan, user, "Mobilidade e recuperacao", today.plusDays(4), 2, "Baixa"));
-        return sessions;
-    }
-
-    private WorkoutSession createSession(
-            WorkoutPlan plan,
-            AuthenticatedUser user,
-            String title,
-            LocalDate scheduledDate,
-            int sortOrder,
-            String intensity
-    ) {
-        return workoutSessionRepository.save(WorkoutSession.builder()
-                .plan(plan)
-                .userId(user.userId())
-                .title(title)
-                .scheduledDate(scheduledDate)
-                .status(sortOrder == 0 ? WorkoutSessionStatus.IN_PROGRESS : WorkoutSessionStatus.SCHEDULED)
-                .estimatedDurationMinutes(sortOrder == 2 ? 35 : 55)
-                .intensity(intensity)
-                .sortOrder(sortOrder)
-                .build());
-    }
-
-    private void createExercises(WorkoutSession session, UserAiCoachContext context, String aiResponse) {
-        List<ExerciseTemplate> templates = templatesForGoal(context.mainGoal());
-        for (int index = 0; index < templates.size(); index++) {
-            ExerciseTemplate template = templates.get(index);
-            workoutExerciseRepository.save(WorkoutExercise.builder()
-                    .session(session)
-                    .name(template.name())
-                    .setsDescription(template.sets())
-                    .repsDescription(template.reps())
-                    .restSeconds(template.restSeconds())
-                    .loadSuggestion(template.loadSuggestion())
-                    .executionNotes(index == 0 && StringUtils.hasText(aiResponse)
-                            ? "Gerado pelo AI Coach. Revise a resposta completa no plano bruto salvo."
-                            : template.executionNotes())
-                    .progressPercent(template.progressPercent())
-                    .sortOrder(index)
-                    .build());
-        }
     }
 
     private WorkoutSession createManualSession(
@@ -426,39 +391,6 @@ public class WorkoutService {
         }
     }
 
-    private List<ExerciseTemplate> templatesForGoal(String goal) {
-        if ("IMPROVE_CONDITIONING".equals(goal) || "LOSE_WEIGHT".equals(goal)) {
-            return List.of(
-                    new ExerciseTemplate("Agachamento goblet", "4", "10", 75, "Carga moderada", "Controle a descida.", 28),
-                    new ExerciseTemplate("Remada baixa", "3", "12", 60, "RPE 7", "Mantenha escapas ativas.", 18),
-                    new ExerciseTemplate("Supino halteres", "3", "10", 75, "RPE 7", "Evite amplitude dolorosa.", 12),
-                    new ExerciseTemplate("Bike intervalada", "6", "1 min forte", 60, "Intenso controlado", "Recupere entre tiros.", 0),
-                    new ExerciseTemplate("Prancha", "3", "40s", 45, "Peso corporal", "Mantenha quadril alinhado.", 0)
-            );
-        }
-
-        return List.of(
-                new ExerciseTemplate("Supino reto", "4", "6-8", 90, "RPE 7-8", "Priorize tecnica antes de carga.", 30),
-                new ExerciseTemplate("Remada curvada", "4", "8-10", 90, "RPE 7", "Mantenha tronco estavel.", 20),
-                new ExerciseTemplate("Agachamento livre", "4", "6-8", 120, "RPE 7-8", "Pare antes de perder postura.", 16),
-                new ExerciseTemplate("Desenvolvimento halteres", "3", "10", 75, "Moderada", "Evite compensar lombar.", 0),
-                new ExerciseTemplate("Puxada alta", "3", "10-12", 75, "Moderada", "Puxe com cotovelos.", 0)
-        );
-    }
-
-    private String titleForGoal(String goal, String fallback) {
-        if ("GAIN_MUSCLE".equals(goal)) {
-            return "Hipertrofia full body";
-        }
-        if ("LOSE_WEIGHT".equals(goal)) {
-            return "Condicionamento metabolico";
-        }
-        if ("PERFORMANCE".equals(goal)) {
-            return "Performance e potencia";
-        }
-        return fallback;
-    }
-
     private String metaForDate(LocalDate date) {
         LocalDate today = LocalDate.now();
         if (date.isEqual(today)) {
@@ -488,14 +420,4 @@ public class WorkoutService {
         return StringUtils.hasText(value) ? value.trim() : null;
     }
 
-    private record ExerciseTemplate(
-            String name,
-            String sets,
-            String reps,
-            Integer restSeconds,
-            String loadSuggestion,
-            String executionNotes,
-            Integer progressPercent
-    ) {
-    }
 }

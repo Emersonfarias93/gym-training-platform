@@ -1,5 +1,7 @@
 import "server-only";
 
+import { internalApiHeaders } from "@/lib/internal-api";
+
 import { normalizePlanStatus } from "@/lib/auth";
 import type { AuthUser, UserPlanStatus } from "@/types/auth";
 import type { UserAiCoachContextResponse, UserPremiumStatusResponse } from "@/types/user";
@@ -26,6 +28,7 @@ function getUserServiceEndpoint(path: string) {
 
 function getUserHeaders(user: Pick<AuthUser, "userId" | "email" | "fullName">) {
   return {
+    ...internalApiHeaders(),
     "Content-Type": "application/json",
     "X-User-Id": user.userId,
     "X-User-Email": user.email,
@@ -50,6 +53,7 @@ async function userServiceRequest<T>(path: string, user: Pick<AuthUser, "userId"
   const response = await fetch(getUserServiceEndpoint(path), {
     method: "GET",
     cache: "no-store",
+    signal: AbortSignal.timeout(10000),
     headers: getUserHeaders(user)
   });
 

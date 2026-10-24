@@ -83,7 +83,8 @@ async function enrichAuthUser(user: AuthUser): Promise<AuthUser> {
       lastSyncedAt: premium.lastSyncedAt
     });
   } catch {
-    return sanitizeAuthUser(user);
+    return sanitizeAuthUser({ ...user, planStatus: "COMMON", planName: null,
+      premiumStatus: "NONE", currentPeriodEnd: null });
   }
 }
 
@@ -121,6 +122,7 @@ async function authServiceRequest<T>(path: string, init: RequestInit): Promise<T
   const response = await fetch(getAuthServiceEndpoint(path), {
     ...init,
     cache: "no-store",
+    signal: AbortSignal.timeout(10000),
     headers: {
       "Content-Type": "application/json",
       ...(init.headers ?? {})
@@ -237,10 +239,10 @@ export async function getServerAuthSession() {
         fullName,
         email: validation.email,
         cpfMasked: profile?.cpfMasked,
-        planStatus: normalizePlanStatus(profile?.planStatus ?? validation.planStatus),
-        planName: profile?.planName,
-        premiumStatus: profile?.premiumStatus,
-        currentPeriodEnd: profile?.currentPeriodEnd,
+        planStatus: "COMMON",
+        planName: null,
+        premiumStatus: "NONE",
+        currentPeriodEnd: null,
         lastSyncedAt: profile?.lastSyncedAt,
         expiresAt
       }))

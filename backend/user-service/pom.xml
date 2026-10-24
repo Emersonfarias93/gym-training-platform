@@ -16,6 +16,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>com.gym.training</groupId>
+            <artifactId>internal-security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>

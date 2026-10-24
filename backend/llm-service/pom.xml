@@ -16,6 +16,11 @@
 
     <dependencyManagement>
         <dependencies>
+        <dependency>
+            <groupId>com.gym.training</groupId>
+            <artifactId>internal-security</artifactId>
+            <version>${project.version}</version>
+        </dependency>
             <dependency>
                 <groupId>org.springframework.ai</groupId>
                 <artifactId>spring-ai-bom</artifactId>

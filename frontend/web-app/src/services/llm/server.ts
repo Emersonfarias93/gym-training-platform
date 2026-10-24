@@ -1,5 +1,7 @@
 import "server-only";
 
+import { internalApiHeaders } from "@/lib/internal-api";
+
 import type { LlmGenerateRequest, LlmGenerateResponse } from "@/types/ai-coach";
 
 const DEFAULT_LLM_SERVICE_URL = "http://localhost:8087";
@@ -42,8 +44,10 @@ export async function generateWithLlmService(payload: LlmGenerateRequest) {
   const response = await fetch(getLlmServiceEndpoint("/api/llm/generate"), {
     method: "POST",
     cache: "no-store",
+    signal: AbortSignal.timeout(60000),
     headers: {
-      "Content-Type": "application/json"
+      ...internalApiHeaders(),
+    "Content-Type": "application/json"
     },
     body: JSON.stringify(payload)
   });

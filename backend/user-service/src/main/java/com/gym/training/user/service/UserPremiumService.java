@@ -32,7 +32,14 @@ public class UserPremiumService {
     @Transactional
     public UserPremiumSnapshot getOrCreatePremiumSnapshot(AuthenticatedUser authenticatedUser) {
         UserPremiumSnapshot snapshot = getOrCreatePremiumSnapshotWithoutSync(authenticatedUser);
-        return syncWithPaymentAccess(authenticatedUser, snapshot);
+        snapshot = syncWithPaymentAccess(authenticatedUser, snapshot);
+        if (snapshot.isPremiumActive() && (snapshot.getCurrentPeriodEnd() == null
+                || !snapshot.getCurrentPeriodEnd().isAfter(Instant.now()))) {
+            snapshot.setPremiumActive(false);
+            snapshot.setStatus(PremiumStatus.EXPIRED);
+            snapshot = userPremiumSnapshotRepository.save(snapshot);
+        }
+        return snapshot;
     }
 
     /**

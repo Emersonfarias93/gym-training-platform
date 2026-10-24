@@ -1,5 +1,7 @@
 import "server-only";
 
+import { internalApiHeaders } from "@/lib/internal-api";
+
 import type {
   PixCheckoutResponse,
   PixProviderResponse,
@@ -109,8 +111,10 @@ export async function createPixTransaction(
   const response = await fetch(getPaymentServiceEndpoint("/api/payments/pix/transactions"), {
     method: "POST",
     cache: "no-store",
+    signal: AbortSignal.timeout(15000),
     headers: {
-      "Content-Type": "application/json",
+      ...internalApiHeaders(),
+    "Content-Type": "application/json",
       "X-User-Id": requester.userId,
       "X-User-Email": requester.email,
       "X-User-Full-Name": requester.fullName,
@@ -123,14 +127,17 @@ export async function createPixTransaction(
   return normalizePixResponse(payload);
 }
 
-export async function getPixTransactionStatus(transactionId: string): Promise<PixStatusResponse> {
+export async function getPixTransactionStatus(transactionId: string, userId: string): Promise<PixStatusResponse> {
   const response = await fetch(
     getPaymentServiceEndpoint(`/api/payments/pix/transactions/${encodeURIComponent(transactionId)}`),
     {
       method: "GET",
       cache: "no-store",
+    signal: AbortSignal.timeout(15000),
       headers: {
-        "Content-Type": "application/json"
+        ...internalApiHeaders(),
+        "X-User-Id": userId,
+    "Content-Type": "application/json"
       }
     }
   );

@@ -1,64 +1,58 @@
 import {
   BarChart3,
-  BrainCircuit,
-  CreditCard,
+  MessageSquare,
+  UserRound,
   Dumbbell,
-  Gauge,
+  LayoutDashboard,
   UtensilsCrossed
 } from "lucide-react";
-
 import type { AppView, NavItem, PageIntro } from "@/types/dashboard";
 
 export const sidebarItems: NavItem[] = [
-  { id: "dashboard", label: "Dashboard", icon: Gauge },
-  { id: "workouts", label: "Treinos", icon: Dumbbell },
-  { id: "diet", label: "Dieta", icon: UtensilsCrossed },
-  { id: "evolution", label: "Evolucao", icon: BarChart3 },
-  { id: "ai-coach", label: "AI Coach", icon: BrainCircuit, badge: "Live" },
-  { id: "account", label: "Conta", icon: CreditCard }
+  { id: "dashboard", label: "Visão geral", icon: LayoutDashboard },
+  { id: "workouts", label: "Meus treinos", icon: Dumbbell },
+  { id: "evolution", label: "Acompanhamento", icon: BarChart3 },
+  { id: "ai-coach", label: "Meu coach", icon: MessageSquare },
+  { id: "diet", label: "Alimentação", icon: UtensilsCrossed },
+  { id: "account", label: "Minha conta", icon: UserRound }
 ];
 
 export const pageIntro: Record<AppView, PageIntro> = {
   dashboard: {
-    eyebrow: "Visao geral",
-    title: "Seu resumo de treino e evolucao",
-    description:
-      "Acompanhe seus treinos, sua sessao atual e o que da para desbloquear com o plano ativo.",
+    eyebrow: "Visão geral",
+    title: "Sua rotina, em dia.",
+    description: "Um lugar para organizar seus treinos e dar o próximo passo.",
     filters: []
   },
   workouts: {
-    eyebrow: "Training Engine",
-    title: "Treinos manuais ou com IA, conforme o seu plano",
+    eyebrow: "Meus treinos",
+    title: "Treinos feitos para sua rotina.",
     description:
-      "Usuarios comuns podem montar a propria ficha manualmente; usuarios com plano ativo geram e acompanham treinos com IA.",
+      "Monte sua ficha, ajuste os exercícios e escolha o treino que vai acompanhar você.",
     filters: []
   },
   diet: {
-    eyebrow: "Dieta",
-    title: "Experiencia de dieta em refatoracao",
-    description:
-      "Essa area sera reorganizada para o fluxo do usuario final. Por enquanto, ela permanece como um aviso de transicao.",
+    eyebrow: "Alimentação",
+    title: "Cuidar de você vai além do treino.",
+    description: "Seu acompanhamento de alimentação está a caminho.",
     filters: []
   },
   evolution: {
-    eyebrow: "Evolucao",
-    title: "Evolucao dos seus treinos",
-    description:
-      "Acompanhe treino ativo, exercicios cadastrados e historico a partir das fichas salvas na sua conta.",
+    eyebrow: "Acompanhamento",
+    title: "Seu planejamento em perspectiva.",
+    description: "Consulte suas fichas e a distribuição dos exercícios planejados.",
     filters: []
   },
   "ai-coach": {
-    eyebrow: "FitAI Assistant",
-    title: "IA conversacional para estrategia, prescricao e acompanhamento",
-    description:
-      "Centralize historico, prompts rapidos e respostas guiadas para usuarios com plano ativo.",
-    filters: ["Insights", "Treino", "Dieta", "Mensagens"]
+    eyebrow: "Meu coach",
+    title: "Uma conversa sobre seu treino.",
+    description: "Tire dúvidas e explore ajustes para sua rotina com o assistente de IA.",
+    filters: []
   },
   account: {
-    eyebrow: "Conta e assinatura",
-    title: "Plano, dados pessoais e pagamentos em um so lugar",
-    description:
-      "Acompanhe sua assinatura mensal, vencimento do plano, dados basicos e historico de cobrancas.",
-    filters: ["Plano", "Pagamentos", "LGPD", "Perfil"]
+    eyebrow: "Minha conta",
+    title: "Tudo sobre sua conta.",
+    description: "Consulte seus dados de acesso e os detalhes do seu plano.",
+    filters: []
   }
 };

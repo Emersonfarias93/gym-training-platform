@@ -6,8 +6,8 @@ export function DietPage() {
   return (
     <ComingSoonPanel
       badge="Dieta · Em breve"
-      title="A area de dieta sera refeita para a experiencia do usuario"
-      description="Estamos substituindo a tela atual por uma visao mais simples de refeicoes, metas nutricionais e acompanhamento diario, sem a estrutura de painel administrativo que ainda aparece hoje."
+      title="Seu espaço de alimentação está a caminho."
+      description="Em breve, você poderá organizar refeições e acompanhar suas metas nutricionais por aqui. Enquanto isso, seus treinos continuam disponíveis."
       icon={UtensilsCrossed}
     />
   );

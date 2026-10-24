@@ -31,7 +31,7 @@ export function PasswordInput({
       />
       <button
         aria-label={isVisible ? "Ocultar senha" : "Mostrar senha"}
-        className="absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-[var(--fitai-text-muted)] transition-colors hover:bg-[rgba(79,124,255,0.08)] hover:text-[var(--fitai-text-primary)]"
+        className="absolute right-3 top-1/2 grid size-8 -translate-y-1/2 place-items-center rounded-full text-[var(--fitai-text-muted)] transition-colors hover:bg-[rgba(50,107,77,0.08)] hover:text-[var(--fitai-text-primary)]"
         onClick={() => setIsVisible((current) => !current)}
         type="button"
       >

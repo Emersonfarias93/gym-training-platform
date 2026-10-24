@@ -16,8 +16,8 @@ type StackedListCardProps = {
 };
 
 const toneClassMap = {
-  primary: "border-[rgba(79,124,255,0.22)] bg-[rgba(79,124,255,0.10)] text-[var(--fitai-primary)]",
-  success: "border-[rgba(0,208,132,0.18)] bg-[rgba(0,208,132,0.10)] text-[var(--fitai-success)]",
+  primary: "border-[rgba(50,107,77,0.22)] bg-[rgba(50,107,77,0.10)] text-[var(--fitai-primary)]",
+  success: "border-[rgba(50,107,77,0.18)] bg-[rgba(50,107,77,0.10)] text-[var(--fitai-success)]",
   warning: "border-[rgba(255,159,67,0.20)] bg-[rgba(255,159,67,0.10)] text-[var(--fitai-warning)]",
   purple: "border-[rgba(155,89,255,0.22)] bg-[rgba(155,89,255,0.10)] text-[var(--fitai-purple)]",
   danger: "border-[rgba(255,107,107,0.22)] bg-[rgba(255,107,107,0.10)] text-[var(--fitai-danger)]"

@@ -15,13 +15,13 @@ export function OverviewCard({ title, value, helper, icon: Icon }: OverviewCardP
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-sm text-[var(--fitai-text-secondary)]">{title}</p>
-          <p className="mt-3 text-2xl font-semibold text-[var(--fitai-text-primary)]">{value}</p>
+          <p className="mt-3 text-[28px] font-semibold tracking-tight tabular-nums text-[var(--fitai-text-primary)]">{value}</p>
         </div>
-        <div className="rounded-2xl border border-[var(--fitai-border)] bg-[rgba(79,124,255,0.10)] p-3 text-[var(--fitai-primary)]">
+        <div className="rounded-lg bg-[var(--sidebar-accent)] p-2 text-[var(--fitai-primary)]">
           <Icon className="size-5" />
         </div>
       </div>
-      <p className="mt-4 text-sm text-[var(--fitai-text-secondary)]">{helper}</p>
+      <p className="mt-3 text-xs text-[var(--fitai-text-secondary)]">{helper}</p>
     </Card>
   );
 }

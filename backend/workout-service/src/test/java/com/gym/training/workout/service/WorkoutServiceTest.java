@@ -8,6 +8,9 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.never;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 import com.gym.training.workout.controller.request.CreateManualWorkoutRequest;
 import com.gym.training.workout.controller.request.ManualWorkoutExerciseRequest;
@@ -54,6 +57,9 @@ class WorkoutServiceTest {
     @Mock
     private LlmWorkoutClient llmWorkoutClient;
 
+    @Mock
+    private GeneratedWorkoutParser generatedWorkoutParser;
+
     @InjectMocks
     private WorkoutService workoutService;
 
@@ -88,11 +94,12 @@ class WorkoutServiceTest {
     @Test
     void getOverviewContaTreinosAtivosDoUsuario() {
         when(workoutPlanRepository.countByUserIdAndStatus(userId, WorkoutPlanStatus.ACTIVE)).thenReturn(2L);
-        when(workoutSessionRepository.findTop3ByUserIdOrderByScheduledDateAscSortOrderAsc(userId)).thenReturn(List.of());
+        when(workoutSessionRepository.findTop3ByUserIdAndPlan_StatusOrderByScheduledDateAscSortOrderAsc(userId, WorkoutPlanStatus.ACTIVE)).thenReturn(List.of());
         when(workoutPlanRepository.findFirstByUserIdAndStatusOrderByCreatedAtDesc(userId, WorkoutPlanStatus.ACTIVE))
                 .thenReturn(Optional.empty());
-        when(workoutSessionRepository.findByUserIdAndScheduledDateBetweenOrderByScheduledDateAscSortOrderAsc(
+        when(workoutSessionRepository.findByUserIdAndPlan_StatusAndScheduledDateBetweenOrderByScheduledDateAscSortOrderAsc(
                 eq(userId),
+                eq(WorkoutPlanStatus.ACTIVE),
                 any(),
                 any()
         )).thenReturn(List.of());
@@ -125,7 +132,7 @@ class WorkoutServiceTest {
         when(workoutSessionRepository.findByPlan_IdOrderBySortOrderAsc(chosenId)).thenReturn(List.of(s0, s1));
         when(workoutPlanRepository.findFirstByUserIdAndStatusOrderByCreatedAtDesc(userId, WorkoutPlanStatus.ACTIVE))
                 .thenReturn(Optional.of(chosen));
-        when(workoutSessionRepository.findTop3ByUserIdOrderByScheduledDateAscSortOrderAsc(userId)).thenReturn(List.of());
+        when(workoutSessionRepository.findTop3ByUserIdAndPlan_StatusOrderByScheduledDateAscSortOrderAsc(userId, WorkoutPlanStatus.ACTIVE)).thenReturn(List.of());
         when(workoutExerciseRepository.findBySession_IdOrderBySortOrderAsc(any())).thenReturn(List.of());
 
         workoutService.activatePlan(user, chosenId);
@@ -217,8 +224,11 @@ class WorkoutServiceTest {
     @Test
     void generateWithAiArquivaOutrosEFicaEmUso() {
         WorkoutPlan existing = plan(UUID.randomUUID(), WorkoutPlanStatus.ACTIVE, WorkoutGenerationStatus.MANUAL);
-        when(userContextClient.getAiCoachContext(user)).thenReturn(UserAiCoachContext.empty(user));
-        when(llmWorkoutClient.generateWorkout(eq(user), any(), any())).thenReturn("");
+        when(userContextClient.getAiCoachContext(user)).thenReturn(new UserAiCoachContext(
+                "Aluno", true, false, null, null, null, null, null, null, null, null, null));
+        when(llmWorkoutClient.generateWorkout(eq(user), any(), any())).thenReturn("generated-json");
+        when(generatedWorkoutParser.parse("generated-json")).thenReturn(
+                new UpdateWorkoutPlanRequest("Treino personalizado", "HYPERTROPHY", List.of(manualRequest().session())));
         when(workoutPlanRepository.findByUserIdAndStatus(userId, WorkoutPlanStatus.ACTIVE)).thenReturn(List.of(existing));
         when(workoutPlanRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
         when(workoutSessionRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
@@ -237,12 +247,44 @@ class WorkoutServiceTest {
     private void stubEmptyOverview() {
         when(workoutPlanRepository.findFirstByUserIdAndStatusOrderByCreatedAtDesc(userId, WorkoutPlanStatus.ACTIVE))
                 .thenReturn(Optional.empty());
-        when(workoutSessionRepository.findTop3ByUserIdOrderByScheduledDateAscSortOrderAsc(userId)).thenReturn(List.of());
-        when(workoutSessionRepository.findByUserIdAndScheduledDateBetweenOrderByScheduledDateAscSortOrderAsc(
+        when(workoutSessionRepository.findTop3ByUserIdAndPlan_StatusOrderByScheduledDateAscSortOrderAsc(userId, WorkoutPlanStatus.ACTIVE)).thenReturn(List.of());
+        when(workoutSessionRepository.findByUserIdAndPlan_StatusAndScheduledDateBetweenOrderByScheduledDateAscSortOrderAsc(
                 eq(userId),
+                eq(WorkoutPlanStatus.ACTIVE),
                 any(),
                 any()
         )).thenReturn(List.of());
+    }
+
+    @Test
+    void generationFailureDoesNotArchiveCurrentPlan() {
+        when(userContextClient.getAiCoachContext(user)).thenReturn(new UserAiCoachContext(
+                "Aluno", true, false, null, null, null, null, null, null, null, null, null));
+        when(llmWorkoutClient.generateWorkout(eq(user), any(), any())).thenReturn("invalid");
+        when(generatedWorkoutParser.parse("invalid")).thenThrow(
+                new ResponseStatusException(HttpStatus.BAD_GATEWAY));
+        assertThrows(ResponseStatusException.class, () -> workoutService.generateWithAi(user, null));
+        verify(workoutPlanRepository, never()).save(any());
+        verify(workoutExerciseRepository, never()).save(any());
+    }
+
+    @Test
+    void generationRequiresPremiumInBackend() {
+        when(userContextClient.getAiCoachContext(user)).thenReturn(UserAiCoachContext.empty(user));
+        var error = assertThrows(ResponseStatusException.class, () -> workoutService.generateWithAi(user, null));
+        assertEquals(403, error.getStatusCode().value());
+        verify(llmWorkoutClient, never()).generateWorkout(any(), any(), any());
+    }
+
+    @Test
+    void freeLimitIsEnforcedInBackend() {
+        when(workoutPlanRepository.findByUserIdOrderByCreatedAtDesc(userId)).thenReturn(List.of(
+                plan(UUID.randomUUID(), WorkoutPlanStatus.ACTIVE, WorkoutGenerationStatus.MANUAL),
+                plan(UUID.randomUUID(), WorkoutPlanStatus.ARCHIVED, WorkoutGenerationStatus.MANUAL)));
+        var error = assertThrows(ResponseStatusException.class,
+                () -> workoutService.createManualWorkout(user, manualRequest()));
+        assertEquals(403, error.getStatusCode().value());
+        verify(workoutPlanRepository, never()).save(any());
     }
 
     private CreateManualWorkoutRequest manualRequest() {

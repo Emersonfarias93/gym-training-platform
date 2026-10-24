@@ -2,6 +2,7 @@ package com.gym.training.user.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -69,8 +70,8 @@ class UserPremiumServiceTest {
     void sincronizaStatusPremiumComPaymentService() {
         UUID userId = UUID.randomUUID();
         AuthenticatedUser user = new AuthenticatedUser(userId, "a@b.com", "Nome Sobrenome");
-        Instant periodEnd = Instant.parse("2026-07-27T12:00:00Z");
-        Instant syncedAt = Instant.parse("2026-06-27T12:00:00Z");
+        Instant periodEnd = Instant.now().plusSeconds(30L * 24 * 60 * 60);
+        Instant syncedAt = Instant.now();
         UserProfile profile = UserProfile.builder()
                 .authUserId(userId)
                 .email("a@b.com")
@@ -100,5 +101,21 @@ class UserPremiumServiceTest {
         assertEquals("FitAI Premium", response.planName());
         assertEquals(periodEnd, response.currentPeriodEnd());
         verify(repository).save(snapshot);
+    }
+
+    @Test
+    void expiredSnapshotCannotKeepPremiumWhenPaymentServiceIsUnavailable() {
+        UUID userId = UUID.randomUUID();
+        var user = new AuthenticatedUser(userId, "a@b.com", "Aluno");
+        var profile = UserProfile.builder().authUserId(userId).build();
+        var snapshot = UserPremiumSnapshot.builder().userProfile(profile)
+                .premiumActive(true).status(PremiumStatus.ACTIVE)
+                .currentPeriodEnd(Instant.now().minusSeconds(60)).build();
+        when(repository.findByUserProfileAuthUserId(userId)).thenReturn(Optional.of(snapshot));
+        when(paymentAccessClient.getAccessStatus(user)).thenReturn(Optional.empty());
+        when(repository.save(snapshot)).thenReturn(snapshot);
+        var response = service.getPremiumStatus(user);
+        assertFalse(response.premiumActive());
+        assertEquals(PremiumStatus.EXPIRED, response.status());
     }
 }

@@ -12,9 +12,10 @@ public class UserContextClient {
 
     public UserContextClient(
             RestClient.Builder builder,
+            @Value("${INTERNAL_API_KEY:}") String internalApiKey,
             @Value("${fitai.services.user-service-url}") String userServiceUrl
     ) {
-        this.restClient = builder.baseUrl(userServiceUrl).build();
+        this.restClient = builder.defaultHeader("X-Internal-Api-Key", internalApiKey).baseUrl(userServiceUrl).build();
     }
 
     public UserAiCoachContext getAiCoachContext(AuthenticatedUser user) {

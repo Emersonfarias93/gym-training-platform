@@ -15,6 +15,6 @@ public record ManualWorkoutSessionRequest(
         @NotNull LocalDate scheduledDate,
         @NotNull @Min(15) @Max(240) Integer estimatedDurationMinutes,
         @NotBlank @Size(max = 40) String intensity,
-        @NotEmpty @Size(max = 12) List<@Valid ManualWorkoutExerciseRequest> exercises
+        @NotEmpty @Size(max = 12) List<@NotNull @Valid ManualWorkoutExerciseRequest> exercises
 ) {
 }

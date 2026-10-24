@@ -1,6 +1,5 @@
 package com.gym.training.payment.controller.request;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -104,7 +103,7 @@ public class StorePixTransactionRequest {
         this.type = type;
     }
 
-    @JsonAnyGetter
+    @JsonIgnore
     public Map<String, Object> getAdditionalProperties() {
         return additionalProperties;
     }

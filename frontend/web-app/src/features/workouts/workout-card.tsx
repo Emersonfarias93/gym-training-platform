@@ -25,17 +25,6 @@ type WorkoutCardProps = {
   busy?: boolean;
 };
 
-function formatShortDate(value: string | null) {
-  if (!value) {
-    return "Sem data";
-  }
-  const [year, month, day] = value.split("-");
-  if (!year || !month || !day) {
-    return value;
-  }
-  return `${day}/${month}`;
-}
-
 function MetaItem({ icon: Icon, label }: { icon: typeof Clock3; label: string }) {
   return (
     <span className="inline-flex items-center gap-1.5 text-xs text-[var(--fitai-text-secondary)]">
@@ -54,7 +43,7 @@ export function WorkoutCard({ plan, onChoose, onEdit, onDelete, busy }: WorkoutC
       className={cn(
         "rounded-2xl border bg-[var(--fitai-surface)] p-5 transition-colors",
         plan.active
-          ? "border-[rgba(79,124,255,0.45)] shadow-[0_0_0_1px_rgba(79,124,255,0.25)]"
+          ? "border-[rgba(50,107,77,0.45)] shadow-[0_0_0_1px_rgba(50,107,77,0.25)]"
           : "border-[var(--fitai-border)]"
       )}
     >
@@ -65,15 +54,15 @@ export function WorkoutCard({ plan, onChoose, onEdit, onDelete, busy }: WorkoutC
               className={cn(
                 "gap-1.5",
                 isAi
-                  ? "bg-[rgba(79,124,255,0.10)] text-[var(--fitai-primary)]"
-                  : "border-[var(--fitai-border-strong)] bg-[rgba(255,255,255,0.03)] text-[var(--fitai-text-secondary)]"
+                  ? "bg-[rgba(50,107,77,0.10)] text-[var(--fitai-primary)]"
+                  : "border-[var(--fitai-border-strong)] bg-[var(--fitai-surface-elevated)] text-[var(--fitai-text-secondary)]"
               )}
             >
               {isAi ? <Sparkles className="size-3" /> : <Dumbbell className="size-3" />}
               {isAi ? "IA" : "Manual"}
             </Badge>
             {plan.active ? (
-              <Badge className="gap-1.5 border-[rgba(0,208,132,0.24)] bg-[rgba(0,208,132,0.10)] text-[var(--fitai-success)]">
+              <Badge className="gap-1.5 border-[rgba(50,107,77,0.24)] bg-[rgba(50,107,77,0.10)] text-[var(--fitai-success)]">
                 <CheckCircle2 className="size-3" />
                 Ativo
               </Badge>

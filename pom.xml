@@ -25,6 +25,7 @@
     </properties>
 
     <modules>
+        <module>backend/internal-security</module>
         <module>backend/auth-service</module>
         <module>backend/user-service</module>
         <module>backend/payment-service</module>

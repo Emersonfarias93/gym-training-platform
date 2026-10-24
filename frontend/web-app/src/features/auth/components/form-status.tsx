@@ -14,12 +14,12 @@ const toneMap = {
   loading: {
     icon: LoaderCircle,
     className:
-      "border-[rgba(79,124,255,0.18)] bg-[rgba(79,124,255,0.08)] text-[var(--fitai-primary)]"
+      "border-[rgba(50,107,77,0.18)] bg-[rgba(50,107,77,0.08)] text-[var(--fitai-primary)]"
   },
   success: {
     icon: CheckCircle2,
     className:
-      "border-[rgba(0,208,132,0.18)] bg-[rgba(0,208,132,0.08)] text-[var(--fitai-success)]"
+      "border-[rgba(50,107,77,0.18)] bg-[rgba(50,107,77,0.08)] text-[var(--fitai-success)]"
   }
 } as const;
 

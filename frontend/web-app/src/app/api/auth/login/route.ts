@@ -7,11 +7,15 @@ import {
   getAuthApiErrorStatus,
   loginWithAuthService
 } from "@/services/auth/server";
-import type { LoginInput } from "@/types/auth";
+import { loginSchema } from "@/features/auth/schema";
 
 export async function POST(request: Request) {
   try {
-    const payload = (await request.json()) as LoginInput;
+    const parsed = loginSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ message: "Informe um e-mail e uma senha válidos." }, { status: 400 });
+    }
+    const payload = parsed.data;
     const authResponse =
       createMockAuthResponse(payload) ?? (await loginWithAuthService(payload));
     const user = await createAuthUserFromResponse(authResponse);

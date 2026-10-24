@@ -1,6 +1,7 @@
 package com.gym.training.workout.repository;
 
 import com.gym.training.workout.domain.WorkoutSession;
+import com.gym.training.workout.domain.WorkoutPlanStatus;
 import com.gym.training.workout.domain.WorkoutSessionStatus;
 import java.time.LocalDate;
 import java.util.Collection;
@@ -13,15 +14,16 @@ public interface WorkoutSessionRepository extends JpaRepository<WorkoutSession, 
 
     long countByUserIdAndStatusIn(UUID userId, Collection<WorkoutSessionStatus> statuses);
 
-    List<WorkoutSession> findTop3ByUserIdOrderByScheduledDateAscSortOrderAsc(UUID userId);
+    List<WorkoutSession> findTop3ByUserIdAndPlan_StatusOrderByScheduledDateAscSortOrderAsc(UUID userId, WorkoutPlanStatus planStatus);
 
     Optional<WorkoutSession> findFirstByUserIdAndStatusInOrderByScheduledDateAscSortOrderAsc(
             UUID userId,
             Collection<WorkoutSessionStatus> statuses
     );
 
-    List<WorkoutSession> findByUserIdAndScheduledDateBetweenOrderByScheduledDateAscSortOrderAsc(
+    List<WorkoutSession> findByUserIdAndPlan_StatusAndScheduledDateBetweenOrderByScheduledDateAscSortOrderAsc(
             UUID userId,
+            WorkoutPlanStatus planStatus,
             LocalDate start,
             LocalDate end
     );
